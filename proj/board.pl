@@ -38,7 +38,7 @@ piece(' ', _, '\x2500\').
 
 write_line([], _) :- write('\n').
 write_line([H | T], O) :- 
-    piece(H, O, R), write(R), write(' '),
+    piece(H, O, R), write(R), write('\x2500\'),
     Q is O+1,
     write_line(T, Q).
 
