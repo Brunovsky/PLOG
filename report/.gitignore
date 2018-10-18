@@ -1,0 +1,12 @@
+*.blg
+*.bbl
+*.bcf
+*.aux
+*.log
+*.synctex.gz
+*.run.xml
+*.out
+*.toc
+styles/*.aux
+styles/*.log
+styles/*.synctex.gz
