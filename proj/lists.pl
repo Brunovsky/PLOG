@@ -6,6 +6,13 @@ is_list([]).
 is_list([_ | _]).
 
 /**
+ * get(L, N, C).
+ *   C is the element at position N in list L (0-indexed).
+ */
+list_get([H | _], 0, H).
+list_get([_ | T], N, C) :- N > 0, M is N-1, get(T, M, C).
+
+/**
  * join(A, B, R).
  *   Concatenating A and B results in R.
  */
@@ -103,66 +110,192 @@ deep_flatten([], []).
 deep_flatten([L | T], R) :- is_list(L), deep_flatten(L, L1), deep_flatten(T, T1), join(L1, T1, R).
 deep_flatten([H | T], [H | R]) :- \+ is_list(H), deep_flatten(T, R).
 
-
+/**
+ * include_each(L, F, R).
+ *   Filter list L, include only elements H that verify F(H) into list R.
+ */
 include_each([], _, []).
 include_each([H | T], F, [H | R]) :- call(F, H), include_each(T, F, R).
 include_each([H | T], F, R) :- \+ call(F, H), include_each(T, F, R).
 
+/**
+ * a_include_each(L, F, A, R).
+ *   Filter list L, include only elements H that verify F(H, A) into list R.
+ */
 a_include_each([], _, _, []).
 a_include_each([H | T], F, A, [H | R]) :- call(F, H, A), a_include_each(T, F, A, R).
 a_include_each([H | T], F, A, R) :- \+ call(F, H, A), a_include_each(T, F, A, R).
 
+/**
+ * b_include_each(L, F, B, R).
+ *   Filter list L, include only elements H that verify F(B, H) into list R.
+ */
 b_include_each([], _, _, []).
 b_include_each([H | T], F, B, [H | R]) :- call(F, B, H), b_include_each(T, F, B, R).
 b_include_each([H | T], F, B, R) :- \+ call(F, B, H), b_include_each(T, F, B, R).
 
-
+/**
+ * exclude_each(L, F, R).
+ *   Filter list L, exclude all elements H that verify F(H) from list R.
+ */
 exclude_each([], _, []).
 exclude_each([H | T], F, [H | R]) :- \+ call(F, H), exclude_each(T, F, R).
 exclude_each([H | T], F, R) :- call(F, H), exclude_each(T, F, R).
 
+/**
+ * a_exclude_each(L, F, A, R).
+ *   Filter list L, exclude all elements H that verify F(H, A) from list R.
+ */
 a_exclude_each([], _, _, []).
 a_exclude_each([H | T], F, A, [H | R]) :- \+ call(F, H, A), a_exclude_each(T, F, A, R).
 a_exclude_each([H | T], F, A, R) :- call(F, H, A), a_exclude_each(T, F, A, R).
 
+/**
+ * b_exclude_each(L, F, B, R).
+ *   Fitler list L, exclude all elements H that verify F(B, H) from list R.
+ */
 b_exclude_each([], _, _, []).
 b_exclude_each([H | T], F, B, [H | R]) :- \+ call(F, B, H), b_exclude_each(T, F, B, R).
 b_exclude_each([H | T], F, B, R) :- call(F, B, H), b_exclude_each(T, F, B, R).
 
-
+/**
+ * all_of(L, F).
+ *   All the elements H of list L verify F(H).
+ */
 all_of([], _).
 all_of([H | T], F) :- call(F, H), all_of(T, F).
 
+/**
+ * a_all_of(L, F, A).
+ *   All the elements H of list L verify F(H, A).
+ */
 a_all_of([], _, _).
 a_all_of([H | T], F, A) :- call(F, H, A), a_all_of(T, F, A).
 
+/**
+ * b_all_of(L, F, B).
+ *   All the elements H of list L verify F(B, H).
+ */
 b_all_of([], _, _).
 b_all_of([H | T], F, B) :- call(F, B, H), b_all_of(T, F, B).
 
-
+/**
+ * any_of(L, F).
+ *   At least one element H of list L verifies F(H).
+ */
 any_of([H | T], F) :- call(F, H); any_of(T, F).
 
+/**
+ * a_any_of(L, F, A).
+ *   At least one element H of list L verifies F(H, A).
+ */
 a_any_of([H | T], F, A) :- call(F, H, A); a_any_of(T, F, A).
 
+/**
+ * b_any_of(L, F, B).
+ *   At least one element H of list L verifies F(B, H).
+ */
 b_any_of([H | T], F, B) :- call(F, B, H); b_any_of(T, F, B).
 
-
+/**
+ * none_of(L, F).
+ *   No element H of list L verifies F(H).
+ */
 none_of([], _).
 none_of([H | T], F) :- \+ call(F, H), none_of(T, F).
 
+/**
+ * a_none_of(L, F, A).
+ *   No element H of list L verifies F(H, A).
+ */
 a_none_of([], _, _).
 a_none_of([H | T], F, A) :- \+ call(F, H, A), a_none_of(T, F, A).
 
+/**
+ * b_none_of(L, F, B).
+ *   No element H of list L verifies F(B, H).
+ */
 b_none_of([], _, _).
 b_none_of([H | T], F, B) :- \+ call(F, B, H), b_none_of(T, F, B).
 
+/**
+ * count(L, F, N).
+ *   Count the elements of L that pass F(H) into N.
+ */
+count([], _, 0).
+count([H | T], F, N) :- call(F, H), count(T, F, M), N is M+1.
+count([H | T], F, N) :- \+ call(F, H), count(T, F, N).
 
+/**
+ * a_count(L, F, A, N).
+ *   Count the elements of L that pass F(H, A) into N.
+ */
+a_count([], _, _, 0).
+a_count([H | T], F, A, N) :- call(F, H, A), count(T, F, A, M), N is M+1.
+a_count([H | T], F, A, N) :- \+ call(F, H, A), count(T, F, A, N).
+
+/**
+ * b_count(L, F, B, N).
+ *   Count the elements of L that pass F(B, H) into N.
+ */
+b_count([], _, _, 0).
+b_count([H | T], F, B, N) :- call(F, B, H), count(T, F, B, M), N is M+1.
+b_count([H | T], F, B, N) :- \+ call(F, B, H), count(T, F, B, N).
+
+/**
+ * contains(L, X).
+ *   List L contains X.
+ */
 contains([H | T], X) :- H = X; contains(T, X).
 
+/**
+ * contains_all(L, S).
+ *   List L contains all elements of list S.
+ */
 contains_all(_, []).
 contains_all(L, [H | T]) :- contains(L, H), contains_all(L, T).
 
+/**
+ * contains_any(L, S).
+ *   List L contains at least one element of list S.
+ */
 contains_any(L, [H | T]) :- contains(L, H); contains_any(L, T).
 
+/**
+ * contains_none(L, S).
+ *   List L contains no elements from list S.
+ */
 contains_none(_, []).
 contains_none(L, [H | T]) :- \+ contains(L, H), contains_none(L, T).
+
+/**
+ * foreach_increasing(L, F, N).
+ *   Call F(H, N) for each element H of list L, with N increasing for each element.
+ */
+foreach_increasing([], _, _).
+foreach_increasing([H | T], F, N) :- call(F, H, N), M is N+1,
+                                     foreach_increasing(T, F, M).
+
+/**
+ * a_foreach_increasing(L, F, N, A).
+ *   Call F(H, A, N) for each element H of list L, with N increasing for each element.
+ */
+a_foreach_increasing([], _, _, _).
+a_foreach_increasing([H | T], F, A, N) :- call(F, H, A, N), M is N+1,
+                                          a_foreach_increasing(T, F, A, M).
+
+/**
+ * foreach_decreasing(L, F, N).
+ *   Call F(H, N) for each element H of list L, with N decreasing for each element.
+ */
+foreach_decreasing([], _, _).
+foreach_decreasing([H | T], F, N) :- call(F, H, N), M is N-1,
+                                     foreach_decreasing(T, F, M).
+
+/**
+ * a_foreach_decreasing(L, F, N, A).
+ *   Call F(H, A, N) for each element H of list L, with N decreasing for each element.
+ */
+a_foreach_decreasing([], _, _, _).
+a_foreach_decreasing([H | T], F, A, N) :- call(F, H, A, N), M is N-1, 
+                                          a_foreach_decreasing(T, F, A, M).
