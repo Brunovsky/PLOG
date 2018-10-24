@@ -11,7 +11,7 @@
 	\vspace{-2\baselineskip}
 	\includegraphics[scale=0.15]{feuplogo.jpg}\\
 	{\Huge Pente}\\
-	{\Large Game Overview, History and Rules}\\
+	{\Large Game Overview, History, Rules and Initial Implementation}\\
 	{\normalsize PLOG 2018}
 }
 
@@ -34,8 +34,14 @@ Customers waiting for their orders to arrive would play a variation of the game 
 
 Some variations allow for more than two independent players, and even teams, to play simultaneously. These require relaxing the winning conditions of the game to accommodate for the increased opposition --- namely requiring only a four-in-a-row for three or four players, and allowing mixed captures for teams.\supercite{pente-winning-moves}
 
+\begin{wrapfigure}[12]{l}[2em]{0.33\textwidth}
+	\vspace*{-1\baselineskip}
+	\includegraphics[scale=0.4]{goban.png}
+	\caption{\boardsize{19} \textit{Go} board. \label{fig:goban}}
+\end{wrapfigure}
+
 The game has many variations for two player games -- all of which have a common ancestry in \textit{Gomoku}, which has a significantly simpler rule-set.
-All variations of the game are played in the style of \textit{Go}, on the intersections of a traditional \boardsize{19} \emph{Go board} with black and white pieces called \emph{stones}. One player, \textsl{White}, uses the white stones, and the other, \textsl{Black}, uses the black stones. Once placed on the board, stones may not be moved, but may be removed from the board if \emph{captured}.
+All variations of the game are played in the style of \textit{Go}, on the intersections of a traditional \boardsize{19} \emph{Go} board with black and white pieces called \emph{stones}. One player, \textsl{White}, uses the white stones, and the other, \textsl{Black}, uses the black stones. Once placed on the board, stones may not be moved, but may be removed from the board if \emph{captured}.
 
 Introductory or speed games may be played on the smaller \boardsize{9} or \boardsize{13} boards, but the tighter space makes it very difficult to generate common patterns of play.
 
@@ -71,8 +77,8 @@ Some sources add the following secondary rules.
 
 \begin{itemize}
 	\item White always plays first, in the center.\supercite{pente-renjunu, pente-wikipedia} This is unlike \textit{Renju} and \textit{Gomoku}.
-	\item \textsl{Suicides} are not possible -- if a player places two adjacent friendly stones into a bracketed position --- forming the second panel of \autoref{fig:capture} --- his stones are not captured.\supercite{pente-renjunu,pente-org,pente-wikipedia,pente-winning-moves}
-	\item Tournament Rule: The first player's second move is restricted -- it must be at least three intersections away from the center (that is, outside the middle \boardsize{5}).\supercite{pente-net,pente-org,pente-wikipedia,pente-winning-moves}
+	\item \textsl{Suicides} are not possible -- if a player places two adjacent friendly stones into a bracketed position --- for example, if White forms the second panel of \autoref{fig:capture} --- his stones are not captured.\supercite{pente-renjunu,pente-org,pente-wikipedia,pente-winning-moves}
+	\item Tournament Rule: The first player's second move is restricted -- it must be at least three intersections away from the center (that is, outside the board's middle \boardsize{5}).\supercite{pente-net,pente-org,pente-wikipedia,pente-winning-moves}
 \end{itemize}
 
 We'll be using these three rules hereafter.
@@ -80,6 +86,52 @@ We'll be using these three rules hereafter.
 Other sources do not specify starting player (or choose Black) and do not require the tournament rule, at least for casual play. 
 
 Among variations we find: suicides allowed, called \textit{poofs} (\textit{Poof-Pente}); harsher Tournament Rule (\textit{G-Pente}, \textit{D-Pente}); 3-in-a-row captures (\textit{Keryo-Pente}), and others.\supercite{pente-org,pente-net}
+
+\section{Implementation: Internal Representation}
+
+Representing the game's board is fairly simple. Every position in the \boardsize{19} board is in one of three states: white piece, black piece, or empty. We'll represent the board using a \boardsize{19} matrix (list of lists), whose elements are \textbf{w}, \textbf{b} or \textbf{c}, for each state respectively. This matrix will be called $Board$.
+
+Now, each player has captured a certain number of pieces (an integer) and only plays pieces of a certain color (white or black). These will be $\textup{player}(Color, Captures)$.
+
+The overall game state will be kept by $\textup{game}(Board, White, Black, next)$, where $White$ and $Black$ are players and $next$ is \textbf{w} or \textbf{b} according to who will play next.
+
+For examples see \autoref{fig:earlygame}, \autoref{fig:midgame} and \autoref{fig:lategame} below.
+
+\section{Implementation: Board Display}
+
+We've decided to flip the board (display only, not representation) when it is Black's turn to play, as if the two players were playing face-to-face on a physical Go board. Naturally we adjust the identification of rows and columns.
+
+To draw the board with text (on the console) we used unicode box-drawing characters (range \texttt{u+2500}--\texttt{u+257f}). The white and black pieces become filled and empty unicode circles, respectively.
+
+\begin{figure}[bhtp]
+	\begin{minipage}{0.45\textwidth}
+	\includegraphics[scale=0.25]{earlygame.png}
+	\end{minipage}
+	\begin{minipage}{0.55\textwidth}
+		\includegraphics[scale=0.50]{earlygame-code.png}
+	\end{minipage}
+	\caption{A game after 10 moves. It is White's turn to play.\label{fig:earlygame}}
+\end{figure}
+
+\begin{figure}[bhtp]
+	\begin{minipage}{0.45\textwidth}
+		\includegraphics[scale=0.25]{midgame.png}
+	\end{minipage}
+	\begin{minipage}{0.55\textwidth}
+		\includegraphics[scale=0.50]{midgame-code.png}
+	\end{minipage}
+	\caption{A game after 29 moves. It is Black's turn to play.\label{fig:midgame}}
+\end{figure}
+
+\begin{figure}[bhtp]
+	\begin{minipage}{0.45\textwidth}
+		\includegraphics[scale=0.25]{lategame.png}
+	\end{minipage}
+	\begin{minipage}{0.55\textwidth}
+		\includegraphics[scale=0.50]{lategame-code.png}
+	\end{minipage}
+	\caption{A game after 44 moves. It is White's turn to play, and win at H11.\label{fig:lategame}}
+\end{figure}
 
 \printbibliography
 
