@@ -69,3 +69,20 @@ plog(lategame) :- display_game([
     [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 2
     [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c]  % 1
 ], player(white, 8), player(black, 8), w).
+
+plog(early13) :- display_game([
+%    A  B  C  D  E  F  G  H  J  K  L  M  N
+    [c, c, c, c, c, c, c, c, c, c, c, c, c], % 13
+    [c, c, c, c, c, c, c, c, c, c, c, c, c], % 12
+    [c, c, c, c, c, c, c, c, c, c, c, c, c], % 11
+    [c, c, c, c, c, c, c, c, w, c, c, c, c], % 10
+    [c, c, c, c, c, c, c, c, c, c, c, c, c], % 9
+    [c, c, c, c, c, c, b, c, w, c, c, c, c], % 8
+    [c, c, c, c, c, c, w, w, b, b, w, c, c], % 7
+    [c, c, c, c, c, c, c, c, c, w, c, c, c], % 6
+    [c, c, c, c, c, c, c, w, b, c, c, c, c], % 5
+    [c, c, c, c, c, c, c, c, c, c, c, c, c], % 4
+    [c, c, c, c, c, c, c, c, c, c, c, c, c], % 3
+    [c, c, c, c, c, c, c, c, c, c, c, c, c], % 2
+    [c, c, c, c, c, c, c, c, c, c, c, c, c]  % 1
+], player(white, 0), player(black, 0), w).

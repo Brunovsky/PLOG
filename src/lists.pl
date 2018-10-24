@@ -380,7 +380,7 @@ foreach_increasing([H | T], F, N) :- call(F, H, N), M is N + 1,
  */
 l_foreach_increasing([], _, _, _).
 l_foreach_increasing([H | T], F, N, Args) :- apply(F, [H, N | Args]), M is N + 1,
-                                          l_foreach_increasing(T, F, Args, M).
+                                          l_foreach_increasing(T, F, M, Args).
 
 /**
  * foreach_decreasing(L, F, N).
@@ -396,4 +396,4 @@ foreach_decreasing([H | T], F, N) :- call(F, H, N), M is N - 1,
  */
 l_foreach_decreasing([], _, _, _).
 l_foreach_decreasing([H | T], F, N, Args) :- apply(F, [H, N | Args]), M is N - 1, 
-                                          l_foreach_decreasing(T, F, Args, M).
+                                          l_foreach_decreasing(T, F, M, Args).
