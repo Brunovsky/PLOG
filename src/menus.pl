@@ -13,12 +13,12 @@ menu :-
 	nl, nl,
 	write('Amadeu Pereira\tBruno Carvalho'),
 	nl,
-	getMenuInput(Input),
-	handleMenuInput(Input).
+	getMenuInput(Input).
 
 getMenuInput(Input) :-
 	write('> Option: '),
-	read(Input).
+	read(Input),
+	handleMenuInput(Input).
 
 handleMenuInput(1) :-
 	write('P1 vs P2').
@@ -33,6 +33,5 @@ handleMenuInput(0) :-
 	write('Exit').
 
 handleMenuInput(_) :-
-	write('Invalid Option!\n'),
-	getMenuInput(Input),
-	handleMenuInput(Input).
+	write('Invalid Option!'), nl,
+	getMenuInput(Input).
