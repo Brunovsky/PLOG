@@ -1,106 +1,120 @@
 /**
- * MEDIUM WHITE CIRCLE:     u+25cf
- * MEDIUM BLACK CIRCLE:     u+25cb
- * 
- * LARGE WHITE CIRCLE:      u+25ef
- * LARGE BLACK CIRCLE:      u+2b24
- *
- * SMALL WHITE CIRCLE:      u+26aa 
- * SMALL BLACK CIRCLE:      u+26ab
- *
- * Circled A-Z:             u+24b6 - u+24cf  (9398)
- * Circled 1-20:            u+2460 - u+2473  (9312)
- * Other circles around these unicode codes.
- *
  * UNICODE BOX DRAWING
  * http://jrgraphix.net/r/Unicode/2500-257F
- * 
- *     Bot left             u+2514
- *     Bot right            u+2518
- *     Top left             u+250c
- *     Top right            u+2510
- *     Bottom               u+2534
- *     Top                  u+252c
- *     Left                 u+251c
- *     Right                u+2524
- *     Fill                 u+253c
  *
- * HORIZONTAL DASH:    9472 u+2500
- * VERTICAL DASH:      9474 u+2502
+ * ● White circle      u+25cf     '\x25cf\'
+ * ○ Black circle      u+25cb     '\x25cb\'
+ *
+ * Large white         u+25ef     '\x25ef\'
+ * Large black         u+2b24     '\x2b24\'
+ *
+ * Small white         u+26aa     '\x26aa\'
+ * Small black         u+26ab     '\x26ab\'
+ * 
+ * ┌ Top left          u+250c     '\x250c\'
+ * ┐ Top right         u+2510     '\x2510\'
+ * └ Bot left          u+2514     '\x2514\'
+ * ┘ Bot right         u+2518     '\x2518\'
+ *     
+ * ├ Left              u+251c     '\x251c\'
+ * ┬ Top               u+252c     '\x252c\'
+ * ┤ Right             u+2524     '\x2524\'
+ * ┴ Bottom            u+2534     '\x2534\'
+ *     
+ * ┼ Fill              u+253c     '\x253c\'
+ *
+ * Circled a-z         u+24d0 -- u+24e9
+ *  ⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩ
+ * Circled A-Z         u+24b6 -- u+24cf
+ *  ⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏ
+ * Circled 1-20        u+2460 -- u+2473
+ *  ①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳
+ *
+ * ─ Horizontal dash   u+2500
+ * │ Vertical dash     u+2502
  */
 
-%print_unicodes(X, N) :- N = 0; M is N-1, K is X+1, put_code(X), put_char(' '), print_unicodes(K, M).
-
 /**
- * white        '\x25cf\'
- * black        '\x25cb\'
- * bot left     '\x2514\'
- * bot right    '\x2518\'
- * top left     '\x250c\'
- * top right    '\x2510\'
- * bottom       '\x2534\'
- * top          '\x252c\'
- * left         '\x251c\'
- * right        '\x2524\'
- * fill         '\x253c\'
+ * Internal indexing in the board
+ *    1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 ...
+ * 19 ┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐
+ * 18 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
+ * 17 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
+ * 16 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
+ * 15 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
+ * 14 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
+ * 13 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
+ * 12 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
+ * 11 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
+ * 10 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤  ...
+ *  9 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
+ *  8 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
+ *  7 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
+ *  6 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
+ *  5 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
+ *  4 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
+ *  3 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
+ *  2 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
+ *  1 └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
+ * ...                          ...                            ...
  */
 
 /**
- * write_board_each(P, Row, Col, Size).
+ * write_board_unit(P, Row, Col, Size).
  *   Writes to the console the piece whose internal representation is P,
- *   on location (Row, Col).
+ *   on location (Row, Col), assuming the board is SizexSize.
  */
-% White piece, anywhere
-write_board_each(w, _, _, _) :-
+% White piece, anywhere ●
+write_board_unit(w, _, _, _) :-
     write('\x25cf\ ').
 
-% Black piece, anywhere
-write_board_each(b, _, _, _) :-
+% Black piece, anywhere ○
+write_board_unit(b, _, _, _) :-
     write('\x25cb\ ').
 
-% Bottom-left piece, A1
-write_board_each(c, 1, 1, _) :-
+% Bottom-left piece └
+write_board_unit(c, 1, 1, _) :-
     write('\x2514\\x2500\').
 
-% Bottom-right piece, T1
-write_board_each(c, Size, 1, Size) :-
+% Bottom-right piece ┘
+write_board_unit(c, Size, 1, Size) :-
     write('\x2518\').
 
-% Top-left piece, A19
-write_board_each(c, 1, Size, Size) :-
+% Top-left piece ┌
+write_board_unit(c, 1, Size, Size) :-
     write('\x250c\\x2500\').
 
-% Top-right piece, T19
-write_board_each(c, Size, Size, Size) :-
+% Top-right piece ┐
+write_board_unit(c, Size, Size, Size) :-
     write('\x2510\').
 
-% Bottom piece, B1-S1
-write_board_each(c, Col, 1, Size) :-
+% Bottom piece ┴
+write_board_unit(c, Col, 1, Size) :-
     Col > 1, Col < Size,
     write('\x2534\\x2500\').
 
-% Top piece, B19-S19
-write_board_each(c, Col, Size, Size) :-
+% Top piece ┬
+write_board_unit(c, Col, Size, Size) :-
     Col > 1, Col < Size,
     write('\x252c\\x2500\').
 
-% Left piece, A2-A18
-write_board_each(c, 1, Row, Size) :-
+% Left piece ├
+write_board_unit(c, 1, Row, Size) :-
     Row > 1, Row < Size,
     write('\x251c\\x2500\').
 
-% Right piece, T2-T18
-write_board_each(c, Size, Row, Size) :-
+% Right piece ┤
+write_board_unit(c, Size, Row, Size) :-
     Row > 1, Row < Size,
     write('\x2524\').
 
-% Fill piece, B2-S18
-write_board_each(c, Col, Row, Size) :-
+% Fill piece ┼
+write_board_unit(c, Col, Row, Size) :-
     Row > 1, Row < Size, Col > 1, Col < Size,
     write('\x253c\\x2500\').
 
 /**
- * write_board_left(next, Row).
+ * write_board_left(next, Row, Size).
  *   Print the row's number on the left of the board.
  */
 write_board_left(w, Row, _) :- Row < 10, format(' ~d ', Row).
@@ -111,8 +125,8 @@ write_board_left(b, R, Size) :- Row is Size + 1 - R, Row > 9, format('~d ', Row)
 /**
  * write_board_top_char(I).
  *   Write the char at index I.
- *   We choose to skip letter I.
- *   Some board authors prefer to skip J, others prefer using numbers.
+ *   We choose to skip letter 'I'.
+ *   Some board authors prefer to skip 'J', others prefer using numbers.
  */
 write_board_top_char(I) :- I < 9, C is I + 64, put_char(' '), put_code(C).
 write_board_top_char(I) :- I > 8, C is I + 65, put_char(' '), put_code(C).
@@ -146,7 +160,7 @@ write_board_bottom(b, Wc, Bc) :-
  */
 write_board_line(L, Row, Size, P) :-
     write_board_left(P, Row, Size),
-    l_foreach_increasing(L, write_board_each, 1, [Row, Size]), write('\n').
+    l_foreach_increasing(L, write_board_unit, 1, [Row, Size]), write('\n').
 
 /**
  * display_game(Board)
