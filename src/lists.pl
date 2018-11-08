@@ -359,12 +359,18 @@ foreach([], _).
 foreach([H | T], F) :- call(F, H), foreach(T, F).
 
 /**
- * l_foreach(L, F, Args).
+ * la_foreach(L, F, Args).
  *   Call F(H, Args...) for each element H of list L.
- *   Same as l_all_of.
  */
-l_foreach([], _, _).
-l_foreach([H | T], F, Args) :- apply(F, [H | Args]), l_foreach(T, F, Args).
+la_foreach([], _, _).
+la_foreach([H | T], F, Args) :- apply(F, [H | Args]), la_foreach(T, F, Args).
+
+/**
+ * lb_foreach(L, F, Args).
+ *   Call F(Args..., H) for each element H of list L.
+ */
+lb_foreach([], _, _).
+lb_foreach([H | T], F, Args) :- push_back(Args, H, B), apply(F, B), lb_foreach(T, F, Args).
 
 /**
  * foreach_increasing(L, F, N).
@@ -375,25 +381,47 @@ foreach_increasing([H | T], F, N) :- call(F, H, N), M is N + 1,
                                      foreach_increasing(T, F, M).
 
 /**
- * l_foreach_increasing(L, F, N, Args).
+ * la_foreach_increasing(L, F, Args, N).
  *   Call F(H, N, Args...) for each element H of list L, with N increasing for each element.
  */
-l_foreach_increasing([], _, _, _).
-l_foreach_increasing([H | T], F, N, Args) :- apply(F, [H, N | Args]), M is N + 1,
-                                          l_foreach_increasing(T, F, M, Args).
+la_foreach_increasing([], _, _, _).
+la_foreach_increasing([H | T], F, Args, N) :- apply(F, [H, N | B]),
+                                              M is N + 1,
+                                              la_foreach_increasing(T, F, Args, M).
+
+/**
+ * lb_foreach_increasing(L, F, Args, N).
+ *   Call F(H, Args..., N) for each element H of list L, with N increasing for each element.
+ */
+lb_foreach_increasing([], _, _, _).
+lb_foreach_increasing([H | T], F, Args, N) :- push_back(Args, N, B),
+                                              apply(F, [H | B]),
+                                              M is N + 1,
+                                              lb_foreach_increasing(T, F, Args, M).
 
 /**
  * foreach_decreasing(L, F, N).
  *   Call F(H, N) for each element H of list L, with N decreasing for each element.
  */
 foreach_decreasing([], _, _).
-foreach_decreasing([H | T], F, N) :- call(F, H, N), M is N - 1,
+foreach_decreasing([H | T], F, N) :- call(F, H, N), M is N + 1,
                                      foreach_decreasing(T, F, M).
 
 /**
- * l_foreach_decreasing(L, F, N, Args).
+ * la_foreach_decreasing(L, F, Args, N).
  *   Call F(H, N, Args...) for each element H of list L, with N decreasing for each element.
  */
-l_foreach_decreasing([], _, _, _).
-l_foreach_decreasing([H | T], F, N, Args) :- apply(F, [H, N | Args]), M is N - 1, 
-                                          l_foreach_decreasing(T, F, M, Args).
+la_foreach_decreasing([], _, _, _).
+la_foreach_decreasing([H | T], F, Args, N) :- apply(F, [H, N | B]),
+                                              M is N - 1,
+                                              la_foreach_decreasing(T, F, Args, M).
+
+/**
+ * lb_foreach_decreasing(L, F, Args, N).
+ *   Call F(H, Args..., N) for each element H of list L, with N decreasing for each element.
+ */
+lb_foreach_decreasing([], _, _, _).
+lb_foreach_decreasing([H | T], F, Args, N) :- push_back(Args, N, B),
+                                              apply(F, [H | B]),
+                                              M is N - 1,
+                                              lb_foreach_decreasing(T, F, Args, M).
