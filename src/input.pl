@@ -4,7 +4,7 @@
  *   The position must be in the form E12, A7, B8, etc,
  *   and terminated with a dot.
  *   e.g. E12.
- *        A 14.
+ *        A14.
  *        Z9.
  */
 read_position(Row, Col) :- untilloop(is_alpha, get_char, Col),
