@@ -13,3 +13,4 @@
 % Shorthands
 re :- reconsult('main.pl').
 test :- reconsult('test/test.pl').
+retest :- re, test.

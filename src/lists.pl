@@ -78,6 +78,13 @@ fill_n(0, _, []).
 fill_n(N, E, [E | T]) :- M is N - 1, fill_n(M, E, T).
 
 /**
+ * iota(I, J, L).
+ *   Fills list L with numbers I, I+1, I+2, ..., J.
+ */
+iota(I, I, [I]).
+iota(I, J, [I | T]) :- I < J, K is I + 1, iota(K, J, T).
+
+/**
  * index(L, E, I).
  *   Finds the index I of the first occurence of an item E in the list L.
  *   Fails if no such index exists.
@@ -86,23 +93,36 @@ index([E | _], E, 0).
 index([_ | T], E, I) :- index(T, E, J), !, I is J + 1.
 
 /**
- * range(L, I, J, R).
+ * range(L, [I, J], R).
  * range(L, I, R).
  *   Extracts the sublist starting at index I (inclusive) and ending
  *   at index J (exclusive) from L into R.
  */
-range(L, I, R) :- length(L, J), range(L, I, J, R).
-range(_, 0, 0, []).
-range([], I, J, []) :- I =< J.
-range([H | T], 0, J, [H | R]) :- J > 0, Jr is J - 1, range(T, 0, Jr, R).
-range([_ | T], I, J, R) :- I > 0, Ir is I - 1, J > 0, Jr is J - 1, range(T, Ir, Jr, R).
+range([], _, []).
+range(L, I, R) :- integer(I), length(L, J), range(L, [I, J], R).
+range(_, [0, 0], []).
+range([H | T], [0, J], [H | R]) :- J > 0,
+                                   Jr is J - 1,
+                                   range(T, [0, Jr], R).
+range([_ | T], [I, J], R) :- I > 0, J > 0,
+                             Ir is I - 1, Jr is J - 1,
+                             range(T, [Ir, Jr], R).
 
 /**
- * range_n(L, I, N, R).
+ * range_n(L, [I, N], R).
  *   Extracts the sublist starting at index I (inclusive) with length
  *   N or until the end of the list, from L into R.
  */
-range_n(L, I, N, R) :- J is I + N, range(L, I, J, R).
+range_n(L, [I, N], R) :- J is I + N, range(L, [I, J], R).
+
+/**
+ * consecutive(L, E, N).
+ *   Asserts that list L has N consecutive elements E.
+ */
+consecutive(L, E, N) :- consecutive(L, E, N, 0).
+consecutive(_, _, N, N).
+consecutive([E | L], E, N, I) :- J is I + 1, consecutive(L, E, N, J).
+consecutive([H | L], E, N, _) :- H \= E, consecutive(L, E, N, 0).
 
 /**
  * reverse(L, R).
@@ -117,7 +137,7 @@ reverse([H | T], R) :- reverse(T, Z), push_back(Z, H, R).
  *   R is the list consisting of the resulting Er.
  */
 map([], _, []).
-map([H | T], F, [Hr | Tr]) :- call(F, H, Hr), map(T, F, Tr).
+map([H | T], F, [Hr | Tr]) :- call(F, H, Hr), !, map(T, F, Tr).
 
 /**
  * l_map(L, F, Args, R).
@@ -125,7 +145,9 @@ map([H | T], F, [Hr | Tr]) :- call(F, H, Hr), map(T, F, Tr).
  *   R is the list consisting of the resulting Er.
  */
 l_map([], _, _, []).
-l_map([H | T], F, Args, [Hr | Tr]) :- push_back(Args, Hr, Z), apply(F, [H | Z]), l_map(T, F, Args, Tr).
+l_map([H | T], F, Args, [Hr | Tr]) :- push_back(Args, Hr, Z),
+                                      apply(F, [H | Z]), !,
+                                      l_map(T, F, Args, Tr).
 
 /**
  * flatten(L, R).
@@ -175,14 +197,6 @@ a_include_each([H | T], F, A, [H | R]) :- call(F, H, A), a_include_each(T, F, A,
 a_include_each([H | T], F, A, R) :- \+ call(F, H, A), a_include_each(T, F, A, R).
 
 /**
- * b_include_each(L, F, B, R).
- *   Filter list L, include only elements H that verify F(B, H) into list R.
- */
-b_include_each([], _, _, []).
-b_include_each([H | T], F, B, [H | R]) :- call(F, B, H), b_include_each(T, F, B, R).
-b_include_each([H | T], F, B, R) :- \+ call(F, B, H), b_include_each(T, F, B, R).
-
-/**
  * l_include_each(L, F, Args, R).
  *   Filter list L, include only elements H that verify F(H, Args...) into list R.
  */
@@ -207,14 +221,6 @@ a_exclude_each([H | T], F, A, [H | R]) :- \+ call(F, H, A), a_exclude_each(T, F,
 a_exclude_each([H | T], F, A, R) :- call(F, H, A), a_exclude_each(T, F, A, R).
 
 /**
- * b_exclude_each(L, F, B, R).
- *   Fitler list L, exclude all elements H that verify F(B, H) from list R.
- */
-b_exclude_each([], _, _, []).
-b_exclude_each([H | T], F, B, [H | R]) :- \+ call(F, B, H), b_exclude_each(T, F, B, R).
-b_exclude_each([H | T], F, B, R) :- call(F, B, H), b_exclude_each(T, F, B, R).
-
-/**
  * l_exclude_each(L, F, Args, R).
  *   Filter list L, exclude all elements H that verify F(H, Args...) from list R.
  */
@@ -237,13 +243,6 @@ a_all_of([], _, _).
 a_all_of([H | T], F, A) :- call(F, H, A), a_all_of(T, F, A).
 
 /**
- * b_all_of(L, F, B).
- *   All the elements H of list L verify F(B, H).
- */
-b_all_of([], _, _).
-b_all_of([H | T], F, B) :- call(F, B, H), b_all_of(T, F, B).
-
-/**
  * l_all_of(L, F, Args).
  *   All the elements H of list L verify F(H, Args...).
  */
@@ -261,12 +260,6 @@ any_of([H | T], F) :- call(F, H); any_of(T, F).
  *   At least one element H of list L verifies F(H, A).
  */
 a_any_of([H | T], F, A) :- call(F, H, A); a_any_of(T, F, A).
-
-/**
- * b_any_of(L, F, B).
- *   At least one element H of list L verifies F(B, H).
- */
-b_any_of([H | T], F, B) :- call(F, B, H); b_any_of(T, F, B).
 
 /**
  * l_any_of(L, F, Args).
@@ -287,13 +280,6 @@ none_of([H | T], F) :- \+ call(F, H), none_of(T, F).
  */
 a_none_of([], _, _).
 a_none_of([H | T], F, A) :- \+ call(F, H, A), a_none_of(T, F, A).
-
-/**
- * b_none_of(L, F, B).
- *   No element H of list L verifies F(B, H).
- */
-b_none_of([], _, _).
-b_none_of([H | T], F, B) :- \+ call(F, B, H), b_none_of(T, F, B).
 
 /**
  * l_none_of(L, F, Args).
@@ -317,14 +303,6 @@ count([H | T], F, N) :- \+ call(F, H), count(T, F, N).
 a_count([], _, _, 0).
 a_count([H | T], F, A, N) :- call(F, H, A), count(T, F, A, M), N is M + 1.
 a_count([H | T], F, A, N) :- \+ call(F, H, A), count(T, F, A, N).
-
-/**
- * b_count(L, F, B, N).
- *   Count the elements of L that pass F(B, H) into N.
- */
-b_count([], _, _, 0).
-b_count([H | T], F, B, N) :- call(F, B, H), count(T, F, B, M), N is M + 1.
-b_count([H | T], F, B, N) :- \+ call(F, B, H), count(T, F, B, N).
 
 /**
  * l_count(L, F, Args, N).
@@ -362,25 +340,19 @@ contains_none(L, [H | T]) :- \+ contains(L, H), contains_none(L, T).
 
 /**
  * foreach(L, F).
- *   Call F(H) for each element H of list L.
- *   Same as all_of.
+ *   Call F(H) for each element H of list L, irrespective of success.
  */
 foreach([], _).
-foreach([H | T], F) :- call(F, H), foreach(T, F).
+foreach([H | T], F) :- (call(F, H); \+ call(F, H)),
+                       foreach(T, F).
 
 /**
  * la_foreach(L, F, Args).
- *   Call F(H, Args...) for each element H of list L.
+ *   Call F(H, Args...) for each element H of list L, irrespective of success.
  */
 la_foreach([], _, _).
-la_foreach([H | T], F, Args) :- apply(F, [H | Args]), la_foreach(T, F, Args).
-
-/**
- * lb_foreach(L, F, Args).
- *   Call F(Args..., H) for each element H of list L.
- */
-lb_foreach([], _, _).
-lb_foreach([H | T], F, Args) :- push_back(Args, H, B), apply(F, B), lb_foreach(T, F, Args).
+la_foreach([H | T], F, Args) :- (apply(F, [H | Args]); \+ apply(F, [H | Args])),
+                                la_foreach(T, F, Args).
 
 /**
  * foreach_increasing(L, F, N).
@@ -395,7 +367,7 @@ foreach_increasing([H | T], F, N) :- call(F, H, N), M is N + 1,
  *   Call F(H, N, Args...) for each element H of list L, with N increasing for each element.
  */
 la_foreach_increasing([], _, _, _).
-la_foreach_increasing([H | T], F, Args, N) :- apply(F, [H, N | B]),
+la_foreach_increasing([H | T], F, Args, N) :- apply(F, [H, N | Args]),
                                               M is N + 1,
                                               la_foreach_increasing(T, F, Args, M).
 
@@ -422,7 +394,7 @@ foreach_decreasing([H | T], F, N) :- call(F, H, N), M is N + 1,
  *   Call F(H, N, Args...) for each element H of list L, with N decreasing for each element.
  */
 la_foreach_decreasing([], _, _, _).
-la_foreach_decreasing([H | T], F, Args, N) :- apply(F, [H, N | B]),
+la_foreach_decreasing([H | T], F, Args, N) :- apply(F, [H, N | Args]),
                                               M is N - 1,
                                               la_foreach_decreasing(T, F, Args, M).
 
