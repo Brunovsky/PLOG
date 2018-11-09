@@ -109,3 +109,44 @@ plog_at(Row, Col, E) :- rep_piece_at([
     [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 2
     [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c]  % 1
 ], Row, Col, E).
+
+plog_col(Col, L) :- matrix_col([
+%    A  B  C  D  E  F  G  H  J  K  L  M  N  O  P  Q  R  S  T
+    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 19
+    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 18
+    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 17
+    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 16
+    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 15
+    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 14
+    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 13
+    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 12
+    [c, c, c, c, c, c, c, c, b, c, b, c, c, c, c, c, c, c, c], % 11
+    [c, c, c, c, c, c, c, c, c, w, w, b, w, c, c, c, c, c, c], % 10
+    [c, c, c, c, c, c, c, c, c, b, c, w, c, c, c, c, c, c, c], % 9
+    [c, c, c, c, c, c, c, c, c, c, w, c, c, c, c, c, c, c, c], % 8
+    [c, c, c, c, c, c, c, c, c, b, c, c, c, c, c, c, c, c, c], % 7
+    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 6
+    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 5
+    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 4
+    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 3
+    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 2
+    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c]  % 1
+], Col, L).
+
+plog_slice([RowBegin, RowEnd], [ColBegin, ColEnd], N) :-
+    matrix_slice([
+%    A  B  C  D  E  F  G  H  J  K  L  M  N
+    [c, c, c, c, c, c, c, c, c, c, c, c, c], % 13
+    [c, c, c, c, c, c, c, c, c, c, c, c, c], % 12
+    [c, c, c, c, c, c, c, c, c, c, c, c, c], % 11
+    [c, c, c, c, c, c, c, c, w, c, c, c, c], % 10
+    [c, c, c, c, c, c, c, c, c, c, c, c, c], % 9
+    [c, c, c, c, c, c, b, c, w, c, c, c, c], % 8
+    [c, c, c, c, c, c, w, w, b, b, w, c, c], % 7
+    [c, c, c, c, c, c, c, c, c, w, c, c, c], % 6
+    [c, c, c, c, c, c, c, w, b, c, c, c, c], % 5
+    [c, c, c, c, c, c, c, c, c, c, c, c, c], % 4
+    [c, c, c, c, c, c, c, c, c, c, c, c, c], % 3
+    [c, c, c, c, c, c, c, c, c, c, c, c, c], % 2
+    [c, c, c, c, c, c, c, c, c, c, c, c, c]  % 1
+], [RowBegin, RowEnd], [ColBegin, ColEnd], N).

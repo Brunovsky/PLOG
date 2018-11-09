@@ -6,7 +6,7 @@ is_list([]).
 is_list([_ | _]).
 
 /**
- * get(L, N, C).
+ * list_get(L, N, C).
  *   C is the element at position N in list L (0-indexed).
  */
 list_get([H | _], 0, H).
@@ -87,9 +87,11 @@ index([_ | T], E, I) :- index(T, E, J), !, I is J + 1.
 
 /**
  * range(L, I, J, R).
+ * range(L, I, R).
  *   Extracts the sublist starting at index I (inclusive) and ending
  *   at index J (exclusive) from L into R.
  */
+range(L, I, R) :- length(L, J), range(L, I, J, R).
 range(_, 0, 0, []).
 range([], I, J, []) :- I =< J.
 range([H | T], 0, J, [H | R]) :- J > 0, Jr is J - 1, range(T, 0, Jr, R).
@@ -147,6 +149,14 @@ mixed_flatten([H | T], [H | R]) :- \+ is_list(H), mixed_flatten(T, R).
 deep_flatten([], []).
 deep_flatten([L | T], R) :- is_list(L), deep_flatten(L, L1), deep_flatten(T, T1), join(L1, T1, R).
 deep_flatten([H | T], [H | R]) :- \+ is_list(H), deep_flatten(T, R).
+
+/**
+ * clear_empty_list(L, R).
+ *   Removes from L elements like [].
+ */
+clear_empty_list([], []).
+clear_empty_list([[] | T], R) :- clear_empty_list(T, R).
+clear_empty_list([H | T], [H | R]) :- clear_empty_list(T, R).
 
 /**
  * include_each(L, F, R).
