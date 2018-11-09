@@ -10,69 +10,99 @@ apply(F, [A, B, C, D]) :- call(F, A, B, C, D).
 apply(F, [A, B, C, D, E]) :- call(F, A, B, C, D, E).
 
 /**
- * loop_increasing(F, I, E).
+ * forloop_increasing(F, I, E).
  *   Call F(N) for N in the range [I, E], with N increasing.
  */
-loop_increasing(F, E, E) :- call(F, E).
-loop_increasing(F, I, E) :-
+forloop_increasing(F, E, E) :- call(F, E).
+forloop_increasing(F, I, E) :-
     I < E,
     call(F, I),
     Ir is I + 1,
-    loop_increasing(F, Ir, E).
+    forloop_increasing(F, Ir, E).
 
 /**
- * loop_decreasing(F, I, E).
+ * forloop_decreasing(F, I, E).
  *   Call F(N) for N in the range [I, E], with N decreasing.
  */
-loop_decreasing(F, I, I) :- call(F, I).
-loop_decreasing(F, I, E) :-
+forloop_decreasing(F, I, I) :- call(F, I).
+forloop_decreasing(F, I, E) :-
     I < E,
     call(F, E),
     Er is E - 1,
-    loop_decreasing(F, I, Er).
+    forloop_decreasing(F, I, Er).
 
 /**
- * la_loop_increasing(F, I, E, L).
+ * la_forloop_increasing(F, I, E, L).
  *   Call F(N, L...) for N in the range [I, E], with N increasing.
  */
-la_loop_increasing(F, E, E, L) :- apply(F, [E | L]).
-la_loop_increasing(F, I, E, L) :-
+la_forloop_increasing(F, E, E, L) :- apply(F, [E | L]).
+la_forloop_increasing(F, I, E, L) :-
     I < E,
     apply(F, [I | L]),
     Ir is I + 1,
-    l_loop_increasing(F, Ir, E, L).
+    l_forloop_increasing(F, Ir, E, L).
 
 /**
- * la_loop_decreasing(F, I, E, L).
+ * la_forloop_decreasing(F, I, E, L).
  *   Call F(N, L...) for N in the range [I, E], with N decreasing.
  */
-la_loop_decreasing(F, I, I, L) :- apply(F, [I | L]).
-la_loop_decreasing(F, I, E, L) :-
+la_forloop_decreasing(F, I, I, L) :- apply(F, [I | L]).
+la_forloop_decreasing(F, I, E, L) :-
     I < E,
     apply(F, [I | L]),
     Er is E - 1,
-    l_loop_decreasing(F, I, Er, L).
+    l_forloop_decreasing(F, I, Er, L).
 
 /**
- * la_loop_increasing(F, I, E, L).
+ * la_forloop_increasing(F, I, E, L).
  *   Call F(L..., N) for N in the range [I, E], with N increasing.
  */
-lb_loop_increasing(F, E, E, L) :- push_back(L, I, B), apply(F, B).
-lb_loop_increasing(F, I, E, L) :-
+lb_forloop_increasing(F, E, E, L) :- push_back(L, I, B), apply(F, B).
+lb_forloop_increasing(F, I, E, L) :-
     I < E,
     push_back(L, I, B),
     apply(F, B),
     Ir is I + 1,
-    lb_loop_increasing(F, Ir, E, L).
+    lb_forloop_increasing(F, Ir, E, L).
 
 /**
- * la_loop_decreasing(F, I, E, L).
+ * la_forloop_decreasing(F, I, E, L).
  *   Call F(L..., N) for N in the range [I, E], with N decreasing.
  */
-lb_loop_decreasing(F, I, I, L) :- push_back(L, I, B), apply(F, B).
-lb_loop_decreasing(F, I, E, L) :-
+lb_forloop_decreasing(F, I, I, L) :- push_back(L, I, B), apply(F, B).
+lb_forloop_decreasing(F, I, E, L) :-
     I < E,
     push_back(L, E, B),
     apply(F, B),
     Er is E - 1,
-    lb_loop_decreasing(F, I, Er, L).
+    lb_forloop_decreasing(F, I, Er, L).
+
+/**
+ * whileloop(C, F, R).
+ *   Call goal F(X) repeatedly while goal C(X) holds, then succeed and set R to X.
+ */
+whileloop(C, F, R) :- call(F, X), whileloop_aux(C, F, X, R).
+whileloop_aux(C, F, X, X) :- \+ call(C, X).
+whileloop_aux(C, F, X, R) :- call(F, Y), !, whileloop_aux(C, F, Y, R).
+
+/**
+ * whileloop_fail(C, F).
+ *   Call goal F(X) repeatedly while goal C(X) holds, then fail.
+ */
+whileloop_fail(C, F) :- call(C, X), call(F, X), whileloop_fail(C, F, X).
+whileloop_fail(C, F, X) :- !, call(C, X), call(F, Y), !, whileloop_fail(C, F, Y).
+
+/**
+ * untilloop(C, F, R).
+ *   Call goal F(X) repeatedly until goal C(X) holds, then succeed and set R to X.
+ */
+untilloop(C, F, R) :- call(F, X), untilloop_aux(C, F, X, R).
+untilloop_aux(C, F, X, X) :- call(C, X).
+untilloop_aux(C, F, X, R) :- call(F, Y), !, untilloop_aux(C, F, Y, R).
+
+/**
+ * untilloop_fail(C, F).
+ *   Call goal F(X) repeatedly until goal C(X) holds, then fail.
+ */
+untilloop_fail(C, F) :- \+ call(C, X), call(F, X), untilloop_fail(C, F, X).
+untilloop_fail(C, F, X) :- !, \+ call(C, X), call(F, Y), !, untilloop_fail(C, F, Y).

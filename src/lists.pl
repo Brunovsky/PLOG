@@ -10,7 +10,7 @@ is_list([_ | _]).
  *   C is the element at position N in list L (0-indexed).
  */
 list_get([H | _], 0, H).
-list_get([_ | T], N, C) :- N > 0, M is N - 1, get(T, M, C).
+list_get([_ | T], N, C) :- N > 0, M is N - 1, list_get(T, M, C).
 
 /**
  * join(A, B, R).

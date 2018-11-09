@@ -35,30 +35,6 @@
  */
 
 /**
- * Internal indexing in the board
- *    1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19
- * 19 ┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐
- * 18 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
- * 17 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
- * 16 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
- * 15 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
- * 14 ├──┼──┼──┼──●──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
- * 13 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──●──●──●──┼──┼──┼──┼──┼──┤
- * 12 ├──┼──┼──┼──┼──┼──┼──┼──┼──●──○──○──○──┼──┼──┼──┼──┼──┤
- * 11 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
- * 10 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
- *  9 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
- *  8 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
- *  7 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
- *  6 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
- *  5 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
- *  4 ├──┼──┼──┼──┼──┼──○──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
- *  3 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
- *  2 ├──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┤
- *  1 └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
- */
-
-/**
  * write_board_unit(P, Size, Row, Col).
  *   Writes to the console the piece whose internal representation is P,
  *   on location (Row, Col), assuming the board is SizexSize.
@@ -121,7 +97,7 @@ write_board_left_alph(w, Row, _) :- Row < 10, format(' ~d ', Row).
 write_board_left_alph(w, Row, _) :- Row > 9, format('~d ', Row).
 write_board_left_alph(b, R, Size) :- Row is Size + 1 - R, Row < 10, format(' ~d ', Row).
 write_board_left_alph(b, R, Size) :- Row is Size + 1 - R, Row > 9, format('~d ', Row).
-% ⑲ ⑱ ...
+% ⑲  ⑱ ...
 write_board_left_cnum(w, Row, _) :- C is Row + 9311, write(' '), put_code(C), write(' ').
 write_board_left_cnum(b, R, Size) :- C is Size + 1 - R + 9311, write(' '), put_code(C), write(' ').
 
@@ -151,11 +127,11 @@ write_board_top_char(I) :- write_board_top_char_alph(I).
  */
 write_board_top(w, Size) :-
     write('  '),
-    loop_increasing(write_board_top_char, 1, Size),
+    forloop_increasing(write_board_top_char, 1, Size),
     nl.
 write_board_top(b, Size) :-
     write('  '),
-    loop_decreasing(write_board_top_char, 1, Size),
+    forloop_decreasing(write_board_top_char, 1, Size),
     nl.
 
 /**
@@ -175,7 +151,7 @@ write_board_bottom(b, Wc, Bc) :-
 write_board_line(L, P, Size, Row) :-
     write_board_left(P, Row, Size),
     lb_foreach_increasing(L, write_board_unit, [Size, Row], 1),
-    write('\n').
+    nl.
 
 /**
  * display_game(Board)
