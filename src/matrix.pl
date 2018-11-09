@@ -57,36 +57,40 @@ matrix_main_diag(M, L) :- matrix_get(M, 0, 0, E),
                           push_front(T, E, L).
 
 /**
- * matrix_left_diagonal(M, I, L).
- * matrix_right_diagonal(M, I, L).
- *   Consider
- *              [ 1   3   4   9 ]
- *              [ 7   2   3   8 ]
- *              [ 8   0   6   1 ]
- *              [ 0   2   4   3 ]
- *   The left diagonal 0 is the main diagonal [1,2,6,3].
- *   The left diagonal -1 is above it, [3,3,1].
- *   The left diagonal 1 is below it, [7,0,4]. And so on.
- *   The right diagonal 0 is [0,0,3,9].
- *   The right diagonal -1 is above it, [8,2,4].
- *   The right diagonal 1 is [2,6,8]. And so on.
+ * matrix_left_diagonal(M, I, D).
+ *   Extracts the main diagonal D from a submatrix of M
+ *   starting at row I (or column -I if I is negative).
+ *   The elements of D are ordered by column.
+ *   
+ * matrix_right_diagonal(M, I, D).
+ *   Extracts the diagonal perpendicular to the main diagonal
+ *   from a submatrix of M starting at row I or column -I.
+ *   The elements of D are ordered by column.
  */
-matrix_left_diag_below(M, I, L) :- matrix_slice(M, I, 0, N),
-                                   matrix_main_diag(N, L).
-matrix_left_diag_above(M, I, L) :- matrix_slice(M, 0, I, N),
-                                   matrix_main_diag(N, L).
-matrix_left_diag(M, I, L) :-
+matrix_left_diag(M, I, D) :-
     I < 0, J is -I,
     matrix_slice(M, J, 0, N),
-    matrix_main_diag(N, L);
+    matrix_main_diag(N, D);
     I >= 0,
     matrix_slice(M, 0, I, N),
-    matrix_main_diag(N, L).
+    matrix_main_diag(N, D).
 
-matrix_right_diag(M, I, L) :-
+matrix_right_diag(M, I, D) :-
     J is -I,
-    reverse(M, R),
-    matrix_left_diag(R, J, L).
+    matrix_row_reverse(M, R),
+    matrix_left_diag(R, J, D).
+
+/**
+ * matrix_row_reverse(M, R).
+ *   Reverse the order of M's rows.
+ */
+matrix_row_reverse(M, R) :- reverse(M, T).
+
+/**
+ * matrix_col_reverse(M, R).
+ *   Reverse the order of M's columns.
+ */
+matrix_col_reverse(M, R) :- map(M, reverse, T).
 
 /**
  * matrix_reverse(M, R).

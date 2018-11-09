@@ -10,9 +10,6 @@
 :- reconsult('src/print-board.pl').
 :- reconsult('src/strings.pl').
 
-% Faster reconsult.
+% Shorthands
 re :- reconsult('main.pl').
-
-/******************************************
- *************** TEST SPACE ***************
- *****************************************/ 
+test :- reconsult('test/test.pl').
