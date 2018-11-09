@@ -1,5 +1,5 @@
 /**
- * read_position(Row, Col).
+ * read_position(-Row, -Col).
  *   Read a board position from standard input.
  *   The position must be in the form E12, A7, B8, etc,
  *   and terminated with a dot.

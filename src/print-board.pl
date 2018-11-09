@@ -10,17 +10,17 @@
  *
  * Small white         u+26aa     '\x26aa\'
  * Small black         u+26ab     '\x26ab\'
- * 
+ *
  * ┌ Top left          u+250c     '\x250c\'
  * ┐ Top right         u+2510     '\x2510\'
  * └ Bot left          u+2514     '\x2514\'
  * ┘ Bot right         u+2518     '\x2518\'
- *     
+ *
  * ├ Left              u+251c     '\x251c\'
  * ┬ Top               u+252c     '\x252c\'
  * ┤ Right             u+2524     '\x2524\'
  * ┴ Bottom            u+2534     '\x2534\'
- *     
+ *
  * ┼ Fill              u+253c     '\x253c\'
  *
  * Circled a-z         u+24d0 -- u+24e9
@@ -35,7 +35,7 @@
  */
 
 /**
- * write_board_unit(P, Size, Row, Col).
+ * write_board_unit(+P, +Size, +Row, +Col).
  *   Writes to the console the piece whose internal representation is P,
  *   on location (Row, Col), assuming the board is SizexSize.
  */
@@ -89,7 +89,7 @@ write_board_unit(c, Size, Row, Col) :-
     write('\x253c\\x2500\').
 
 /**
- * write_board_left(P, Row, Size).
+ * write_board_left(+P, +Row, +Size).
  *   Print the row's number on the left of the board.
  */
 % 19 18 ...
@@ -104,7 +104,7 @@ write_board_left_cnum(b, R, Size) :- C is Size + 1 - R + 9311, write(' '), put_c
 write_board_left(P, Row, Size) :- write_board_left_alph(P, Row, Size).
 
 /**
- * write_board_top_char(I).
+ * write_board_top_char(+I).
  *   Write the char at index I.
  *   We choose to skip letter 'I'.
  *   Some board authors prefer to skip 'J', others prefer using numbers.
@@ -122,7 +122,7 @@ write_board_top_char_cmin(I) :- I > 8, C is I + 9424, write(' '), put_code(C).
 write_board_top_char(I) :- write_board_top_char_alph(I).
 
 /**
- * write_board_top(P).
+ * write_board_top(+P).
  *   Print the top row of the board.
  */
 write_board_top(w, Size) :-
@@ -135,7 +135,7 @@ write_board_top(b, Size) :-
     nl.
 
 /**
- * write_board_bottom(next, WhiteCaptures, BlackCaptures).
+ * write_board_bottom(+next, +WhiteCaptures, +BlackCaptures).
  *   Print the players' captures below the board.
  */
 write_board_bottom(w, Wc, Bc) :-
@@ -144,7 +144,7 @@ write_board_bottom(b, Wc, Bc) :-
     format('        White: ~d       > Black: ~d\n', [Wc, Bc]).
 
 /**
- * write_board_line(L, P, Size, Row).
+ * write_board_line(+L, +P, +Size, +Row).
  *   Print a board row (Size elements) on a given Row.
  *   According to player P's perspective.
  */
@@ -154,7 +154,7 @@ write_board_line(L, P, Size, Row) :-
     nl.
 
 /**
- * display_game(Board)
+ * display_game(+Board, +White, +Black, +next).
  *   Print the whole board.
  */
 display_game(Board, player(white, Wc), player(black, Bc), w) :-
@@ -169,6 +169,3 @@ display_game(Board, player(white, Wc), player(black, Bc), b) :-
     write_board_top(b, Size),
     lb_foreach_decreasing(Reversed, write_board_line, [b, Size], Size),
     write_board_bottom(b, Wc, Bc).
-
-% reconsult('board.pl').
-% reconsult('lists.pl').

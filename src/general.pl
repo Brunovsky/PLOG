@@ -1,8 +1,8 @@
 /**
- * apply(F, L).
+ * apply(:F, +L).
  *   Call goal (function) F with arguments L.
  */
-apply(F, []) :- call(F). 
+apply(F, []) :- call(F).
 apply(F, [A]) :- call(F, A).
 apply(F, [A, B]) :- call(F, A, B).
 apply(F, [A, B, C]) :- call(F, A, B, C).
@@ -10,7 +10,7 @@ apply(F, [A, B, C, D]) :- call(F, A, B, C, D).
 apply(F, [A, B, C, D, E]) :- call(F, A, B, C, D, E).
 
 /**
- * forloop_increasing(F, I, E).
+ * forloop_increasing(:F, +I, +E).
  *   Call F(N) for N in the range [I, E], with N increasing.
  */
 forloop_increasing(F, E, E) :- call(F, E).
@@ -21,7 +21,7 @@ forloop_increasing(F, I, E) :-
     forloop_increasing(F, Ir, E).
 
 /**
- * l_forloop_increasing(F, I, E, L).
+ * l_forloop_increasing(:F, +I, +E, +L).
  *   Call F(N, L...) for N in the range [I, E], with N increasing.
  */
 l_forloop_increasing(F, E, E, L) :- apply(F, [E | L]).
@@ -32,7 +32,7 @@ l_forloop_increasing(F, I, E, L) :-
     l_forloop_increasing(F, Ir, E, L).
 
 /**
- * forloop_decreasing(F, I, E).
+ * forloop_decreasing(:F, +I, +E).
  *   Call F(N) for N in the range [I, E], with N decreasing.
  */
 forloop_decreasing(F, I, I) :- call(F, I).
@@ -43,7 +43,7 @@ forloop_decreasing(F, I, E) :-
     forloop_decreasing(F, I, Er).
 
 /**
- * l_forloop_decreasing(F, I, E, L).
+ * l_forloop_decreasing(:F, +I, +E, +L).
  *   Call F(N, L...) for N in the range [I, E], with N decreasing.
  */
 l_forloop_decreasing(F, I, I, L) :- apply(F, [I | L]).
@@ -54,7 +54,7 @@ l_forloop_decreasing(F, I, E, L) :-
     l_forloop_decreasing(F, I, Er, L).
 
 /**
- * whileloop(C, F, R).
+ * whileloop(:C, :F, -R).
  *   Call goal F(X) repeatedly while goal C(X) holds, then succeed and set R to X.
  */
 whileloop(C, F, R) :- call(F, X), whileloop_aux(C, F, X, R).
@@ -62,14 +62,14 @@ whileloop_aux(C, _, X, X) :- \+ call(C, X).
 whileloop_aux(C, F, _, R) :- call(F, Y), !, whileloop_aux(C, F, Y, R).
 
 /**
- * whileloop_fail(C, F).
+ * whileloop_fail(:C, :F).
  *   Call goal F(X) repeatedly while goal C(X) holds, then fail.
  */
 whileloop_fail(C, F) :- call(C, X), call(F, X), whileloop_fail(C, F, X).
 whileloop_fail(C, F, X) :- !, call(C, X), call(F, Y), !, whileloop_fail(C, F, Y).
 
 /**
- * untilloop(C, F, R).
+ * untilloop(:C, :F, +R).
  *   Call goal F(X) repeatedly until goal C(X) holds, then succeed and set R to X.
  */
 untilloop(C, F, R) :- call(F, X), untilloop_aux(C, F, X, R).
@@ -77,7 +77,7 @@ untilloop_aux(C, _, X, X) :- call(C, X).
 untilloop_aux(C, F, _, R) :- call(F, Y), !, untilloop_aux(C, F, Y, R).
 
 /**
- * untilloop_fail(C, F).
+ * untilloop_fail(:C, :F).
  *   Call goal F(X) repeatedly until goal C(X) holds, then fail.
  */
 untilloop_fail(C, F) :- \+ call(C, X), call(F, X), untilloop_fail(C, F, X).
