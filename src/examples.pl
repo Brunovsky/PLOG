@@ -87,7 +87,7 @@ plog(early13) :- display_game([
     [c, c, c, c, c, c, c, c, c, c, c, c, c]  % 1
 ], player(white, 0), player(black, 0), w).
 
-plog_at(Row, Col, E) :- piece_at([
+plog_at(Row, Col, E) :- rep_piece_at([
 %    A  B  C  D  E  F  G  H  J  K  L  M  N  O  P  Q  R  S  T
     [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 19
     [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 18
@@ -109,26 +109,3 @@ plog_at(Row, Col, E) :- piece_at([
     [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 2
     [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c]  % 1
 ], Row, Col, E).
-
-plog_at(String, E) :- piece_at([
-%    A  B  C  D  E  F  G  H  J  K  L  M  N  O  P  Q  R  S  T
-    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 19
-    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 18
-    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 17
-    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 16
-    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 15
-    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 14
-    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 13
-    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 12
-    [c, c, c, c, c, c, c, c, b, c, b, c, c, c, c, c, c, c, c], % 11
-    [c, c, c, c, c, c, c, c, c, w, w, b, w, c, c, c, c, c, c], % 10
-    [c, c, c, c, c, c, c, c, c, b, c, w, c, c, c, c, c, c, c], % 9
-    [c, c, c, c, c, c, c, c, c, c, w, c, c, c, c, c, c, c, c], % 8
-    [c, c, c, c, c, c, c, c, c, b, c, c, c, c, c, c, c, c, c], % 7
-    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 6
-    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 5
-    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 4
-    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 3
-    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 2
-    [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c]  % 1
-], String, E).

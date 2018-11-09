@@ -35,8 +35,60 @@ char_rep(L, U, C) :- is_uppercase_char(U), !,
                      char_code(U, S), C is S - 64.
 
 char_rep(L, U, C) :- integer(C), !,
-                     Sl is C + 64, Su is C + 96,
+                     Sl is C + 96, Su is C + 64,
                      char_code(L, Sl), char_code(U, Su).
 
 % Wanna know what's funny? This whole thing just for char_rep ---
 % it would have taken less lines if done by brute force. Ayy lmao.
+
+% Back to Pente...
+
+/**
+ * toprow_index(C, I).
+ *   Returns the 1-index I, in the top row, of some alphanumeric atom C.
+ */
+toprow_index(U, I) :- is_uppercase_char(U), char_rep(_, U, S), S < 9, I is S.
+toprow_index(U, I) :- is_uppercase_char(U), char_rep(_, U, S), S > 9, I is S - 1.
+toprow_index(L, I) :- is_lowercase_char(L), char_rep(L, _, S), S < 9, I is S.
+toprow_index(L, I) :- is_lowercase_char(L), char_rep(L, _, S), S > 9, I is S - 1.
+toprow_index(N, I) :- is_numeric(N), char_numeric(N, I).
+toprow_index(I, I) :- integer(I).
+
+/**
+ * toprow_internal(C, I).
+ *   Returns the 0-index I, in the top row, of some alphanumeric atom C.
+ */
+toprow_internal(C, I) :- toprow_index(C, J), I is J - 1.
+
+/**
+ * toprow_rep(I, C).
+ *   Returns the character matching the 0-index I in the top row.
+ */
+toprow_rep(I, C) :- I + 1 < 9, J is I + 1, char_rep(_, C, J).
+toprow_rep(I, C) :- I + 1 > 8, J is I + 2, char_rep(_, C, J).
+
+/**
+ * rep_internal(Size, Rep, Internal).
+ *   Matches, for a given board size, an internal [Row, Col]
+ *   with a UI [Row, Col]
+ */
+rep_internal(Size, [RepRow, RepCol], [IntRow, IntCol]) :-
+    var(IntRow), var(IntCol),
+    toprow_index(RepCol, I),
+    IntRow is Size - RepRow,
+    IntCol is I - 1.
+rep_internal(Size, [RepRow, RepCol], [IntRow, IntCol]) :-
+    var(RepRow), var(RepCol),
+    I is IntCol + 1,
+    toprow_index(RepCol, I),
+    RepRow is Size - IntRow.
+
+/**
+ * rep_piece_at(Board, Row, Col, E).
+ *   E is the piece at position Row|Col in the Board.
+ *   Row and Col are Rep.
+ */
+rep_piece_at(Board, Row, Col, E) :- length(Board, Size),
+                                    rep_internal(Size, [Row, Col], [R, C]),
+                                    write(R), nl, write(C), nl,
+                                    matrix_get(Board, R, C, E).

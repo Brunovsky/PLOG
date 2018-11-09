@@ -3,6 +3,7 @@
 :- reconsult('src/examples.pl').
 :- reconsult('src/game.pl').
 :- reconsult('src/general.pl').
+:- reconsult('src/input.pl').
 :- reconsult('src/lists.pl').
 :- reconsult('src/matrix.pl').
 :- reconsult('src/menus.pl').
@@ -15,9 +16,3 @@ re :- reconsult('main.pl').
 /******************************************
  *************** TEST SPACE ***************
  *****************************************/ 
-read_position(Row, Col) :- untilloop(is_alpha, get_char, Col),
-                           peek_char(I),
-                           is_numeric(I),
-                           read(Row),
-                           integer(Row);
-                           read_position(Row, Col).

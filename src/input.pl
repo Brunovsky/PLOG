@@ -9,9 +9,7 @@
  */
 read_position(Row, Col) :- untilloop(is_alpha, get_char, Col),
                            peek_char(I),
-                           (is_numeric(I),
-                            read(Row),
-                            (integer(Row);
-                             \+ integer(Row),
-                             read_position(Row, Col));
-                            read_position(Row, Col)).
+                           is_numeric(I),
+                           read(Row),
+                           integer(Row);
+                           read_position(Row, Col).
