@@ -6,6 +6,78 @@ test_list_get :-
     \+ list_get([], 0, _),
     \+ list_get([a,b,c,d], 4, _).
 
+% list_set(L, N, E, C).
+test_list_set :-
+    list_set([0,1,2,3,4], 2, a, [0,1,a,3,4]),
+    list_set([0,1,2,3,4,5,6], 3, b, [0,1,2,b,4,5,6]),
+    list_set([a,b], 0, 1, [1,b]),
+    \+ list_set([], 0, _, _),
+    \+ list_set([a,b], 2, _, _).
+
+% index(L, E, I).
+test_index :-
+    index([a,b,a,a,c,b,b,c], c, 4),
+    index([a,b,a,a,b,b,a,c], c, 7),
+    index([a,b,c,d], b, 1),
+    \+ index([a,b,a,a,b,b], c, _),
+    \+ index([], _, _).
+
+% prefix(J, L).
+test_prefix :-
+    prefix([1,2,3], [1,2,3,4]),
+    prefix([1,2,3], [1,2,3]),
+    prefix([X], [X | _]),
+    \+ prefix([_ | _], []),
+    \+ prefix([1,2,3], [1,2,4]),
+    \+ prefix([2,3], [1,2,3]).
+
+% proper_prefix(J, L).
+test_proper_prefix :-
+    proper_prefix([1,2,3], [1,2,3,4]),
+    \+ proper_prefix([1,2,3], [1,2,3]),
+    proper_prefix([X], [X | [_ | _]]),
+    \+ proper_prefix(_, []),
+    \+ proper_prefix([1,2,3], [1,2,4]),
+    \+ proper_prefix([1,2,3], [1,2]).
+
+% suffix(J, L).
+test_suffix :-
+    suffix([2,3,4], [1,2,3,4]),
+    suffix([1,2,3], [1,2,3]),
+    suffix([X], [_ | X]),
+    \+ suffix([_ | _], []),
+    \+ suffix([1,2,3], [1,2,4]),
+    \+ suffix([1,2], [1,2,3]).
+
+% proper_suffix(J, L).
+test_proper_suffix :-
+    proper_suffix([2,3,4], [1,2,3,4]),
+    \+ proper_suffix([1,2,3], [1,2,3]),
+    proper_suffix([X], [_ | X]),
+    \+ proper_suffix([_ | _], []),
+    \+ proper_suffix([1,2,3], [1,2,4]),
+    \+ proper_suffix([1,2], [1,2,3]).
+
+% sublist(J, L).
+test_sublist :-
+    sublist([5,6,7], [0,1,2,3,4,5,6,7,8,9]),
+    sublist([0,1,2,3], [0,1,2,3,4,5,6]),
+    sublist([5,6,7,8], [0,1,2,3,4,5,6,7,8]),
+    contains([0,1,2,3,4,5,6], X), sublist([X], [0,1,2,3,4,5,6]),
+    sublist([], [_ | _]),
+    sublist([1,2,3], [1,2,3]),
+    \+ sublist([2,3,5], [0,1,2,3,4,5,6]),
+    \+ sublist([4,5], [0,1,2,3,4]).
+
+% sublist_n(J, L, N).
+test_sublist_n :-
+    sublist_n([1,2,3,4], [0,1,2,3,4,5,6], 4),
+    sublist_n([1], [0,1,2,3], 1),
+    sublist_n([], [_ | _], 0),
+    sublist_n([0,1,2,3], [0,1,2,3 | _], 4),
+    \+ sublist_n([2,3], [0,1,2,3,4,5], 3),
+    \+ sublist_n([2,3], [0,1,2,4,5], 2).
+
 % join(A, B, R).
 test_join :-
     join([a,b,c,d], [e,f,g], [a,b,c,d,e,f,g]),
@@ -48,7 +120,9 @@ test_fill_n :-
     fill_n(7, b, [b,b,b,b,b,b,b]),
     fill_n(2, 0, [0,0]),
     fill_n(0, a, []),
-    fill_n(3, [a,X], [[a,X],[a,X],[a,X]]).
+    fill_n(3, [a,X], [[a,X],[a,X],[a,X]]),
+    \+ fill_n(3, a, [a,a,a,a]),
+    \+ fill_n(5, c, [c,c,c]).
 
 % iota(I, J, L).
 test_iota :-
@@ -57,14 +131,6 @@ test_iota :-
     iota(4, 4, [4]),
     \+ iota(4, 3, _),
     iota(9, 14, [9, 10, 11, 12, 13, 14]).
-
-% index(L, E, I).
-test_index :-
-    index([a,b,a,a,c,b,b,c], c, 4),
-    index([a,b,a,a,b,b,a,c], c, 7),
-    index([a,b,c,d], b, 1),
-    \+ index([a,b,a,a,b,b], c, _),
-    \+ index([], _, _).
 
 % range(L, I, R).
 test_range :-
@@ -137,6 +203,14 @@ test_clear_empty_list :-
 
 test_lists :- test_all([
     test_list_get,
+    test_list_set,
+    test_index,
+    test_prefix,
+    test_proper_prefix,
+    test_suffix,
+    test_proper_suffix,
+    test_sublist,
+    test_sublist_n,
     test_join,
     test_push_front,
     test_push_back,
@@ -144,7 +218,6 @@ test_lists :- test_all([
     test_pop_back,
     test_fill_n,
     test_iota,
-    test_index,
     test_range,
     test_range_n,
     test_consecutive,

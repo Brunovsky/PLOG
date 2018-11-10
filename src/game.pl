@@ -8,6 +8,18 @@
 player(_, _).
 
 /**
+ * other_player(?P1, ?P2).
+ */
+other_player(w, b).
+other_player(b, w).
+
+/**
+ * is_player(?P).
+ */
+is_player(w).
+is_player(b).
+
+/**
  * game(?Board, ?White, ?Black, ?next).
  *   A game of Pente.
  *   > The current Board is represented by a 19x19 matrix, consisting of

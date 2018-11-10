@@ -8,3 +8,4 @@ test_all(Tests) :- foreach(Tests, print_test).
 % Everything in test/
 :- reconsult('lists.pl').
 :- reconsult('matrix.pl').
+:- reconsult('board.pl').

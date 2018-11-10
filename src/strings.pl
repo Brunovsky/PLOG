@@ -81,7 +81,7 @@ char_rep(L, U, C) :- integer(C), !,
  */
 
 /**
- * toprow_index(+C, -I).
+ * toprow_index(+C, ?I).
  *   Returns the 1-index I, in the top row, of some alphanumeric atom C.
  */
 toprow_index(U, I) :- is_uppercase_char(U), char_rep(_, U, S), S < 9, I is S.
@@ -92,13 +92,13 @@ toprow_index(N, I) :- is_numeric(N), char_numeric(N, I).
 toprow_index(I, I) :- integer(I).
 
 /**
- * toprow_internal(+C, -I).
+ * toprow_internal(+C, ?I).
  *   Returns the 0-index I, in the top row, of some alphanumeric atom C.
  */
 toprow_internal(C, I) :- toprow_index(C, J), I is J - 1.
 
 /**
- * toprow_rep(+I, -C).
+ * toprow_rep(+I, ?C).
  *   Returns the character matching the 0-index I in the top row.
  */
 toprow_rep(I, C) :- I + 1 < 9, J is I + 1, char_rep(_, C, J).
@@ -121,7 +121,7 @@ rep_internal(Size, [RepRow, RepCol], [IntRow, IntCol]) :-
     RepRow is Size - IntRow.
 
 /**
- * rep_piece_at(+Board, +Row, +Col, -E).
+ * rep_piece_at(+Board, +Row, +Col, ?E).
  *   E is the piece at position Row|Col in the Board.
  *   Row and Col are Rep.
  */

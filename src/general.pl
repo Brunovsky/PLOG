@@ -69,7 +69,7 @@ whileloop_fail(C, F) :- call(C, X), call(F, X), whileloop_fail(C, F, X).
 whileloop_fail(C, F, X) :- !, call(C, X), call(F, Y), !, whileloop_fail(C, F, Y).
 
 /**
- * untilloop(:C, :F, +R).
+ * untilloop(:C, :F, -R).
  *   Call goal F(X) repeatedly until goal C(X) holds, then succeed and set R to X.
  */
 untilloop(C, F, R) :- call(F, X), untilloop_aux(C, F, X, R).
