@@ -21,7 +21,7 @@ getMenuInput(Input) :-
 	handleMenuInput(Input).
 
 handleMenuInput(1) :-
-	write('P1 vs P2').
+	start_game(19, player, player).
 
 handleMenuInput(2) :-
 	write('P1 vs BOT').

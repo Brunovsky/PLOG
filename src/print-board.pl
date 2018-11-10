@@ -157,13 +157,13 @@ write_board_line(L, P, Size, Row) :-
  * display_game(+Board, +White, +Black, +next).
  *   Print the whole board.
  */
-display_game(Board, player(white, Wc), player(black, Bc), w) :-
+display_game(Board, player(w, Wc), player(b, Bc), w) :-
     matrix_size(Board, Size, Size),
     write_board_top(w, Size),
     lb_foreach_decreasing(Board, write_board_line, [w, Size], Size),
     write_board_bottom(w, Wc, Bc).
 
-display_game(Board, player(white, Wc), player(black, Bc), b) :-
+display_game(Board, player(w, Wc), player(b, Bc), b) :-
     matrix_size(Board, Size, Size),
     matrix_reverse(Board, Reversed),
     write_board_top(b, Size),
