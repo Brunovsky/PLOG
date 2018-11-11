@@ -168,8 +168,8 @@ matrix_transpose(M, T) :- matrix_col(M, 1, Col0),
  */
 matrix_left_diagonals(M, Ds) :- matrix_size(M, R, C),
                                 I is 1 - C, J is R - 1,
-                                iota(I, J, IList),
-                                map(IList, matrix_left_diag(M), Ds).
+                                numlist(I, J, RangeList),
+                                map(RangeList, matrix_left_diag(M), Ds).
 
 /**
  * matrix_right_diagonals(+M, ?Ds).
@@ -178,8 +178,8 @@ matrix_left_diagonals(M, Ds) :- matrix_size(M, R, C),
 matrix_right_diagonals(M, Ds) :- matrix_size(M, R, C),
                                  I is 1 - C,
                                  J is R - 1,
-                                 iota(I, J, IList),
-                                 map(IList, matrix_right_diag(M), Ds).
+                                 numlist(I, J, RangeList),
+                                 map(RangeList, matrix_right_diag(M), Ds).
 
 /**
  * matrix_diagonals(+M, ?Ds).

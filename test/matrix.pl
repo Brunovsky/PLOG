@@ -25,8 +25,7 @@ test_matrix_slice :-
     matrix_slice([[a,b,c],[d,e,f],[g,h,i]], 1, 2, [[b,c],[e,f],[h,i]]),
     matrix_slice([[a,b,c],[d,e,f],[g,h,i]], 3, 3, [[i]]),
     matrix_slice([[a,b],[c,d],[e,f],[g,h]], 3, 2, [[f],[h]]),
-    matrix_slice([[a,b],[c,d],[e,f],[g,h]], 4, 3, []),
-    matrix_slice(M, 1, 1, M).
+    matrix_slice([[a,b],[c,d],[e,f],[g,h]], 4, 3, []).
 
 % matrix_main_diag(M, D).
 test_matrix_main_diag :-

@@ -14,42 +14,6 @@ test_list_set :-
     \+ list_set([], 1, _, _),
     \+ list_set([a,b], 3, _, _).
 
-% prefix(J, L).
-test_prefix :-
-    prefix([1,2,3], [1,2,3,4]),
-    prefix([1,2,3], [1,2,3]),
-    prefix([X], [X | _]),
-    \+ prefix([_ | _], []),
-    \+ prefix([1,2,3], [1,2,4]),
-    \+ prefix([2,3], [1,2,3]).
-
-% proper_prefix(J, L).
-test_proper_prefix :-
-    proper_prefix([1,2,3], [1,2,3,4]),
-    \+ proper_prefix([1,2,3], [1,2,3]),
-    proper_prefix([X], [X | [_ | _]]),
-    \+ proper_prefix(_, []),
-    \+ proper_prefix([1,2,3], [1,2,4]),
-    \+ proper_prefix([1,2,3], [1,2]).
-
-% suffix(J, L).
-test_suffix :-
-    suffix([2,3,4], [1,2,3,4]),
-    suffix([1,2,3], [1,2,3]),
-    suffix([X], [_ | X]),
-    \+ suffix([_ | _], []),
-    \+ suffix([1,2,3], [1,2,4]),
-    \+ suffix([1,2], [1,2,3]).
-
-% proper_suffix(J, L).
-test_proper_suffix :-
-    proper_suffix([2,3,4], [1,2,3,4]),
-    \+ proper_suffix([1,2,3], [1,2,3]),
-    proper_suffix([X], [_ | X]),
-    \+ proper_suffix([_ | _], []),
-    \+ proper_suffix([1,2,3], [1,2,4]),
-    \+ proper_suffix([1,2], [1,2,3]).
-
 % sublist(J, L).
 test_sublist :-
     sublist([5,6,7], [0,1,2,3,4,5,6,7,8,9]),
@@ -116,14 +80,6 @@ test_fill_n :-
     \+ fill_n(3, a, [a,a,a,a]),
     \+ fill_n(5, c, [c,c,c]).
 
-% iota(I, J, L).
-test_iota :-
-    iota(10, 14, [10,11,12,13,14]),
-    iota(-3, 7, [-3,-2,-1,0,1,2,3,4,5,6,7]),
-    iota(4, 4, [4]),
-    \+ iota(4, 3, _),
-    iota(9, 14, [9, 10, 11, 12, 13, 14]).
-
 % range(L, I, R).
 test_range :-
     range([0,1,2,3,4,5], [3,5], [2,3,4]),
@@ -147,12 +103,6 @@ test_consecutive :-
     consecutive([3,2,4,4,4,4,2,0], 4, 4),
     \+ consecutive([3,2,4,4,4,2,0], 4, 4),
     \+ consecutive([0,1], a, 5).
-
-% reverse(L, R).
-test_reverse :-
-    reverse([a,b,c,d], [d,c,b,a]),
-    reverse([a,b], [b,a]),
-    reverse([], []).
 
 % map(L, F, R).
 test_map :-
@@ -273,10 +223,6 @@ test_suchthat :-
 test_lists :- test_all([
     test_list_get,
     test_list_set,
-    test_prefix,
-    test_proper_prefix,
-    test_suffix,
-    test_proper_suffix,
     test_sublist,
     test_sublist_n,
     test_join,
@@ -285,11 +231,9 @@ test_lists :- test_all([
     test_pop_front,
     test_pop_back,
     test_fill_n,
-    test_iota,
     test_range,
     test_range_n,
     test_consecutive,
-    test_reverse,
     test_map,
     test_l_map,
     test_flatten,

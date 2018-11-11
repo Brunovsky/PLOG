@@ -1,20 +1,10 @@
 /**
- * Lists Mini Library
+ * Lists Library Extension
  *
  * List indexing is 1-based (1-indexing). So the head has index 1.
  *
  * Some predicates here are tested in test/lists.pl
- *
- * Builtin library library(lists) is not used and not compatible with
- * this library, so do not include it.
  */
-
-/**
- * is_list(+L).
- *   true if L is a list, including [].
- */
-is_list([]).
-is_list([_ | _]).
 
 /**
  * list_get(+L, +N, -C).
@@ -35,43 +25,11 @@ list_set_aux([_ | T], 1, E, [E | T]) :- !.
 list_set_aux([H | T], N, E, [H | R]) :- M is N - 1, list_set_aux(T, M, E, R), !.
 
 /**
- * prefix(?P, +L).
- *   Asserts P is a prefix of L.
- *   Provides prefixes of L (nondeterminate).
- */
-prefix([], L) :- is_list(L).
-prefix([H | Px], [H | Lx]) :- prefix(Px, Lx).
-
-/**
- * proper_prefix(?P, +L).
- *   Asserts P is a proper prefix of L.
- *   Provides proper prefixes of L (nondeterminate).
- */
-proper_prefix([], [_ | _]).
-proper_prefix([H | Px], [H | Lx]) :- proper_prefix(Px, Lx).
-
-/**
- * suffix(?S, +L).
- *   Asserts S is a suffix of L.
- *   Provides suffixes of L (nondeterminate).
- */
-suffix(S, S) :- is_list(S).
-suffix(S, [_ | Lx]) :- suffix(S, Lx).
-
-/**
- * proper_suffix(?S, +L).
- *   Asserts S is a proper suffix of L.
- *   Provides proper suffixes of L (nondeterminate).
- */
-proper_suffix(S, [_ | S]).
-proper_suffix(S, [_ | Lx]) :- proper_suffix(S, Lx).
-
-/**
  * sublist(?J, +L).
  *   Asserts J is a sublist of L.
  *   Provides sublists of L (nondeterminate).
  */
-sublist(J, L) :- var(J), !, prefix(P, L), suffix(J, P).
+sublist(J, L) :- var(J), !, prefix(L, P), suffix(P, J).
 sublist(J, L) :- length(J, N), sublist_n(J, L, N).
 
 /**
@@ -79,7 +37,7 @@ sublist(J, L) :- length(J, N), sublist_n(J, L, N).
  *   Asserts J is a sublist of L with length N.
  *   Provides sublists of L with length N (nondeterminate).
  */
-sublist_n(J, L, N) :- prefix(J, L), length(J, N).
+sublist_n(J, L, N) :- prefix(L, J), length(J, N).
 sublist_n(J, [_ | L], N) :- sublist_n(J, L, N).
 
 /**
@@ -124,36 +82,12 @@ back([X], X).
 back([_ | T], B) :- back(T, B).
 
 /**
- * head(?L, ?X).
- * front(?L, ?X).
- *   X is the head of L.
- */
-front([H | _], H).
-head([H | _], H).
-
-/**
- * tail(?L, ?T).
- * shift(?L, ?T).
- *   T is the tail of L.
- */
-tail([_ | T], T).
-shift([_ | T], T).
-
-/**
  * fill_n(+N, ?E, ?L).
  *   L is a list with N elements E.
  *   N must be an integer.
  */
 fill_n(0, _, []).
 fill_n(N, E, [E | T]) :- M is N - 1, fill_n(M, E, T).
-
-/**
- * iota(+I, +J, -L).
- *   Creates a list L with numbers I, I+1, I+2, ..., J.
- *   I and J must be integers.
- */
-iota(I, I, [I]).
-iota(I, J, [I | T]) :- I < J, K is I + 1, iota(K, J, T).
 
 /**
  * range(+L, +[I, J], -R).
@@ -194,13 +128,6 @@ range_aux([_ | T], [I, N], R) :- I > 1, Ir is I - 1,
  *   Asserts that list L has N consecutive elements E.
  */
 consecutive(L, E, N) :- fill_n(N, E, EList), !, sublist_n(EList, L, N).
-
-/**
- * reverse(+L, ?R).
- *   R is the list L but in reverse order.
- */
-reverse([], []).
-reverse([H | T], R) :- reverse(T, Z), push_back(Z, H, R).
 
 /**
  * map(+L, :F, ?R).
