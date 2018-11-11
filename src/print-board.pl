@@ -186,6 +186,6 @@ print_board(Board) :- print_board(Board, w).
  * display_game(+Board, +White, +Black, +Next).
  *   Print the whole board, plus captures on the bottom.
  */
-display_game(Board, player(w, Wc), player(b, Bc), Next) :-
+display_game(Board, Wc, Bc, Next) :-
     print_board(Board, Next),
     write_bottom(Next, Wc, Bc).

@@ -34,13 +34,13 @@ game(_, _, _, _).
 * 	Starts a player vs player pente game with a board with size S
 */
 start_game(S, player, player):- make_board(S, B),
-																game_loop(game(B, player(w, 0), player(b, 0), w), S).
+																game_loop(game(B, 0, 0, w), S).
 
 /**
-* add_captures(+player(C, T), Captures, -Np)
-* 	Adds a given number (Captures) to the given player captures
+* add_captures(+P, +Captures, -Np)
+* 	Adds a given number (Captures) to the given player captures (P)
 */
-add_captures(player(C, T), Captures, Np):- Nt is T + Captures, Np = player(C, Nt).
+add_captures(P, Captures, Np):- Np is P + Captures.
 
 /**
 * game_loop(+game(B, Pw, Pb, Next))
@@ -64,11 +64,11 @@ game_loop(game(B, Pw, Pb, b), Size):- display_game(B, Pw, Pb, b),
 																add_captures(Pb, Captures, Npb),
 																game_loop_aux(game(NewBoard, Pw, Pb, b), Npb, Size).
 
-game_loop_aux(game(B, Pw, Pb, w), Np, _Size):-	game_over(game(B, Np, Pb, w), w), !,
+game_loop_aux(game(B, _Pw, Pb, w), Np, _Size):-	game_over(game(B, Np, Pb, w), w), !,
 																		display_game(B, Np, Pb, w),
 															      victory(w).
 
-game_loop_aux(game(B, Pw, Pb, b), Np, _Size):-	game_over(game(B, Pw, Np, b), b), !,
+game_loop_aux(game(B, Pw, _Pb, b), Np, _Size):-	game_over(game(B, Pw, Np, b), b), !,
 																		display_game(B, Pw, Np, b),
 															      victory(b).
 
