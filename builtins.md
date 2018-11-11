@@ -1,5 +1,7 @@
 # Builtin SICSTUS Prolog Predicates
 
+[Documentation SICSTUS 4.4.1](https://sicstus.sics.se/sicstus/docs/latest4/pdf/sicstus.pdf)
+
 ### abolish/[1,2]
 
     abolish(+Predicates).
