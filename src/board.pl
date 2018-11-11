@@ -19,10 +19,12 @@ five_board(Board, P) :- consecutive_matrix(Board, P, 5).
  * game_over(+game(Board, White, Black, next), ?P).
  *   Verifies if the game is over with winner P (w or b).
  */
-game_over(game(Board, player(w, Wc), player(b, _), next), w) :-
-    five_board(Board, w); Wc >= 10.
-game_over(game(Board, player(w, _), player(b, Bc), next), b) :-
-    five_board(Board, b); Bc >= 10.
+game_over(game(Board, player(w, Wc), player(b, _Bc), _Next), w) :-
+	  five_board(Board, w);
+	 	Wc >= 10.
+game_over(game(Board, player(w, _Wc), player(b, Bc), _Next), b) :-
+	  five_board(Board, b); 
+		Bc >= 10.
 
 /**
  * check_dead_stones_left(+P, +L).

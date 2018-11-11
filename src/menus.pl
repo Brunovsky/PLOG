@@ -13,9 +13,9 @@ menu :-
 	nl, nl,
 	write('Amadeu Pereira\tBruno Carvalho'),
 	nl,
-	getMenuInput(Input).
+	getMenuInput.
 
-getMenuInput(Input) :-
+getMenuInput :-
 	write('> Option: '),
 	read(Input),
 	handleMenuInput(Input).
@@ -34,4 +34,4 @@ handleMenuInput(0) :-
 
 handleMenuInput(_) :-
 	write('Invalid Option!'), nl,
-	getMenuInput(Input).
+	getMenuInput.

@@ -8,7 +8,7 @@
 player(_, _).
 
 /**
- * other_player(?P1, ?P2).
+ * other_player(+P1, ?P2).
  */
 other_player(w, b).
 other_player(b, w).
@@ -34,11 +34,11 @@ game(_, _, _, _).
 * 	Starts a player vs player pente game with a board with size S
 */
 start_game(S, player, player):- make_board(S, B),
-																game_loop(game(B, player(w, 0), player(b, 0), w)).
+																game_loop(game(B, player(w, 0), player(b, 0), w), S).
 
 /**
 * add_captures(+player(C, T), Captures, -Np)
-* 	Adds a given number (Captures) to the given player
+* 	Adds a given number (Captures) to the given player captures
 */
 add_captures(player(C, T), Captures, Np):- Nt is T + Captures, Np = player(C, Nt).
 
@@ -46,22 +46,41 @@ add_captures(player(C, T), Captures, Np):- Nt is T + Captures, Np = player(C, Nt
 * game_loop(+game(B, Pw, Pb, Next))
 * 	Next iteration of the game 
 */
-game_loop(game(B, Pw, Pb, w)):- display_game(B, Pw, Pb, w),
+game_loop(game(B, Pw, Pb, w), Size):- display_game(B, Pw, Pb, w),
 																read_position(Row, Col),
-																%place_stone(w, [Row, Col], B, NewBoard, Captures),
-																add_captures(Pw, 2, Npw),
-																game_loop_aux(game(B, Pw, Pb, w), Npw).
+																rep_piece_at(B, Row, Col, E),
+																E == c, !,
+																rep_internal(Size, [Row, Col], [RowI, ColI]),
+																place_stone(w, B, [RowI, ColI], NewBoard, Captures),
+																add_captures(Pw, Captures, Npw),
+																game_loop_aux(game(NewBoard, Pw, Pb, w), Npw, Size).
 
-game_loop(game(B, Pw, Pb, b)):- display_game(B, Pw, Pb, b),
+game_loop(game(B, Pw, Pb, b), Size):- display_game(B, Pw, Pb, b),
 																read_position(Row, Col),
-																%place_stone(b, [Row, Col], B, NewBoard, Captures),
-																add_captures(Pb, 2, Npb),
-																game_loop_aux(game(B, Pw, Pb, b), Npb).
+																rep_piece_at(B, Row, Col, E),
+																E == c, !,
+																rep_internal(Size, [Row, Col], [RowI, ColI]),
+																place_stone(b, B, [RowI, ColI], NewBoard, Captures),
+																add_captures(Pb, Captures, Npb),
+																game_loop_aux(game(NewBoard, Pw, Pb, b), Npb, Size).
 
-game_loop_aux(game(B, Pw, Pb, N), _):- other_player(N, P),
-																		game_over(game(B, Pw, Pb, N), P),
-															      write("Game Ended").
+game_loop_aux(game(B, Pw, Pb, w), Np, _Size):-	game_over(game(B, Np, Pb, w), w), !,
+																		display_game(B, Np, Pb, w),
+															      victory(w).
 
-game_loop_aux(game(B, Pw, Pb, w), Npw):- game_loop(game(B, Npw, Pb, b)).
+game_loop_aux(game(B, Pw, Pb, b), Np, _Size):-	game_over(game(B, Pw, Np, b), b), !,
+																		display_game(B, Pw, Np, b),
+															      victory(b).
 
-game_loop_aux(game(B, Pw, Pb, b), Npb):- game_loop(game(B, Pw, Npb, w)).
+game_loop_aux(game(B, _Pw, Pb, w), Npw, Size):- game_loop(game(B, Npw, Pb, b), Size).
+
+game_loop_aux(game(B, Pw, _Pb, b), Npb, Size):- game_loop(game(B, Pw, Npb, w), Size).
+
+/**
+* victory(P)
+* displays a victory message for the player P (w or b)
+*/
+victory(w):- write('White player won!'), nl.
+victory(b):- write('Black player won!'), nl.
+
+s_g(S):- start_game(S, player, player).
