@@ -189,7 +189,7 @@ remove_dead_stones(P, Board, [Row, Col], NewBoard, Captures) :-
  *   number of removed stones to Captures.
  */
 place_stone(w, Board, [Row, Col], NewBoard, Captures) :-
-    matrix_set(Board, Row, Col, 'W', WBoard),
+		matrix_set(Board, Row, Col, 'W', WBoard),
     remove_dead_stones(w, WBoard, [Row, Col], Removed, Captures),
     matrix_set(Removed, Row, Col, w, NewBoard).
 
@@ -219,3 +219,15 @@ valid_moves(Board, _, ListOfMoves) :- empty_positions(Board, ListOfMoves).
 /**
  * move(+[Row, Col], +game(Board, White, Black, P), ?game(Board, White, Black, P)).
  */
+move([Row, Col], game(Board, Wc, Bc, w), game(NewBoard, Wc1, Bc, b)) :-
+		place_stone(w, Board, [Row, Col], NewBoard, Captures),
+		add_captures(Wc, Captures, Wc1).
+
+move([Row, Col], game(Board, Wc, Bc, b), game(NewBoard, Wc, Bc1, w)) :-
+		place_stone(b, Board, [Row, Col], NewBoard, Captures),
+		add_captures(Bc, Captures, Bc1).
+
+
+
+	 	
+
