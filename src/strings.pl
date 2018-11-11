@@ -127,5 +127,5 @@ rep_internal(Size, [RepRow, RepCol], [IntRow, IntCol]) :-
  */
 rep_piece_at(Board, Row, Col, E) :- length(Board, Size),
                                     rep_internal(Size, [Row, Col], [R, C]),
-                                    write(R), nl, write(C), nl,
+																		%write(R), nl, write(C), nl,
                                     matrix_get(Board, R, C, E).
