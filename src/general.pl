@@ -14,44 +14,40 @@ apply(F, [A, B, C, D, E]) :- call(F, A, B, C, D, E).
  *   Call F(N) for N in the range [I, E], with N increasing.
  */
 forloop_increasing(F, E, E) :- call(F, E).
-forloop_increasing(F, I, E) :-
-    I < E,
-    call(F, I),
-    Ir is I + 1,
-    forloop_increasing(F, Ir, E).
+forloop_increasing(F, I, E) :- I < E,
+                               call(F, I),
+                               Ir is I + 1,
+                               forloop_increasing(F, Ir, E).
 
 /**
  * l_forloop_increasing(:F, +I, +E, +L).
  *   Call F(N, L...) for N in the range [I, E], with N increasing.
  */
 l_forloop_increasing(F, E, E, L) :- apply(F, [E | L]).
-l_forloop_increasing(F, I, E, L) :-
-    I < E,
-    apply(F, [I | L]),
-    Ir is I + 1,
-    l_forloop_increasing(F, Ir, E, L).
+l_forloop_increasing(F, I, E, L) :- I < E,
+                                    apply(F, [I | L]),
+                                    Ir is I + 1,
+                                    l_forloop_increasing(F, Ir, E, L).
 
 /**
  * forloop_decreasing(:F, +I, +E).
  *   Call F(N) for N in the range [I, E], with N decreasing.
  */
 forloop_decreasing(F, I, I) :- call(F, I).
-forloop_decreasing(F, I, E) :-
-    I < E,
-    call(F, E),
-    Er is E - 1,
-    forloop_decreasing(F, I, Er).
+forloop_decreasing(F, I, E) :- I < E,
+                               call(F, E),
+                               Er is E - 1,
+                               forloop_decreasing(F, I, Er).
 
 /**
  * l_forloop_decreasing(:F, +I, +E, +L).
  *   Call F(N, L...) for N in the range [I, E], with N decreasing.
  */
 l_forloop_decreasing(F, I, I, L) :- apply(F, [I | L]).
-l_forloop_decreasing(F, I, E, L) :-
-    I < E,
-    apply(F, [I | L]),
-    Er is E - 1,
-    l_forloop_decreasing(F, I, Er, L).
+l_forloop_decreasing(F, I, E, L) :- I < E,
+                                    apply(F, [I | L]),
+                                    Er is E - 1,
+                                    l_forloop_decreasing(F, I, Er, L).
 
 /**
  * whileloop(:C, :F, -R).

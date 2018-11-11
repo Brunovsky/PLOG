@@ -70,19 +70,27 @@ test_matrix_right_diag :-
 
 % matrix_row_reverse(M, R).
 test_matrix_row_reverse :-
-    matrix_row_reverse([[1,2,3],[4,5,6],[7,8,9]], [[7,8,9],[4,5,6],[1,2,3]]).
+    matrix_row_reverse([[1,2,3],[4,5,6],[7,8,9]], [[7,8,9],[4,5,6],[1,2,3]]),
+    matrix_row_reverse([[1,2],[3,4],[5,6],[7,8]], [[7,8],[5,6],[3,4],[1,2]]),
+    matrix_row_reverse([[1,2,3,4,5],[5,6,7,8,9]], [[5,6,7,8,9],[1,2,3,4,5]]).
 
 % matrix_col_reverse(M, R).
 test_matrix_col_reverse :-
-    matrix_col_reverse([[1,2,3],[4,5,6],[7,8,9]], [[3,2,1],[6,5,4],[9,8,7]]).
+    matrix_col_reverse([[1,2,3],[4,5,6],[7,8,9]], [[3,2,1],[6,5,4],[9,8,7]]),
+    matrix_col_reverse([[1,2],[3,4],[5,6],[7,8]], [[2,1],[4,3],[6,5],[8,7]]),
+    matrix_col_reverse([[1,2,3,4,5],[5,6,7,8,9]], [[5,4,3,2,1],[9,8,7,6,5]]).
 
 % matrix_reverse(M, R).
 test_matrix_reverse :-
-    matrix_reverse([[1,2,3],[4,5,6],[7,8,9]], [[9,8,7],[6,5,4],[3,2,1]]).
+    matrix_reverse([[1,2,3],[4,5,6],[7,8,9]], [[9,8,7],[6,5,4],[3,2,1]]),
+    matrix_reverse([[1,2],[3,4],[5,6],[7,8]], [[8,7],[6,5],[4,3],[2,1]]),
+    matrix_reverse([[1,2,3,4,5],[5,6,7,8,9]], [[9,8,7,6,5],[5,4,3,2,1]]).
 
 % matrix_transpose(M, T).
 test_matrix_transpose :-
-    matrix_transpose([[1,2,3],[4,5,6],[7,8,9]], [[1,4,7],[2,5,8],[3,6,9]]).
+    matrix_transpose([[1,2,3],[4,5,6],[7,8,9]], [[1,4,7],[2,5,8],[3,6,9]]),
+    matrix_transpose([[1,2],[3,4],[5,6],[7,8]], [[1,3,5,7],[2,4,6,8]]),
+    matrix_transpose([[1,2,3,4,5],[5,6,7,8,9]], [[1,5],[2,6],[3,7],[4,8],[5,9]]).
 
 % matrix_left_diagonals(M, Ds).
 test_matrix_left_diagonals :-
@@ -108,9 +116,31 @@ test_matrix_right_diagonals :-
         [1], [2,6], [3,7,11], [4,8,12], [5,9,13], [10,14], [15]
     ]).
 
+% consecutive_any_row(M, E, N).
+test_consecutive_any_row :-
+    consecutive_any_row([[a,a,b,b,a,b,a],[a,b,b,a,a,a,b],[a,b,b,b,b,a,b]], b, 4),
+    consecutive_any_row([[a,b,b,a],[b,b,a,b],[b,b,b,a],[a,a,a,b]], b, 3),
+    \+ consecutive_any_row([[a,b,b,b,a],[a,a,a,b,a],[b,a,a,a,b]], a, 4),
+    \+ consecutive_any_row([[a,a,b],[b,b,a],[c,c,d],[d,d,d]], c, 3),
+    \+ consecutive_any_row([[a,a,b],[b,b,a],[c,c,c],[d,d,d]], c, 4).
+
+% consecutive_any_col(M, E, N).
+test_consecutive_any_col :-
+    consecutive_any_col([[a,b,a,a],[b,b,a,b],[b,b,b,a],[b,a,b,a]], b, 3),
+    consecutive_any_col([[a,b],[c,d],[b,d],[c,a],[c,b],[c,a],[a,d]], c, 3),
+    \+ consecutive_any_col([[o,k,k],[k,o,o],[o,o,k]], k, 3),
+    \+ consecutive_any_col([[a,b],[a,b],[a,b],[b,a],[a,b],[a,b],[a,b]], a, 4),
+    \+ consecutive_any_col([[a,a,b],[b,b,a],[c,c,d],[d,d,d]], c, 5).
+
+% consecutive_any_diag(M, E, N).
+test_consecutive_any_diag :-
+    consecutive_any_diag([[a,b,b,a],[a,c,b,a],[c,d,c,b],[b,c,a,b]], b, 3),
+    \+ consecutive_any_diag([[a,b,b,a],[a,c,b,a],[c,a,a,b],[b,c,c,b]], a, 3).
+
 test_matrix :- test_all([
     test_matrix_size,
     test_matrix_get,
+    test_matrix_set,
     test_matrix_slice,
     test_matrix_main_diag,
     test_matrix_left_diag,
@@ -120,7 +150,10 @@ test_matrix :- test_all([
     test_matrix_reverse,
     test_matrix_transpose,
     test_matrix_left_diagonals,
-    test_matrix_right_diagonals
+    test_matrix_right_diagonals,
+    test_consecutive_any_row,
+    test_consecutive_any_col,
+    test_consecutive_any_diag
 ]).
 
 :- test_matrix.

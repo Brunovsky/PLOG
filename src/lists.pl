@@ -168,7 +168,7 @@ range_n(L, [I, N], R) :- J is I + N, range(L, [I, J], R).
  * consecutive(+L, +E, +N).
  *   Asserts that list L has N consecutive elements E.
  */
-consecutive(L, E, N) :- fill_n(N, E, EList), !, sublist(EList, L).
+consecutive(L, E, N) :- fill_n(N, E, EList), !, sublist_n(EList, L, N).
 
 /**
  * reverse(+L, ?R).
@@ -370,27 +370,25 @@ l_count([H | T], F, Args, N) :- \+ apply(F, [H | Args]), count(T, F, Args, N).
  * contains(+L, ?X).
  *   List L contains X.
  */
-contains([H | T], X) :- H = X; contains(T, X).
+contains(L, X) :- member(X, L).
 
 /**
  * contains_all(+L, +S).
  *   List L contains all elements of list S.
  */
-contains_all(_, []).
-contains_all(L, [H | T]) :- contains(L, H), contains_all(L, T).
+contains_all(L, S) :- all_of(S, contains(L)).
 
 /**
  * contains_any(+L, +S).
  *   List L contains at least one element of list S.
  */
-contains_any(L, [H | T]) :- contains(L, H); contains_any(L, T).
+contains_any(L, S) :- any_of(S, contains(L)).
 
 /**
  * contains_none(+L, +S).
  *   List L contains no elements from list S.
  */
-contains_none(_, []).
-contains_none(L, [H | T]) :- \+ contains(L, H), contains_none(L, T).
+contains_none(L, S) :- none_of(S, contains(L)).
 
 /**
  * foreach(+L, :F).

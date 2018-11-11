@@ -22,7 +22,7 @@ plog(earlygame) :- display_game([
     [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 3
     [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 2
     [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c]  % 1
-], player(white, 0), player(black, 0), w).
+], player(w, 0), player(b, 0), w).
 
 plog(midgame) :- display_game([
 %    A  B  C  D  E  F  G  H  J  K  L  M  N  O  P  Q  R  S  T
@@ -45,7 +45,7 @@ plog(midgame) :- display_game([
     [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 3
     [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 2
     [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c]  % 1
-], player(white, 4), player(black, 2), b).
+], player(w, 4), player(b, 2), b).
 
 plog(lategame) :- display_game([
 %    A  B  C  D  E  F  G  H  J  K  L  M  N  O  P  Q  R  S  T
@@ -68,7 +68,7 @@ plog(lategame) :- display_game([
     [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 3
     [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c], % 2
     [c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c]  % 1
-], player(white, 8), player(black, 8), w).
+], player(w, 8), player(b, 8), w).
 
 plog(early13) :- display_game([
 %    A  B  C  D  E  F  G  H  J  K  L  M  N
@@ -85,4 +85,4 @@ plog(early13) :- display_game([
     [c, c, c, c, c, c, c, c, c, c, c, c, c], % 3
     [c, c, c, c, c, c, c, c, c, c, c, c, c], % 2
     [c, c, c, c, c, c, c, c, c, c, c, c, c]  % 1
-], player(white, 0), player(black, 0), w).
+], player(w, 0), player(b, 0), w).

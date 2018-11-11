@@ -47,49 +47,57 @@ write_board_unit(w, _, _, _) :-
 write_board_unit(b, _, _, _) :-
     write('\x25cb\ ').
 
+% Ⓦ White piece, anywhere Ⓦ
+write_board_unit('W', _, _, _) :-
+    write('\x24cc\ ').
+
+% Ⓑ Black piece, anywhere Ⓑ
+write_board_unit('B', _, _, _) :-
+    write('\x24b7\ ').
+
 % Bottom-left piece └
-write_board_unit(c, _, 1, 1) :-
+write_board_unit(_, _, 1, 1) :-
     write('\x2514\\x2500\').
 
 % Bottom-right piece ┘
-write_board_unit(c, Size, 1, Size) :-
+write_board_unit(_, [_, ColSize], 1, ColSize) :-
     write('\x2518\').
 
 % Top-left piece ┌
-write_board_unit(c, Size, Size, 1) :-
+write_board_unit(_, [RowSize, _], RowSize, 1) :-
     write('\x250c\\x2500\').
 
 % Top-right piece ┐
-write_board_unit(c, Size, Size, Size) :-
+write_board_unit(_, [RowSize, ColSize], RowSize, ColSize) :-
     write('\x2510\').
 
 % Bottom piece ┴
-write_board_unit(c, Size, 1, Col) :-
-    Col > 1, Col < Size,
+write_board_unit(_, [_, ColSize], 1, Col) :-
+    Col > 1, Col < ColSize,
     write('\x2534\\x2500\').
 
 % Top piece ┬
-write_board_unit(c, Size, Size, Col) :-
-    Col > 1, Col < Size,
+write_board_unit(_, [RowSize, ColSize], RowSize, Col) :-
+    Col > 1, Col < ColSize,
     write('\x252c\\x2500\').
 
 % Left piece ├
-write_board_unit(c, Size, Row, 1) :-
-    Row > 1, Row < Size,
+write_board_unit(_, [RowSize, _], Row, 1) :-
+    Row > 1, Row < RowSize,
     write('\x251c\\x2500\').
 
 % Right piece ┤
-write_board_unit(c, Size, Row, Size) :-
-    Row > 1, Row < Size,
+write_board_unit(_, [RowSize, ColSize], Row, ColSize) :-
+    Row > 1, Row < RowSize,
     write('\x2524\').
 
 % Fill piece ┼
-write_board_unit(c, Size, Row, Col) :-
-    Row > 1, Row < Size, Col > 1, Col < Size,
+write_board_unit(_, [RowSize, ColSize], Row, Col) :-
+    Row > 1, Row < RowSize, Col > 1, Col < ColSize,
     write('\x253c\\x2500\').
 
 /**
- * write_board_left(+P, +Row, +Size).
+ * write_board_left(+P, +Row, +RowSize).
  *   Print the row's number on the left of the board.
  */
 % 19 18 ...
@@ -125,47 +133,55 @@ write_board_top_char(I) :- write_board_top_char_alph(I).
  * write_board_top(+P).
  *   Print the top row of the board.
  */
-write_board_top(w, Size) :-
+write_board_top(w, ColSize) :-
     write('  '),
-    forloop_increasing(write_board_top_char, 1, Size),
+    forloop_increasing(write_board_top_char, 1, ColSize),
     nl.
-write_board_top(b, Size) :-
+write_board_top(b, ColSize) :-
     write('  '),
-    forloop_decreasing(write_board_top_char, 1, Size),
+    forloop_decreasing(write_board_top_char, 1, ColSize),
     nl.
 
 /**
- * write_board_bottom(+next, +WhiteCaptures, +BlackCaptures).
+ * write_bottom(+next, +WhiteCaptures, +BlackCaptures).
  *   Print the players' captures below the board.
  */
-write_board_bottom(w, Wc, Bc) :-
+write_bottom(w, Wc, Bc) :-
     format('      > White: ~d         Black: ~d\n', [Wc, Bc]).
-write_board_bottom(b, Wc, Bc) :-
+write_bottom(b, Wc, Bc) :-
     format('        White: ~d       > Black: ~d\n', [Wc, Bc]).
 
 /**
- * write_board_line(+L, +P, +Size, +Row).
- *   Print a board row (Size elements) on a given Row.
+ * write_board_line(+L, +P, +[RowSize, ColSize], +Row).
+ *   Print a board row (ColSize elements) on a given Row.
  *   According to player P's perspective.
  */
-write_board_line(L, P, Size, Row) :-
-    write_board_left(P, Row, Size),
-    lb_foreach_increasing(L, write_board_unit, [Size, Row], 1),
+write_board_line(L, P, [RowSize, ColSize], Row) :-
+    write_board_left(P, Row, RowSize),
+    lb_foreach_increasing(L, write_board_unit, [[RowSize, ColSize], Row], 1),
     nl.
 
 /**
- * display_game(+Board, +White, +Black, +next).
+ * print_board(+Board, +P).
  *   Print the whole board.
  */
-display_game(Board, player(white, Wc), player(black, Bc), w) :-
-    matrix_size(Board, Size, Size),
-    write_board_top(w, Size),
-    lb_foreach_decreasing(Board, write_board_line, [w, Size], Size),
-    write_board_bottom(w, Wc, Bc).
+print_board(Board, w) :-
+    matrix_size(Board, RowSize, ColSize),
+    write_board_top(w, ColSize),
+    lb_foreach_decreasing(Board, write_board_line, [w, [RowSize, ColSize]], RowSize).
 
-display_game(Board, player(white, Wc), player(black, Bc), b) :-
-    matrix_size(Board, Size, Size),
+print_board(Board, b) :-
+    matrix_size(Board, RowSize, ColSize),
     matrix_reverse(Board, Reversed),
-    write_board_top(b, Size),
-    lb_foreach_decreasing(Reversed, write_board_line, [b, Size], Size),
-    write_board_bottom(b, Wc, Bc).
+    write_board_top(b, ColSize),
+    lb_foreach_decreasing(Reversed, write_board_line, [b, [RowSize, ColSize]], RowSize).
+
+print_board(Board) :- print_board(Board, w).
+
+/**
+ * display_game(+Board, +White, +Black, +Next).
+ *   Print the whole board, plus captures on the bottom.
+ */
+display_game(Board, player(w, Wc), player(b, Bc), Next) :-
+    print_board(Board, Next),
+    write_bottom(Next, Wc, Bc).

@@ -154,7 +154,8 @@ test_consecutive :-
     \+ consecutive([0,0,3,3,4,9,7,3,4,3,0,3,3,3,3,5], 3, 5),
     consecutive([6,4,2,8,3,4,4,5,8,8,9,9,9,8,1,2,3,5,6,8,8,2,3,9], 9, 3),
     consecutive([3,2,4,4,4,4,2,0], 4, 4),
-    \+ consecutive([3,2,4,4,4,2,0], 4, 4).
+    \+ consecutive([3,2,4,4,4,2,0], 4, 4),
+    \+ consecutive([0,1], a, 5).
 
 % reverse(L, R).
 test_reverse :-
