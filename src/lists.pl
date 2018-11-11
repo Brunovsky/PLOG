@@ -9,8 +9,8 @@ is_list([_ | _]).
  * list_get(+L, +N, -C).
  *   C is the element at position N in list L (0-indexed).
  */
-list_get([H | _], 0, H).
-list_get([_ | T], N, C) :- N > 0, M is N - 1, list_get(T, M, C).
+list_get([H | _], 0, H) :- !.
+list_get([_ | T], N, C) :- N > 0, M is N - 1, list_get(T, M, C), !.
 
 /**
  * list_set(+L, +N, +E, -R).
@@ -18,32 +18,6 @@ list_get([_ | T], N, C) :- N > 0, M is N - 1, list_get(T, M, C).
  */
 list_set([_ | T], 0, E, [E | T]).
 list_set([H | T], N, E, [H | R]) :- M is N - 1, list_set(T, M, E, R).
-
-/**
- * index(+L, +E, ?I).
- *   Finds the index I of the first occurrence of an item E in the list L.
- *   Fails if no such index exists.
- */
-index([E | _], E, 0) :- !.
-index([_ | T], E, I) :- index(T, E, J), !, I is J + 1.
-
-/**
- * last_index(+L, +E, ?I).
- *   Finds the index I of the last occurrence of an item E in the list L.
- *   Fails if no such index exists.
- */
-last_index([E], E, 0) :- !.
-last_index([E | L], E, I) :- last_index(L, E, J), !, I is J + 1.
-last_index([E | L], E, 0) :- !.
-last_index([_ | L], E, I) :- last_index(L, E, J), !, I is J + 1.
-
-/**
- * indices(+L, +E, ?I).
- *   Finds the indices I of the occurrences of an item E in the list L.
- *   Provides indices of such occurrences.
- */
-indices([E | _], E, 0).
-indices([_ | T], E, I) :- indices(T, E, J), I is J + 1.
 
 /**
  * prefix(?P, +L).
@@ -88,12 +62,10 @@ sublist_n(J, L, N) :- prefix(J, L), length(J, N).
 sublist_n(J, [_ | L], N) :- sublist_n(J, L, N).
 
 /**
- * join(+A, +B, -R).
+ * join(?A, ?B, ?R).
  *   Concatenating A and B results in R.
  */
-join([], [], []).
-join([], [H | T], [H | T]).
-join([X | A], B, [X | C]) :- join(A, B, C).
+join(A, B, R) :- append(A, B, R).
 
 /**
  * push_front(+L, +X, -R).
@@ -303,62 +275,65 @@ l_exclude_each([H | T], F, Args, R) :- apply(F, [H | Args]), l_exclude_each(T, F
 /**
  * all_of(+L, :F).
  *   All the elements H of list L verify F(H).
+ *   Matches only once.
  */
-all_of([], _).
-all_of([H | T], F) :- call(F, H), all_of(T, F).
+all_of([], _) :- !.
+all_of([H | T], F) :- call(F, H), all_of(T, F), !.
 
 /**
  * a_all_of(+L, :F, +A).
  *   All the elements H of list L verify F(H, A).
+ *   Matches only once.
  */
-a_all_of([], _, _).
-a_all_of([H | T], F, A) :- call(F, H, A), a_all_of(T, F, A).
+a_all_of([], _, _) :- !.
+a_all_of([H | T], F, A) :- call(F, H, A), a_all_of(T, F, A), !.
 
 /**
  * l_all_of(+L, :F, +Args).
  *   All the elements H of list L verify F(H, Args...).
+ *   Matches only once.
  */
-l_all_of([], _, _).
-l_all_of([H | T], F, Args) :- apply(F, [H | Args]), l_all_of(T, F, Args).
+l_all_of([], _, _) :- !.
+l_all_of([H | T], F, Args) :- apply(F, [H | Args]), l_all_of(T, F, Args), !.
 
 /**
  * any_of(+L, :F).
  *   At least one element H of list L verifies F(H).
  */
-any_of([H | T], F) :- call(F, H); any_of(T, F).
+any_of([H | T], F) :- call(F, H), !; any_of(T, F), !.
 
 /**
  * a_any_of(+L, :F, +A).
  *   At least one element H of list L verifies F(H, A).
  */
-a_any_of([H | T], F, A) :- call(F, H, A); a_any_of(T, F, A).
+a_any_of([H | T], F, A) :- call(F, H, A), !; a_any_of(T, F, A), !.
 
 /**
  * l_any_of(+L, :F, +Args).
  *   At least one element H of list L verifies F(H, Args...).
  */
-l_any_of([H | T], F, Args) :- apply(F, [H | Args]); l_any_of(T, F, Args).
+l_any_of([H | T], F, Args) :- apply(F, [H | Args]), !; l_any_of(T, F, Args), !.
 
 /**
  * none_of(+L, :F).
  *   No element H of list L verifies F(H).
  */
 none_of([], _).
-none_of([H | T], F) :- \+ call(F, H), none_of(T, F).
+none_of([H | T], F) :- \+ call(F, H), none_of(T, F), !.
 
 /**
  * a_none_of(+L, :F, +A).
  *   No element H of list L verifies F(H, A).
  */
 a_none_of([], _, _).
-a_none_of([H | T], F, A) :- \+ call(F, H, A), a_none_of(T, F, A).
+a_none_of([H | T], F, A) :- \+ call(F, H, A), a_none_of(T, F, A), !.
 
 /**
  * l_none_of(+L, :F, +Args).
  *   No element H of list L verifies F(H, Args...).
  */
 l_none_of([], _, _).
-l_none_of([H | T], F, Args) :- \+ apply(F, [H | Args]), l_none_of(T, F, Args).
+l_none_of([H | T], F, Args) :- \+ apply(F, [H | Args]), l_none_of(T, F, Args), !.
 
 /**
  * count(+L, :F, ?N).
@@ -387,26 +362,30 @@ l_count([H | T], F, Args, N) :- \+ apply(F, [H | Args]), count(T, F, Args, N).
 /**
  * contains(+L, ?X).
  *   List L contains X.
+ *   Matches only once.
  */
-contains(L, X) :- member(X, L).
+contains(L, X) :- member(X, L), !.
 
 /**
  * contains_all(+L, +S).
  *   List L contains all elements of list S.
+ *   Matches only once.
  */
-contains_all(L, S) :- all_of(S, contains(L)).
+contains_all(L, S) :- all_of(S, contains(L)), !.
 
 /**
  * contains_any(+L, +S).
  *   List L contains at least one element of list S.
+ *   Matches only once.
  */
-contains_any(L, S) :- any_of(S, contains(L)).
+contains_any(L, S) :- any_of(S, contains(L)), !.
 
 /**
  * contains_none(+L, +S).
  *   List L contains no elements from list S.
+ *   Matches only once.
  */
-contains_none(L, S) :- none_of(S, contains(L)).
+contains_none(L, S) :- none_of(S, contains(L)), !.
 
 /**
  * foreach(+L, :F).
@@ -484,7 +463,7 @@ lb_foreach_decreasing([H | T], F, Args, N) :- push_back(Args, N, B),
  */
 list_min([X], X) :- !.
 list_min([H1, H2 | T], Min) :- H1 < H2, !, list_min([H1 | T], Min).
-list_min([H1, H2 | T], Min) :- !, list_min([H2 | T], Min).
+list_min([_, H2 | T], Min) :- !, list_min([H2 | T], Min).
 
 /**
  * list_max(+L, ?Max).
@@ -492,4 +471,116 @@ list_min([H1, H2 | T], Min) :- !, list_min([H2 | T], Min).
  */
 list_max([X], X) :- !.
 list_max([H1, H2 | T], Max) :- H1 < H2, !, list_max([H2 | T], Max).
-list_max([H1, H2 | T], Max) :- !, list_max([H1 | T], Max).
+list_max([H1, _ | T], Max) :- !, list_max([H1 | T], Max).
+
+/**
+ * index(+L, +E, ?I).
+ *   Finds the index I of the first occurrence of an item E in the list L.
+ *   Fails if no such item exists.
+ */
+index([E | _], E, 0) :- !.
+index([_ | T], E, I) :- index(T, E, J), I is J + 1, !.
+
+/**
+ * last_index(+L, +E, ?I).
+ *   Finds the index I of the last occurrence of an item E in the list L.
+ *   Fails if no such item exists.
+ */
+last_index([E], E, 0) :- !.
+last_index([E | L], E, I) :- last_index(L, E, J), I is J + 1, !.
+last_index([E | _], E, 0) :- !.
+last_index([_ | L], E, I) :- last_index(L, E, J), I is J + 1, !.
+
+/**
+ * indices(+L, +E, ?I).
+ *   Finds the indices I of the occurrences of an item E in the list L.
+ *   Provides indices of such occurrences.
+ */
+indices([E | _], E, 0).
+indices([_ | T], E, I) :- indices(T, E, J), I is J + 1.
+
+/**
+ * index_suchthat(+L, :F, ?I).
+ *   Finds the first index I such that F(H) holds for that index.
+ */
+index_suchthat([H | _], F, 0) :- call(F, H), !.
+index_suchthat([H | T], F, I) :- \+ call(F, H),
+                                 index_suchthat(T, F, J), I is J + 1, !.
+
+/**
+ * a_index_suchthat(+L, :F, +A, ?I).
+ *   Finds the first index I such that F(H, A) holds for that index.
+ */
+a_index_suchthat([H | _], F, A, 0) :- call(F, H, A), !.
+a_index_suchthat([H | T], F, A, I) :- \+ call(F, H, A),
+                                      a_index_suchthat(T, F, A, J),
+                                      I is J + 1, !.
+
+/**
+ * l_index_suchthat(+L, :F, +Args, ?I).
+ *   Finds the first index I such that F(H, Args...) holds for that index.
+ */
+l_index_suchthat([H | _], F, Args, 0) :- apply(F, [H | Args]), !.
+l_index_suchthat([H | T], F, Args, I) :- \+ apply(F, [H | Args]),
+                                    l_index_suchthat(T, F, Args, J),
+                                    I is J + 1, !.
+
+/**
+ * last_index_suchthat(+L, :F, ?I).
+ *   Finds the last index I such that F(H) holds for that index.
+ */
+last_index_suchthat([H], F, 0) :- call(F, H), !.
+last_index_suchthat([H | L], F, I) :- call(F, H),
+                                      last_index_suchthat(L, F, J),
+                                      I is J + 1, !.
+last_index_suchthat([H | _], F, 0) :- call(F, H), !.
+last_index_suchthat([_ | L], F, I) :- last_index_suchthat(L, F, J),
+                                      I is J + 1, !.
+
+/**
+ * last_index_suchthat(+L, :F, A, ?I).
+ *   Finds the last index I such that F(H, A) holds for that index.
+ */
+a_last_index_suchthat([H], F, A, 0) :- call(F, H, A), !.
+a_last_index_suchthat([H | L], F, A, I) :- call(F, H, A),
+                                        a_last_index_suchthat(L, F, A, J),
+                                        I is J + 1, !.
+a_last_index_suchthat([H | _], F, A, 0) :- call(F, H, A), !.
+a_last_index_suchthat([_ | L], F, A, I) :- a_last_index_suchthat(L, F, A, J),
+                                        I is J + 1, !.
+
+/**
+ * last_index_suchthat(+L, :F, Args, ?I).
+ *   Finds the last index I such that F(H, Args...) holds for that index.
+ */
+l_last_index_suchthat([H], F, Args, 0) :- apply(F, [H | Args]), !.
+l_last_index_suchthat([H | L], F, Args, I) :- apply(F, [H | Args]),
+                                              l_last_index_suchthat(L, F, Args, J),
+                                              I is J + 1, !.
+l_last_index_suchthat([H | _], F, Args, 0) :- apply(F, [H | Args]), !.
+l_last_index_suchthat([_ | L], F, Args, I) :- l_last_index_suchthat(L, F, Args, J),
+                                              I is J + 1, !.
+
+/**
+ * indices_suchthat(+L, :F, ?I).
+ *   Finds the first index I such that F(H) holds for that index.
+ */
+indices_suchthat([H | _], F, 0) :- call(F, H).
+indices_suchthat([_ | T], F, I) :- indices_suchthat(T, F, J), I is J + 1.
+
+/**
+ * a_indices_suchthat(+L, :F, +A, ?I).
+ *   Finds the first index I such that F(H, A) holds for that index.
+ */
+a_indices_suchthat([H | _], F, A, 0) :- call(F, H, A).
+a_indices_suchthat([_ | T], F, A, I) :- a_indices_suchthat(T, F, A, J),
+                                        I is J + 1.
+
+/**
+ * l_indices_suchthat(+L, :F, +Args, ?I).
+ *   Finds the first index I such that F(H, Args...) holds for that index.
+ */
+l_indices_suchthat([H | _], F, Args, 0) :- apply(F, [H | Args]).
+l_indices_suchthat([_ | T], F, Args, I) :- l_indices_suchthat(T, F, Args, J),
+                                           I is J + 1.
+l_indices_suchthat([H | _], F, Args, 0) :- apply(F, [H | Args]).

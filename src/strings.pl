@@ -2,7 +2,7 @@ atom_is_char(A) :- atom_chars(A, [_]).
 
 is_char(A) :- atom(A), atom_is_char(A).
 
-is_lowercase_char(A) :- is_char(A), char_code(A, C), C > 96, C < 123.
+is_lowercase_char(A) :- is_char(A), char_code(A, C), C >= 0'a, C =< 0'z.
 is_uppercase_char(A) :- is_char(A), char_code(A, C), C > 64, C < 91.
 is_numeric(A) :- is_char(A), char_code(A, C), C > 47, C < 58.
 is_alpha(A) :- is_lowercase_char(A); is_uppercase_char(A).
