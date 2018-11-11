@@ -34,7 +34,7 @@ game(_, _, _, _).
 * 	Starts a player vs player pente game with a board with size S
 */
 start_game(S, player, player):- make_board(S, B),
-																game_loop(game(B, 0, 0, w), S).
+		game_loop(game(B, 0, 0, w), S).
 
 /**
 * add_captures(+P, +Captures, -Np)
@@ -47,34 +47,40 @@ add_captures(P, Captures, Np):- Np is P + Captures.
 * 	Next iteration of the game 
 */
 game_loop(game(B, Pw, Pb, w), Size):- display_game(B, Pw, Pb, w),
-																read_position(Row, Col),
-																rep_piece_at(B, Row, Col, E),
-																E == c, !,
-																rep_internal(Size, [Row, Col], [RowI, ColI]),
-																place_stone(w, B, [RowI, ColI], NewBoard, Captures),
-																add_captures(Pw, Captures, Npw),
-																game_loop_aux(game(NewBoard, Pw, Pb, w), Npw, Size).
+		read_position(Row, Col),
+		rep_piece_at(B, Row, Col, E),
+		E == c, !,
+		rep_internal(Size, [Row, Col], [RowI, ColI]),
+
+		%	place_stone(w, B, [RowI, ColI], NewBoard, Captures),
+		%	add_captures(Pw, Captures, Npw),
+
+		move([RowI, ColI], game(B, Pw, Pb, w), game(NewBoard, Npw, _, Next),
+		game_loop_aux(game(NewBoard, Npw, Pb, Next), Size).
 
 game_loop(game(B, Pw, Pb, b), Size):- display_game(B, Pw, Pb, b),
-																read_position(Row, Col),
-																rep_piece_at(B, Row, Col, E),
-																E == c, !,
-																rep_internal(Size, [Row, Col], [RowI, ColI]),
-																place_stone(b, B, [RowI, ColI], NewBoard, Captures),
-																add_captures(Pb, Captures, Npb),
-																game_loop_aux(game(NewBoard, Pw, Pb, b), Npb, Size).
+		read_position(Row, Col),
+		rep_piece_at(B, Row, Col, E),
+		E == c, !,
+		rep_internal(Size, [Row, Col], [RowI, ColI]),
 
-game_loop_aux(game(B, _Pw, Pb, w), Np, _Size):-	game_over(game(B, Np, Pb, w), w), !,
-																		display_game(B, Np, Pb, w),
-															      victory(w).
+		%	place_stone(b, B, [RowI, ColI], NewBoard, Captures),
+		% add_captures(Pb, Captures, Npb),
 
-game_loop_aux(game(B, Pw, _Pb, b), Np, _Size):-	game_over(game(B, Pw, Np, b), b), !,
-																		display_game(B, Pw, Np, b),
-															      victory(b).
+		move([RowI, ColI], game(B, Pw, Pb, b), game(NewBoard, _, Npb, Next),
+		game_loop_aux(game(NewBoard, Pw, Npb, Next), Size).
 
-game_loop_aux(game(B, _Pw, Pb, w), Npw, Size):- game_loop(game(B, Npw, Pb, b), Size).
+game_loop_aux(game(B, Pw, Pb, _), _Size):-	
+	  game_over(game(B, Pw, Pb, _), w), !,
+		display_game(B, Pw, Pb, w),
+		victory(w).
 
-game_loop_aux(game(B, Pw, _Pb, b), Npb, Size):- game_loop(game(B, Pw, Npb, w), Size).
+game_loop_aux(game(B, Pw, Pb, _), _Size):-	
+	  game_over(game(B, Pw, Pb, _), b), !,
+		display_game(B, Pw, Pb, b),
+		victory(b).
+
+game_loop_aux(game(B, Pw, Pb, Next), Size):- game_loop(game(B, Pw, Pb, Next), Size).
 
 /**
 * victory(P)
