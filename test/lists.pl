@@ -126,19 +126,18 @@ test_iota :-
 
 % range(L, I, R).
 test_range :-
-    range([0,1,2,3,4,5], [2,5], [2,3,4]),
-    range([a,b,c,d,e,f,g], [1, 6], [b,c,d,e,f]),
-    range([a,b,c,d], [2, 10], [c,d]),
-    range([], _, []),
-    range([a,b,c], [3,5], []),
-    range([0,1,2,3,4,5], 3, [3,4,5]),
-    range([a,b,c,d,e,f,g], 4, [e,f,g]).
+    range([0,1,2,3,4,5], [3,5], [2,3,4]),
+    range([a,b,c,d,e,f,g], [2,6], [b,c,d,e,f]),
+    range([a,b,c,d], [3,10], [c,d]),
+    range([a,b,c], [4,5], []),
+    range([0,1,2,3,4,5], 4, [3,4,5]),
+    range([a,b,c,d,e,f,g], 5, [e,f,g]).
 
 % range_n(L, I, R).
 test_range_n :-
-    range_n([0,1,2,3,4,5,6], [2,4], [2,3,4,5]),
-    range_n([a,b,c,d,e], [1,5], [b,c,d,e]),
-    range_n([a,b,c,d,e], [2,0], []).
+    range_n([0,1,2,3,4,5,6], [3,4], [2,3,4,5]),
+    range_n([a,b,c,d,e], [2,5], [b,c,d,e]),
+    range_n([a,b,c,d,e], [3,0], []).
 
 % consecutive(L, E, N).
 test_consecutive :-
@@ -167,7 +166,7 @@ test_l_map :-
     l_map([[a,b,c],[d,e],[f,g,h,i]], list_get, [2], [b,e,g]),
     l_map([[a,b,a],[b,b,a,b],[c,c,b,a]], index, [a], [1,3,4]),
     l_map([3,4,2], fill_n, [a], [[a,a,a],[a,a,a,a],[a,a]]),
-    l_map([[a,b,c,d],[e,f,g,h]], range_n, [[1,2]], [[b,c],[f,g]]).
+    l_map([[a,b,c,d],[e,f,g,h]], range_n, [[2,2]], [[b,c],[f,g]]).
 
 % flatten(L, R).
 test_flatten :-

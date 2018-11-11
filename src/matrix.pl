@@ -14,13 +14,13 @@ is_matrix([]).
 is_matrix(M) :- matrix_size(M, _, _).
 
 /**
- * matrix_get(+M, +R, +C, ?E).
+ * matrix_get(+M, +R, +C, -E).
  *   E is the element at position (R,C) in matrix M.
  */
 matrix_get(M, R, C, E) :- list_get(M, R, L), !, list_get(L, C, E).
 
 /**
- * matrix_set(+M, +R, +C, +E, ?N).
+ * matrix_set(+M, +R, +C, +E, -N).
  *   Sets E at position (R,C) on matrix M, with result N.
  */
 matrix_set(M, R, C, E, N) :- list_get(M, R, ListRow),
@@ -45,52 +45,65 @@ matrix_col(M, C, L) :- l_map(M, list_get, [C], L).
  * matrix_slice(+M, [RowBegin, RowEnd], +Col, ?N).
  * matrix_slice(+M, +[RowBegin, RowEnd], +[ColBegin, ColEnd], ?N).
  *   Extract a submatrix from M, starting at row RowBegin (inclusive)
- *   and ending at row RowEnd (exclusive), idem for columns.
+ *   and ending at row RowEnd (inclusive), idem for columns.
  */
 matrix_slice(M, Row, Col, N) :-
+    range(M, Row, M1),
+    a_map(M1, range, Col, M2),
+    clear_empty_list(M2, N).
+/*
     integer(Row), integer(Col),
     matrix_size(M, R, C),
     matrix_slice(M, [Row, R], [Col, C], N).
+
 matrix_slice(M, Row, [ColBegin, ColEnd], N) :-
     integer(Row),
     matrix_size(M, R, _),
     matrix_slice(M, [Row, R], [ColBegin, ColEnd], N).
+
 matrix_slice(M, [RowBegin, RowEnd], Col, N) :-
     integer(Col),
     matrix_size(M, _, C),
     matrix_slice(M, [RowBegin, RowEnd], [Col, C], N).
+
 matrix_slice(M, [RowBegin, RowEnd], [ColBegin, ColEnd], N) :-
     range(M, [RowBegin, RowEnd], M1),
     l_map(M1, range, [[ColBegin, ColEnd]], M2),
     clear_empty_list(M2, N). % [[],[],[]] --> []
+*/
 
 /**
  * matrix_main_diag(+M, ?D).
  *   Extracts the main diagonal from matrix M.
  */
 matrix_main_diag([], []).
-matrix_main_diag(M, [E | T]) :- matrix_get(M, 0, 0, E),
-                                matrix_slice(M, 1, 1, N),
+matrix_main_diag(M, [E | T]) :- matrix_get(M, 1, 1, E),
+                                matrix_slice(M, 2, 2, N),
                                 matrix_main_diag(N, T).
 
 /**
  * matrix_left_diagonal(+M, +I, ?D).
- *   Extracts the main diagonal D from a submatrix of M
- *   starting at row I (or column -I if I is negative).
+ *   Extracts the main diagonal D from a submatrix of M.
+ *   If I is 0, it is the main diagonal of M.
+ *   If I > 0, it is the diagonal I spaces below it.
+ *   If I < 0, it is the diagonal I spaces above it.
  *   The elements of D are ordered by row.
  */
-matrix_left_diag(M, I, D) :- I < 0, J is -I,
-                             matrix_slice(M, 0, J, N),
+matrix_left_diag(M, 0, D) :- matrix_main_diag(M, D).
+matrix_left_diag(M, I, D) :- I < 0, J is 1 - I,
+                             matrix_slice(M, 1, J, N),
                              matrix_main_diag(N, D);
-                             I >= 0,
-                             matrix_slice(M, I, 0, N),
+                             I > 0, J is I + 1,
+                             matrix_slice(M, J, 1, N),
                              matrix_main_diag(N, D).
 
 /**
  * matrix_right_diagonal(+M, +I, ?D).
  *   Extracts the diagonal perpendicular to the main diagonal
- *   from a submatrix of M starting at row I or column -I.
- *   This is the diagonal starting at the top right corner.
+ *   from a submatrix of M.
+ *   If I is 0, it is the diagonal starting at the top right corner of M.
+ *   If I > 0, it is the diagonal I spaces below it.
+ *   If I < 0, it is the diagonal I spaces above it.
  *   The elements of D are ordered by row.
  */
 matrix_right_diag(M, I, D) :- matrix_col_reverse(M, R),
@@ -101,14 +114,14 @@ matrix_right_diag(M, I, D) :- matrix_col_reverse(M, R),
  *   Extracts the left diagonal passing through (Row, Col).
  */
 matrix_left_diag_through(M, Row, Col, D) :- I is Row - Col,
-                                       matrix_left_diag(M, I, D).
+                                            matrix_left_diag(M, I, D).
 
 /**
  * matrix_right_diag_through(+M, +Row, +Col, ?D).
  *   Extracts the right diagonal passing through (Row, Col).
  */
 matrix_right_diag_through(M, Row, Col, D) :- matrix_size(M, _, ColSize),
-                                             I is 1 + Row + Col - ColSize,
+                                             I is Row + Col - ColSize - 1,
                                              matrix_right_diag(M, I, D).
 
 /**
@@ -144,8 +157,8 @@ matrix_reverse(M, R) :- map(M, reverse, T), reverse(T, R).
  *   T is the transpose matrix of M.
  */
 matrix_transpose([], []).
-matrix_transpose(M, T) :- matrix_col(M, 0, Col0),
-                          matrix_slice(M, 0, 1, N),
+matrix_transpose(M, T) :- matrix_col(M, 1, Col0),
+                          matrix_slice(M, 1, 2, N),
                           matrix_transpose(N, NT),
                           push_front(NT, Col0, T).
 
@@ -154,8 +167,7 @@ matrix_transpose(M, T) :- matrix_col(M, 0, Col0),
  *   Gets a list of left diagonals of M.
  */
 matrix_left_diagonals(M, Ds) :- matrix_size(M, R, C),
-                                I is 1 - C,
-                                J is R - 1,
+                                I is 1 - C, J is R - 1,
                                 iota(I, J, IList),
                                 map(IList, matrix_left_diag(M), Ds).
 
@@ -209,7 +221,7 @@ consecutive_matrix(M, E, N) :- consecutive_any_row(M, E, N);
  * sublist_any_row(+M, +S).
  *   Asserts the matrix has S somewhere along any row.
  */
-sublist_any_row(M, S) :- is_list(S), any_of(M, sublist(S)).
+sublist_any_row(M, S) :- is_list(S), any_of(M, sublist(S)), !.
 
 /**
  * sublist_any_col(+M, +S).
@@ -217,7 +229,7 @@ sublist_any_row(M, S) :- is_list(S), any_of(M, sublist(S)).
  */
 sublist_any_col(M, S) :- is_list(S),
                          matrix_transpose(M, T), !,
-                         any_of(T, sublist(S)).
+                         any_of(T, sublist(S)), !.
 
 /**
  * sublist_any_diag(+M, +E, +N).
@@ -225,7 +237,7 @@ sublist_any_col(M, S) :- is_list(S),
  */
 sublist_any_diag(M, S) :- is_list(S),
                           matrix_diagonals(M, Ds), !,
-                          any_of(Ds, sublist(S)).
+                          any_of(Ds, sublist(S)), !.
 
 /**
  * sublist_matrix(+M, +E, +N).

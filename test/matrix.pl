@@ -6,27 +6,27 @@ test_matrix_size :-
 
 % matrix_get(M, R, C, E).
 test_matrix_get :-
-    matrix_get([[a,b,c],[d,e,f]], 1, 2, f),
-    matrix_get([[a,b],[c,d],[e,f]], 0, 0, a),
-    matrix_get([[a,b,c,d],[e,f,g,h]], 0, 1, b),
-    \+ matrix_get([[a,b,c],[d,e,f]], 2, _, _),
-    \+ matrix_get([[a,b,c],[d,e,f]], 1, 3, _).
+    matrix_get([[a,b,c],[d,e,f]], 2, 3, f),
+    matrix_get([[a,b],[c,d],[e,f]], 1, 1, a),
+    matrix_get([[a,b,c,d],[e,f,g,h]], 1, 2, b),
+    \+ matrix_get([[a,b,c],[d,e,f]], 3, _, _),
+    \+ matrix_get([[a,b,c],[d,e,f]], 2, 4, _).
 
 % matrix_set(M, R, C, E, N).
 test_matrix_set :-
-    matrix_set([[1,2,3],[4,5,6],[a,b,c]], 2, 0, z, [[1,2,3],[4,5,6],[z,b,c]]),
-    matrix_set([[1,2,3,4],[a,b,c,d]], 0, 3, z, [[1,2,3,z],[a,b,c,d]]),
-    \+ matrix_set([[1,2,3],[4,5,6]], 2, _, _, _),
-    \+ matrix_set([[1,2,3],[4,5,6]], 1, 3, _, _).
+    matrix_set([[1,2,3],[4,5,6],[a,b,c]], 3, 1, z, [[1,2,3],[4,5,6],[z,b,c]]),
+    matrix_set([[1,2,3,4],[a,b,c,d]], 1, 4, z, [[1,2,3,z],[a,b,c,d]]),
+    \+ matrix_set([[1,2,3],[4,5,6]], 3, _, _, _),
+    \+ matrix_set([[1,2,3],[4,5,6]], 2, 4, _, _).
 
 % matrix_slice(M, R, C, N).
 test_matrix_slice :-
-    matrix_slice([[a,b,c],[d,e,f],[g,h,i]], [0,2], [1,3], [[b,c],[e,f]]),
-    matrix_slice([[a,b,c],[d,e,f],[g,h,i]], 0, 1, [[b,c],[e,f],[h,i]]),
-    matrix_slice([[a,b,c],[d,e,f],[g,h,i]], 2, 2, [[i]]),
-    matrix_slice([[a,b],[c,d],[e,f],[g,h]], 2, 1, [[f],[h]]),
-    matrix_slice([[a,b],[c,d],[e,f],[g,h]], 4, 2, []),
-    matrix_slice(M, 0, 0, M).
+    matrix_slice([[a,b,c],[d,e,f],[g,h,i]], [1,2], [2,3], [[b,c],[e,f]]),
+    matrix_slice([[a,b,c],[d,e,f],[g,h,i]], 1, 2, [[b,c],[e,f],[h,i]]),
+    matrix_slice([[a,b,c],[d,e,f],[g,h,i]], 3, 3, [[i]]),
+    matrix_slice([[a,b],[c,d],[e,f],[g,h]], 3, 2, [[f],[h]]),
+    matrix_slice([[a,b],[c,d],[e,f],[g,h]], 4, 3, []),
+    matrix_slice(M, 1, 1, M).
 
 % matrix_main_diag(M, D).
 test_matrix_main_diag :-

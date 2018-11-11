@@ -19,16 +19,20 @@ is_list([_ | _]).
 /**
  * list_get(+L, +N, -C).
  *   C is the element at position N in list L (1-indexing).
+ *   N must be an integer.
  */
-list_get([H | _], 1, H) :- !.
-list_get([_ | T], N, C) :- N > 1, M is N - 1, list_get(T, M, C), !.
+list_get(L, N, C) :- is_list(L), integer(N), list_get_aux(L, N, C).
+list_get_aux([H | _], 1, H) :- !.
+list_get_aux([_ | T], N, C) :- N > 1, M is N - 1, list_get_aux(T, M, C), !.
 
 /**
  * list_set(+L, +N, +E, -R).
  *   Sets E at position N of list L, with result R.
+ *   N must be an integer.
  */
-list_set([_ | T], 1, E, [E | T]) :- !.
-list_set([H | T], N, E, [H | R]) :- M is N - 1, list_set(T, M, E, R), !.
+list_set(L, N, E, R) :- is_list(L), integer(N), list_set_aux(L, N, E, R).
+list_set_aux([_ | T], 1, E, [E | T]) :- !.
+list_set_aux([H | T], N, E, [H | R]) :- M is N - 1, list_set_aux(T, M, E, R), !.
 
 /**
  * prefix(?P, +L).
@@ -155,24 +159,35 @@ iota(I, J, [I | T]) :- I < J, K is I + 1, iota(K, J, T).
  * range(+L, +[I, J], -R).
  * range(+L, +I, -R).
  *   Extracts the sublist starting at index I (inclusive) and ending
- *   at index J (exclusive) from L into R.
+ *   at index J (inclusive) from L into R.
+ *   The second version extracts until the end of the list.
  */
-range([], _, []).
-range(L, I, R) :- integer(I), length(L, J), range(L, [I, J], R).
-range(_, [0, 0], []).
-range([H | T], [0, J], [H | R]) :- J > 0,
-                                   Jr is J - 1,
-                                   range(T, [0, Jr], R), !.
-range([_ | T], [I, J], R) :- I > 0, J > 0,
-                             Ir is I - 1, Jr is J - 1,
-                             range(T, [Ir, Jr], R), !.
+range(L, I, R) :- is_list(L), integer(I), length(L, N), range_aux(L, [I, N], R).
+range(L, [I, J], R) :- is_list(L), integer(I), integer(J),
+                       N is J - I + 1, range_aux(L, [I, N], R).
 
 /**
- * range_n(+L, +[I, N], ?R).
+ * range_n(+L, +[I, N], -R).
+ * range_n(+L, +I, -R).
+ *   Extracts the sublist starting at index I (inclusive) with N
+ *   elements, or until the end of the list.
+ *   The second version extracts until the end of the list.
+ */
+range_n(L, I, R) :- is_list(L), integer(I), length(L, N), range_aux(L, [I, N], R).
+range_n(L, [I, N], R) :- is_list(L), integer(I), integer(N),
+                         range_aux(L, [I, N], R).
+
+/**
+ * range_aux(+L, +[I, N], -R).
  *   Extracts the sublist starting at index I (inclusive) with length
  *   N or until the end of the list, from L into R.
  */
-range_n(L, [I, N], R) :- J is I + N, range(L, [I, J], R).
+range_aux([], [_, _], []).
+range_aux(_, [_, 0], []).
+range_aux([H | T], [1, N], [H | R]) :- N > 0, Nr is N - 1,
+                                       range_aux(T, [1, Nr], R), !.
+range_aux([_ | T], [I, N], R) :- I > 1, Ir is I - 1,
+                                 range_aux(T, [Ir, N], R), !.
 
 /**
  * consecutive(+L, +E, +N).
