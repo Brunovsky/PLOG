@@ -2,12 +2,7 @@
  * apply(:F, +L).
  *   Call goal (function) F with arguments L.
  */
-apply(F, []) :- call(F).
-apply(F, [A]) :- call(F, A).
-apply(F, [A, B]) :- call(F, A, B).
-apply(F, [A, B, C]) :- call(F, A, B, C).
-apply(F, [A, B, C, D]) :- call(F, A, B, C, D).
-apply(F, [A, B, C, D, E]) :- call(F, A, B, C, D, E).
+apply(F, L) :- T =.. [F | L], call(T).
 
 /**
  * forloop_increasing(:F, +I, +E).

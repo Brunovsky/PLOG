@@ -364,7 +364,7 @@ l_count([H | T], F, Args, N) :- \+ apply(F, [H | Args]), count(T, F, Args, N).
  *   List L contains X.
  *   Matches only once.
  */
-contains(L, X) :- member(X, L), !.
+contains(L, X) :- memberchk(X, L).
 
 /**
  * contains_all(+L, +S).

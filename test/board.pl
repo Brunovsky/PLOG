@@ -36,7 +36,7 @@ test_check_dead_stones :-
     \+ check_dead_stones_right(_, [c,b,w,w,'B',w,w,w,b,b,'W',b,b,'W',b,b,c]).
 
 % remove_dead_stones_*(P, Board, [Row, Col], NewBoard, Captures).
-test_remove_dead_stones :-
+test_place_stone :-
     M1 = [
         [w,c,c,c,c,c,w],
         [c,b,c,w,c,b,c],
@@ -91,7 +91,7 @@ test_board :- test_all([
     test_make_board,
     test_five_board,
     test_check_dead_stones,
-    test_remove_dead_stones
+    test_place_stone
 ]).
 
 :- test_board.
