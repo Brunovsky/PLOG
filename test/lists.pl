@@ -270,6 +270,7 @@ test_suchthat :-
     l_indices_suchthat([0,b,_,0,a,_,a,7,q,_,s,y], char_uppercase, ['A'], 6),
     l_indices_suchthat([0,b,_,0,a,_,a,7,q,_,s,y], char_uppercase, ['A'], 9).
 
+
 test_lists :- test_all([
     test_list_get,
     test_list_set,

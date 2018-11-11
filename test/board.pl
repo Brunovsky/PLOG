@@ -87,6 +87,7 @@ test_place_stone :-
     place_stone(b, M2, [4,6], M2Result, 6),
     \+ place_stone(w, M1, [3,3], M1Result, 8).
 
+
 test_board :- test_all([
     test_make_board,
     test_five_board,

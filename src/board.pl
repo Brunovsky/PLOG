@@ -217,5 +217,5 @@ empty_positions(Board, ListRowCols) :- findall(X, empty_position(Board, X), List
 valid_moves(Board, _, ListOfMoves) :- empty_positions(Board, ListOfMoves).
 
 /**
- * move(+Move, +game(Board, White, Black, next), ?game(Board, White, Black, next)).
+ * move(+[Row, Col], +game(Board, White, Black, P), ?game(Board, White, Black, P)).
  */
