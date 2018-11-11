@@ -1,4 +1,15 @@
 /**
+ * Lists Mini Library
+ *
+ * List indexing is 1-based (1-indexing). So the head has index 1.
+ *
+ * Some predicates here are tested in test/lists.pl
+ *
+ * Builtin library library(lists) is not used and not compatible with
+ * this library, so do not include it.
+ */
+
+/**
  * is_list(+L).
  *   true if L is a list, including [].
  */
@@ -7,49 +18,58 @@ is_list([_ | _]).
 
 /**
  * list_get(+L, +N, -C).
- *   C is the element at position N in list L (0-indexed).
+ *   C is the element at position N in list L (1-indexing).
+ *   N must be an integer.
  */
-list_get([H | _], 0, H) :- !.
-list_get([_ | T], N, C) :- N > 0, M is N - 1, list_get(T, M, C), !.
+list_get(L, N, C) :- is_list(L), integer(N), list_get_aux(L, N, C).
+list_get_aux([H | _], 1, H) :- !.
+list_get_aux([_ | T], N, C) :- N > 1, M is N - 1, list_get_aux(T, M, C), !.
 
 /**
  * list_set(+L, +N, +E, -R).
  *   Sets E at position N of list L, with result R.
+ *   N must be an integer.
  */
-list_set([_ | T], 0, E, [E | T]).
-list_set([H | T], N, E, [H | R]) :- M is N - 1, list_set(T, M, E, R).
+list_set(L, N, E, R) :- is_list(L), integer(N), list_set_aux(L, N, E, R).
+list_set_aux([_ | T], 1, E, [E | T]) :- !.
+list_set_aux([H | T], N, E, [H | R]) :- M is N - 1, list_set_aux(T, M, E, R), !.
 
 /**
  * prefix(?P, +L).
- *   Asserts P is a prefix of L. Provides prefixes of L.
+ *   Asserts P is a prefix of L.
+ *   Provides prefixes of L (nondeterminate).
  */
 prefix([], L) :- is_list(L).
 prefix([H | Px], [H | Lx]) :- prefix(Px, Lx).
 
 /**
  * proper_prefix(?P, +L).
- *   Asserts P is a proper prefix of L. Provides proper prefixes of L.
+ *   Asserts P is a proper prefix of L.
+ *   Provides proper prefixes of L (nondeterminate).
  */
 proper_prefix([], [_ | _]).
 proper_prefix([H | Px], [H | Lx]) :- proper_prefix(Px, Lx).
 
 /**
  * suffix(?S, +L).
- *   Asserts S is a suffix of L. Provides suffixes of L.
+ *   Asserts S is a suffix of L.
+ *   Provides suffixes of L (nondeterminate).
  */
 suffix(S, S) :- is_list(S).
 suffix(S, [_ | Lx]) :- suffix(S, Lx).
 
 /**
  * proper_suffix(?S, +L).
- *   Asserts S is a proper suffix of L. Provides proper suffixes of L.
+ *   Asserts S is a proper suffix of L.
+ *   Provides proper suffixes of L (nondeterminate).
  */
 proper_suffix(S, [_ | S]).
 proper_suffix(S, [_ | Lx]) :- proper_suffix(S, Lx).
 
 /**
  * sublist(?J, +L).
- *   Asserts J is a sublist of L. Provides sublists of L.
+ *   Asserts J is a sublist of L.
+ *   Provides sublists of L (nondeterminate).
  */
 sublist(J, L) :- var(J), !, prefix(P, L), suffix(J, P).
 sublist(J, L) :- length(J, N), sublist_n(J, L, N).
@@ -57,6 +77,7 @@ sublist(J, L) :- length(J, N), sublist_n(J, L, N).
 /**
  * sublist(?J, +L, +N).
  *   Asserts J is a sublist of L with length N.
+ *   Provides sublists of L with length N (nondeterminate).
  */
 sublist_n(J, L, N) :- prefix(J, L), length(J, N).
 sublist_n(J, [_ | L], N) :- sublist_n(J, L, N).
@@ -64,69 +85,72 @@ sublist_n(J, [_ | L], N) :- sublist_n(J, L, N).
 /**
  * join(?A, ?B, ?R).
  *   Concatenating A and B results in R.
+ *   Alias for append/3.
  */
 join(A, B, R) :- append(A, B, R).
 
 /**
- * push_front(+L, +X, -R).
+ * push_front(?L, ?X, ?R).
  *   Pushing X into the front of L results in R.
  */
 push_front([], X, [X]).
 push_front([H | T], X, [X | [H | T]]).
 
 /**
- * push_back(+L, +X, -R).
+ * push_back(?L, ?X, ?R).
  *   Pushing X into the back of L results in R.
  */
 push_back([], X, [X]).
 push_back([H | T], X, [H | R]) :- push_back(T, X, R).
 
 /**
- * pop_front(+L, -R).
+ * pop_front(?L, ?R).
  *   Popping the front element of L results in R (i.e. R is the tail of L).
  */
 pop_front([_ | T], T).
 
 /**
- * pop_back(+L, -R).
+ * pop_back(?L, ?R).
  *   Popping the back element of L results in R.
  */
 pop_back([_], []).
 pop_back([H | T], [H | R]) :- pop_back(T, R).
 
 /**
- * back(+L, -X).
+ * back(?L, ?X).
  *   X is the back (last element) of L.
  */
 back([X], X).
 back([_ | T], B) :- back(T, B).
 
 /**
- * head(+L, -X).
- * front(+L, -X).
+ * head(?L, ?X).
+ * front(?L, ?X).
  *   X is the head of L.
  */
 front([H | _], H).
 head([H | _], H).
 
 /**
- * tail(+L, -T).
- * shift(+L, -T).
+ * tail(?L, ?T).
+ * shift(?L, ?T).
  *   T is the tail of L.
  */
 tail([_ | T], T).
 shift([_ | T], T).
 
 /**
- * fill_n(+N, +E, -L).
- *   Fills list L with a total of N elements E.
+ * fill_n(+N, ?E, ?L).
+ *   L is a list with N elements E.
+ *   N must be an integer.
  */
 fill_n(0, _, []).
 fill_n(N, E, [E | T]) :- M is N - 1, fill_n(M, E, T).
 
 /**
  * iota(+I, +J, -L).
- *   Fills list L with numbers I, I+1, I+2, ..., J.
+ *   Creates a list L with numbers I, I+1, I+2, ..., J.
+ *   I and J must be integers.
  */
 iota(I, I, [I]).
 iota(I, J, [I | T]) :- I < J, K is I + 1, iota(K, J, T).
@@ -135,24 +159,35 @@ iota(I, J, [I | T]) :- I < J, K is I + 1, iota(K, J, T).
  * range(+L, +[I, J], -R).
  * range(+L, +I, -R).
  *   Extracts the sublist starting at index I (inclusive) and ending
- *   at index J (exclusive) from L into R.
+ *   at index J (inclusive) from L into R.
+ *   The second version extracts until the end of the list.
  */
-range([], _, []).
-range(L, I, R) :- integer(I), length(L, J), range(L, [I, J], R).
-range(_, [0, 0], []).
-range([H | T], [0, J], [H | R]) :- J > 0,
-                                   Jr is J - 1,
-                                   range(T, [0, Jr], R), !.
-range([_ | T], [I, J], R) :- I > 0, J > 0,
-                             Ir is I - 1, Jr is J - 1,
-                             range(T, [Ir, Jr], R), !.
+range(L, I, R) :- is_list(L), integer(I), length(L, N), range_aux(L, [I, N], R).
+range(L, [I, J], R) :- is_list(L), integer(I), integer(J),
+                       N is J - I + 1, range_aux(L, [I, N], R).
 
 /**
- * range_n(+L, +[I, N], ?R).
+ * range_n(+L, +[I, N], -R).
+ * range_n(+L, +I, -R).
+ *   Extracts the sublist starting at index I (inclusive) with N
+ *   elements, or until the end of the list.
+ *   The second version extracts until the end of the list.
+ */
+range_n(L, I, R) :- is_list(L), integer(I), length(L, N), range_aux(L, [I, N], R).
+range_n(L, [I, N], R) :- is_list(L), integer(I), integer(N),
+                         range_aux(L, [I, N], R).
+
+/**
+ * range_aux(+L, +[I, N], -R).
  *   Extracts the sublist starting at index I (inclusive) with length
  *   N or until the end of the list, from L into R.
  */
-range_n(L, [I, N], R) :- J is I + N, range(L, [I, J], R).
+range_aux([], [_, _], []).
+range_aux(_, [_, 0], []).
+range_aux([H | T], [1, N], [H | R]) :- N > 0, Nr is N - 1,
+                                       range_aux(T, [1, Nr], R), !.
+range_aux([_ | T], [I, N], R) :- I > 1, Ir is I - 1,
+                                 range_aux(T, [Ir, N], R), !.
 
 /**
  * consecutive(+L, +E, +N).
@@ -174,6 +209,15 @@ reverse([H | T], R) :- reverse(T, Z), push_back(Z, H, R).
  */
 map([], _, []).
 map([H | T], F, [Hr | Tr]) :- call(F, H, Hr), !, map(T, F, Tr).
+
+/**
+ * a_map(+L, :F, +A, ?R).
+ *   Calling F once for each element E of L as F(E, A, Er), so that
+ *   R is the list consisting of the resulting Er.
+ */
+a_map([], _, _, []).
+a_map([H | T], F, A, [Hr | Tr]) :- call(F, H, A, Hr), !,
+                                   a_map(T, F, A, Tr).
 
 /**
  * l_map(+L, :F, +Args, ?R).
@@ -478,7 +522,7 @@ list_max([H1, _ | T], Max) :- !, list_max([H1 | T], Max).
  *   Finds the index I of the first occurrence of an item E in the list L.
  *   Fails if no such item exists.
  */
-index([E | _], E, 0) :- !.
+index([E | _], E, 1) :- !.
 index([_ | T], E, I) :- index(T, E, J), I is J + 1, !.
 
 /**
@@ -486,9 +530,9 @@ index([_ | T], E, I) :- index(T, E, J), I is J + 1, !.
  *   Finds the index I of the last occurrence of an item E in the list L.
  *   Fails if no such item exists.
  */
-last_index([E], E, 0) :- !.
+last_index([E], E, 1) :- !.
 last_index([E | L], E, I) :- last_index(L, E, J), I is J + 1, !.
-last_index([E | _], E, 0) :- !.
+last_index([E | _], E, 1) :- !.
 last_index([_ | L], E, I) :- last_index(L, E, J), I is J + 1, !.
 
 /**
@@ -496,14 +540,14 @@ last_index([_ | L], E, I) :- last_index(L, E, J), I is J + 1, !.
  *   Finds the indices I of the occurrences of an item E in the list L.
  *   Provides indices of such occurrences.
  */
-indices([E | _], E, 0).
+indices([E | _], E, 1).
 indices([_ | T], E, I) :- indices(T, E, J), I is J + 1.
 
 /**
  * index_suchthat(+L, :F, ?I).
  *   Finds the first index I such that F(H) holds for that index.
  */
-index_suchthat([H | _], F, 0) :- call(F, H), !.
+index_suchthat([H | _], F, 1) :- call(F, H), !.
 index_suchthat([H | T], F, I) :- \+ call(F, H),
                                  index_suchthat(T, F, J), I is J + 1, !.
 
@@ -511,7 +555,7 @@ index_suchthat([H | T], F, I) :- \+ call(F, H),
  * a_index_suchthat(+L, :F, +A, ?I).
  *   Finds the first index I such that F(H, A) holds for that index.
  */
-a_index_suchthat([H | _], F, A, 0) :- call(F, H, A), !.
+a_index_suchthat([H | _], F, A, 1) :- call(F, H, A), !.
 a_index_suchthat([H | T], F, A, I) :- \+ call(F, H, A),
                                       a_index_suchthat(T, F, A, J),
                                       I is J + 1, !.
@@ -520,7 +564,7 @@ a_index_suchthat([H | T], F, A, I) :- \+ call(F, H, A),
  * l_index_suchthat(+L, :F, +Args, ?I).
  *   Finds the first index I such that F(H, Args...) holds for that index.
  */
-l_index_suchthat([H | _], F, Args, 0) :- apply(F, [H | Args]), !.
+l_index_suchthat([H | _], F, Args, 1) :- apply(F, [H | Args]), !.
 l_index_suchthat([H | T], F, Args, I) :- \+ apply(F, [H | Args]),
                                     l_index_suchthat(T, F, Args, J),
                                     I is J + 1, !.
@@ -529,11 +573,11 @@ l_index_suchthat([H | T], F, Args, I) :- \+ apply(F, [H | Args]),
  * last_index_suchthat(+L, :F, ?I).
  *   Finds the last index I such that F(H) holds for that index.
  */
-last_index_suchthat([H], F, 0) :- call(F, H), !.
+last_index_suchthat([H], F, 1) :- call(F, H), !.
 last_index_suchthat([H | L], F, I) :- call(F, H),
                                       last_index_suchthat(L, F, J),
                                       I is J + 1, !.
-last_index_suchthat([H | _], F, 0) :- call(F, H), !.
+last_index_suchthat([H | _], F, 1) :- call(F, H), !.
 last_index_suchthat([_ | L], F, I) :- last_index_suchthat(L, F, J),
                                       I is J + 1, !.
 
@@ -541,11 +585,11 @@ last_index_suchthat([_ | L], F, I) :- last_index_suchthat(L, F, J),
  * last_index_suchthat(+L, :F, A, ?I).
  *   Finds the last index I such that F(H, A) holds for that index.
  */
-a_last_index_suchthat([H], F, A, 0) :- call(F, H, A), !.
+a_last_index_suchthat([H], F, A, 1) :- call(F, H, A), !.
 a_last_index_suchthat([H | L], F, A, I) :- call(F, H, A),
                                         a_last_index_suchthat(L, F, A, J),
                                         I is J + 1, !.
-a_last_index_suchthat([H | _], F, A, 0) :- call(F, H, A), !.
+a_last_index_suchthat([H | _], F, A, 1) :- call(F, H, A), !.
 a_last_index_suchthat([_ | L], F, A, I) :- a_last_index_suchthat(L, F, A, J),
                                         I is J + 1, !.
 
@@ -553,11 +597,11 @@ a_last_index_suchthat([_ | L], F, A, I) :- a_last_index_suchthat(L, F, A, J),
  * last_index_suchthat(+L, :F, Args, ?I).
  *   Finds the last index I such that F(H, Args...) holds for that index.
  */
-l_last_index_suchthat([H], F, Args, 0) :- apply(F, [H | Args]), !.
+l_last_index_suchthat([H], F, Args, 1) :- apply(F, [H | Args]), !.
 l_last_index_suchthat([H | L], F, Args, I) :- apply(F, [H | Args]),
                                               l_last_index_suchthat(L, F, Args, J),
                                               I is J + 1, !.
-l_last_index_suchthat([H | _], F, Args, 0) :- apply(F, [H | Args]), !.
+l_last_index_suchthat([H | _], F, Args, 1) :- apply(F, [H | Args]), !.
 l_last_index_suchthat([_ | L], F, Args, I) :- l_last_index_suchthat(L, F, Args, J),
                                               I is J + 1, !.
 
@@ -565,14 +609,14 @@ l_last_index_suchthat([_ | L], F, Args, I) :- l_last_index_suchthat(L, F, Args, 
  * indices_suchthat(+L, :F, ?I).
  *   Finds the first index I such that F(H) holds for that index.
  */
-indices_suchthat([H | _], F, 0) :- call(F, H).
+indices_suchthat([H | _], F, 1) :- call(F, H).
 indices_suchthat([_ | T], F, I) :- indices_suchthat(T, F, J), I is J + 1.
 
 /**
  * a_indices_suchthat(+L, :F, +A, ?I).
  *   Finds the first index I such that F(H, A) holds for that index.
  */
-a_indices_suchthat([H | _], F, A, 0) :- call(F, H, A).
+a_indices_suchthat([H | _], F, A, 1) :- call(F, H, A).
 a_indices_suchthat([_ | T], F, A, I) :- a_indices_suchthat(T, F, A, J),
                                         I is J + 1.
 
@@ -580,7 +624,6 @@ a_indices_suchthat([_ | T], F, A, I) :- a_indices_suchthat(T, F, A, J),
  * l_indices_suchthat(+L, :F, +Args, ?I).
  *   Finds the first index I such that F(H, Args...) holds for that index.
  */
-l_indices_suchthat([H | _], F, Args, 0) :- apply(F, [H | Args]).
+l_indices_suchthat([H | _], F, Args, 1) :- apply(F, [H | Args]).
 l_indices_suchthat([_ | T], F, Args, I) :- l_indices_suchthat(T, F, Args, J),
                                            I is J + 1.
-l_indices_suchthat([H | _], F, Args, 0) :- apply(F, [H | Args]).
