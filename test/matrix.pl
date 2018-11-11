@@ -37,13 +37,6 @@ test_matrix_main_diag :-
     matrix_main_diag([[8,9]],[8]),
     matrix_main_diag([], []).
 
-/**
- * [  1   2   3 ]         [ 1  2 ]         [  1   2   3   4   5 ]
- * [  4   5   6 ]         [ 3  4 ]         [  6   7   8   9  10 ]
- * [  7   8   9 ]         [ 5  6 ]         [ 11  12  13  14  15 ]
- * [ 10  11  12 ]         [ 7  8 ]
- *                        [ 9 10 ]
- */
 % matrix_left_diag(M, I, D).
 test_matrix_left_diag :-
     matrix_left_diag([[1,2,3],[4,5,6],[7,8,9],[10,11,12]], 0, [1,5,9]),
@@ -137,6 +130,34 @@ test_consecutive_any_diag :-
     consecutive_any_diag([[a,b,b,a],[a,c,b,a],[c,d,c,b],[b,c,a,b]], b, 3),
     \+ consecutive_any_diag([[a,b,b,a],[a,c,b,a],[c,a,a,b],[b,c,c,b]], a, 3).
 
+% sublist_any_row(M, S).
+test_sublist_any_row :-
+    sublist_any_row([[a,a,b,a,a],[b,b,a,b,c],[d,a,b,c,a]], [a,b,c]),
+    sublist_any_row([[a,c,r,q],[l,w,y,a],[w,y,y,l]], [l,w]),
+    \+ sublist_any_row([[a,b,c,d],[a,d,c,b],[d,c,b,a]], [d,a]).
+
+% sublist_any_col
+test_sublist_any_col :-
+    sublist_any_col([[a,a,b,a,a],[b,b,a,b,c],[d,a,b,c,a]], [b,d]),
+    sublist_any_col([[a,c,r,q],[l,w,y,a],[w,y,y,l]], [r,y,y]),
+    \+ sublist_any_col([[a,b,c,d],[a,d,c,b],[d,c,b,a]], [d,c,b]).
+
+% sublist_any_diag
+test_sublist_any_diag :-
+    sublist_any_diag([[a,a,b,d,a],[b,b,a,b,c],[d,a,b,c,a]], [d,a,a]),
+    sublist_any_diag([[a,c,r,q],[l,w,y,a],[w,y,y,l]], [c,y]),
+    \+ sublist_any_diag([[a,b,c,d],[a,d,c,b],[d,c,b,a]], [a,b]).
+
+% matrix_min(M, Min).
+test_matrix_min :-
+    matrix_min([[4,5,9,3,8,1],[6,0,3,7,8,9]], 0),
+    matrix_min([[6,2,7,4,2,7,8],[4,3,6,7,3,9,8]], 2).
+
+% matrix_max(M, Max).
+test_matrix_max :-
+    matrix_max([[4,5,9,3,8,1],[6,0,3,7,8,9]], 9),
+    matrix_max([[6,2,7,4,2,7,8],[4,3,6,7,3,9,8]], 9).
+
 test_matrix :- test_all([
     test_matrix_size,
     test_matrix_get,
@@ -153,7 +174,12 @@ test_matrix :- test_all([
     test_matrix_right_diagonals,
     test_consecutive_any_row,
     test_consecutive_any_col,
-    test_consecutive_any_diag
+    test_consecutive_any_diag,
+    test_sublist_any_row,
+    test_sublist_any_col,
+    test_sublist_any_diag,
+    test_matrix_min,
+    test_matrix_max
 ]).
 
 :- test_matrix.

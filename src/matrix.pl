@@ -205,3 +205,44 @@ consecutive_matrix(M, E, N) :- consecutive_any_row(M, E, N);
                                consecutive_any_col(M, E, N);
                                consecutive_any_diag(M, E, N).
 
+/**
+ * sublist_any_row(+M, +S).
+ *   Asserts the matrix has S somewhere along any row.
+ */
+sublist_any_row(M, S) :- is_list(S), any_of(M, sublist(S)).
+
+/**
+ * sublist_any_col(+M, +S).
+ *   Asserts the matrix has S somewhere along any column.
+ */
+sublist_any_col(M, S) :- is_list(S),
+                         matrix_transpose(M, T), !,
+                         any_of(T, sublist(S)).
+
+/**
+ * sublist_any_diag(+M, +E, +N).
+ *   Asserts the matrix has N consecutive elements E along any diagonal.
+ */
+sublist_any_diag(M, S) :- is_list(S),
+                          matrix_diagonals(M, Ds), !,
+                          any_of(Ds, sublist(S)).
+
+/**
+ * sublist_matrix(+M, +E, +N).
+ *   Asserts the matrix has N consecutive elements E along any row, column or diagonal.
+ */
+sublist_matrix(M, S) :- sublist_any_row(M, S);
+                        sublist_any_col(M, S);
+                        sublist_any_diag(M, S).
+
+/**
+ * matrix_min(+M, ?Min).
+ *   Using < to compare elements of M, bind Min to the minimum element.
+ */
+matrix_min(M, Min) :- map(M, list_min, RowMins), list_min(RowMins, Min).
+
+/**
+ * matrix_max(+M, ?Max).
+ *   Using < to compare elements of M, bind Max to the maximum element.
+ */
+matrix_max(M, Max) :- map(M, list_max, RowMaxs), list_max(RowMaxs, Max).

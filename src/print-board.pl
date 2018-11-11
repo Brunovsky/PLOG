@@ -35,7 +35,7 @@
  */
 
 /**
- * write_board_unit(+P, +Size, +Row, +Col).
+ * write_board_unit(+P, +[RowSize, ColSize], +Row, +Col).
  *   Writes to the console the piece whose internal representation is P,
  *   on location (Row, Col), assuming the board is SizexSize.
  */
@@ -47,11 +47,11 @@ write_board_unit(w, _, _, _) :-
 write_board_unit(b, _, _, _) :-
     write('\x25cb\ ').
 
-% Ⓦ White piece, anywhere Ⓦ
+% Ⓦ White piece, anywhere Ⓦ.
 write_board_unit('W', _, _, _) :-
     write('\x24cc\ ').
 
-% Ⓑ Black piece, anywhere Ⓑ
+% Ⓑ Black piece, anywhere Ⓑ.
 write_board_unit('B', _, _, _) :-
     write('\x24b7\ ').
 
@@ -99,6 +99,8 @@ write_board_unit(_, [RowSize, ColSize], Row, Col) :-
 /**
  * write_board_left(+P, +Row, +RowSize).
  *   Print the row's number on the left of the board.
+ *
+ * You may choose alph or cnum for a different representation.
  */
 % 19 18 ...
 write_board_left_alph(w, Row, _) :- Row < 10, format(' ~d ', Row).
@@ -116,6 +118,8 @@ write_board_left(P, Row, Size) :- write_board_left_alph(P, Row, Size).
  *   Write the char at index I.
  *   We choose to skip letter 'I'.
  *   Some board authors prefer to skip 'J', others prefer using numbers.
+ *
+ * You may choose alph, ccap or cmin for a different representation.
  */
 % A  B ...
 write_board_top_char_alph(I) :- I < 9, C is I + 64, write(' '), put_code(C).

@@ -16,11 +16,30 @@ test_list_set :-
 
 % index(L, E, I).
 test_index :-
-    index([a,b,a,a,c,b,b,c], c, 4),
-    index([a,b,a,a,b,b,a,c], c, 7),
+    index([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 4),
+    index([a,b,a,a,b,b,a,c,b,a,a,b,c,a,b], c, 7),
     index([a,b,c,d], b, 1),
     \+ index([a,b,a,a,b,b], c, _),
     \+ index([], _, _).
+
+% last_index(L, E, I).
+test_last_index :-
+    last_index([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 13),
+    last_index([a,b,a,a,b,b,a,c,b,c,a,b,c,a,b], c, 12),
+    last_index([a,b,c,d], b, 1),
+    \+ last_index([a,b,a,a,b,b], c, _),
+    \+ last_index([], _, _).
+
+% indices(L, E, I).
+test_indices :-
+    indices([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 4),
+    indices([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 7),
+    indices([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 11),
+    indices([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 13),
+    indices([a,b,a,a,b,b,a,c,b,c,a,b,c,a,b], c, 9),
+    indices([a,b,c,d], b, 1),
+    \+ indices([a,b,a,a,b,b], c, _),
+    \+ indices([], _, _).
 
 % prefix(J, L).
 test_prefix :-
@@ -202,10 +221,22 @@ test_clear_empty_list :-
     clear_empty_list([[],[],[],[]], []),
     clear_empty_list([a,b,c],[a,b,c]).
 
+% list_min(M, Min).
+test_list_min :-
+    list_min([4,7,5,3,7,2,4,7,8], 2),
+    list_min([6,4,8,5,7,4,1,0], 0).
+
+% list_max(M, Max).
+test_list_max :-
+    list_max([4,7,5,3,7,2,4,7,8], 8),
+    list_max([6,4,3,5,7,4,1,0], 7).
+
 test_lists :- test_all([
     test_list_get,
     test_list_set,
     test_index,
+    test_last_index,
+    test_indices,
     test_prefix,
     test_proper_prefix,
     test_suffix,
@@ -222,12 +253,15 @@ test_lists :- test_all([
     test_range,
     test_range_n,
     test_consecutive,
+    test_reverse,
     test_map,
     test_l_map,
     test_flatten,
     test_mixed_flatten,
     test_deep_flatten,
-    test_clear_empty_list
+    test_clear_empty_list,
+    test_list_min,
+    test_list_max
 ]).
 
 :- test_lists.

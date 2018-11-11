@@ -20,12 +20,30 @@ list_set([_ | T], 0, E, [E | T]).
 list_set([H | T], N, E, [H | R]) :- M is N - 1, list_set(T, M, E, R).
 
 /**
- * index(+L, +E, -I).
- *   Finds the index I of the first occurence of an item E in the list L.
+ * index(+L, +E, ?I).
+ *   Finds the index I of the first occurrence of an item E in the list L.
  *   Fails if no such index exists.
  */
-index([E | _], E, 0).
+index([E | _], E, 0) :- !.
 index([_ | T], E, I) :- index(T, E, J), !, I is J + 1.
+
+/**
+ * last_index(+L, +E, ?I).
+ *   Finds the index I of the last occurrence of an item E in the list L.
+ *   Fails if no such index exists.
+ */
+last_index([E], E, 0) :- !.
+last_index([E | L], E, I) :- last_index(L, E, J), !, I is J + 1.
+last_index([E | L], E, 0) :- !.
+last_index([_ | L], E, I) :- last_index(L, E, J), !, I is J + 1.
+
+/**
+ * indices(+L, +E, ?I).
+ *   Finds the indices I of the occurrences of an item E in the list L.
+ *   Provides indices of such occurrences.
+ */
+indices([E | _], E, 0).
+indices([_ | T], E, I) :- indices(T, E, J), I is J + 1.
 
 /**
  * prefix(?P, +L).
@@ -459,3 +477,19 @@ lb_foreach_decreasing([H | T], F, Args, N) :- push_back(Args, N, B),
                                               apply(F, [H | B]),
                                               M is N - 1,
                                               lb_foreach_decreasing(T, F, Args, M).
+
+/**
+ * list_min(+L, ?M).
+ *   Using < to compare members of a list, bind M to the minimum element.
+ */
+list_min([X], X) :- !.
+list_min([H1, H2 | T], Min) :- H1 < H2, !, list_min([H1 | T], Min).
+list_min([H1, H2 | T], Min) :- !, list_min([H2 | T], Min).
+
+/**
+ * list_max(+L, ?Max).
+ *   Using < to compare members of a list, bind Max to the maximum element.
+ */
+list_max([X], X) :- !.
+list_max([H1, H2 | T], Max) :- H1 < H2, !, list_max([H2 | T], Max).
+list_max([H1, H2 | T], Max) :- !, list_max([H1 | T], Max).

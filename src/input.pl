@@ -7,7 +7,8 @@
  *        A14.
  *        Z9.
  */
-read_position(Row, Col) :- untilloop(is_alpha, get_char, Col),
+read_position(Row, Col) :- var(Row), var(Col),
+                           untilloop(is_alpha, get_char, Col),
                            peek_char(I),
                            is_numeric(I),
                            read(Row),
