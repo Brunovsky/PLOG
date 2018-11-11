@@ -246,3 +246,30 @@ matrix_min(M, Min) :- map(M, list_min, RowMins), list_min(RowMins, Min).
  *   Using < to compare elements of M, bind Max to the maximum element.
  */
 matrix_max(M, Max) :- map(M, list_max, RowMaxs), list_max(RowMaxs, Max).
+
+/**
+ * matrix_index(+M, +E, ?[Row, Col]).
+ *   Finds position of the first occurrence of an item E in the matrix M.
+ *   Fails if no such item exists.
+ */
+matrix_index(M, E, [Row, Col]) :- a_index_suchthat(M, contains, E, Row),
+                                  matrix_row(M, Row, ListRow), !,
+                                  index(ListRow, E, Col).
+
+/**
+ * matrix_last_index(+M, +E, ?[Row, Col]).
+ *   Finds position of the last occurrence of an item E in the matrix M.
+ *   Fails if no such item exists.
+ */
+matrix_last_index(M, E, [Row, Col]) :- a_last_index_suchthat(M, contains, E, Row),
+                                       matrix_row(M, Row, ListRow), !,
+                                       last_index(ListRow, E, Col).
+
+/**
+ * matrix_indices(+M, +E, ?[Row, Col]).
+ *   Finds the indices I of the occurrences of an item E in the list L.
+ *   Provides indices of such occurrences.
+ */
+matrix_indices(M, E, [Row, Col]) :- a_indices_suchthat(M, contains, E, Row),
+                                    matrix_row(M, Row, ListRow),
+                                    indices(ListRow, E, Col).

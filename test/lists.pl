@@ -14,33 +14,6 @@ test_list_set :-
     \+ list_set([], 0, _, _),
     \+ list_set([a,b], 2, _, _).
 
-% index(L, E, I).
-test_index :-
-    index([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 4),
-    index([a,b,a,a,b,b,a,c,b,a,a,b,c,a,b], c, 7),
-    index([a,b,c,d], b, 1),
-    \+ index([a,b,a,a,b,b], c, _),
-    \+ index([], _, _).
-
-% last_index(L, E, I).
-test_last_index :-
-    last_index([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 13),
-    last_index([a,b,a,a,b,b,a,c,b,c,a,b,c,a,b], c, 12),
-    last_index([a,b,c,d], b, 1),
-    \+ last_index([a,b,a,a,b,b], c, _),
-    \+ last_index([], _, _).
-
-% indices(L, E, I).
-test_indices :-
-    indices([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 4),
-    indices([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 7),
-    indices([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 11),
-    indices([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 13),
-    indices([a,b,a,a,b,b,a,c,b,c,a,b,c,a,b], c, 9),
-    indices([a,b,c,d], b, 1),
-    \+ indices([a,b,a,a,b,b], c, _),
-    \+ indices([], _, _).
-
 % prefix(J, L).
 test_prefix :-
     prefix([1,2,3], [1,2,3,4]),
@@ -231,12 +204,75 @@ test_list_max :-
     list_max([4,7,5,3,7,2,4,7,8], 8),
     list_max([6,4,3,5,7,4,1,0], 7).
 
+% index(L, E, I).
+test_index :-
+    index([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 4),
+    \+ index([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 7),
+    \+ index([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 11),
+    \+ index([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 13),
+    index([a,b,a,a,b,b,a,c,b,a,a,b,c,a], c, 7),
+    \+ index([a,b,a,a,b,b,a,c,b,a,a,b,c,a], c, 12),
+    index([a,b,c,d], b, 1),
+    \+ index([a,b,a,a,b,b], c, _),
+    \+ index([], _, _).
+
+% last_index(L, E, I).
+test_last_index :-
+    \+ last_index([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 4),
+    \+ last_index([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 7),
+    \+ last_index([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 11),
+    last_index([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 13),
+    \+ last_index([a,b,a,a,b,b,a,c,b,a,a,b,c,a], c, 7),
+    last_index([a,b,a,a,b,b,a,c,b,a,a,b,c,a], c, 12),
+    last_index([a,b,c,d], b, 1),
+    \+ last_index([a,b,a,a,b,b], c, _),
+    \+ last_index([], _, _).
+
+% indices(L, E, I).
+test_indices :-
+    indices([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 4),
+    indices([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 7),
+    indices([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 11),
+    indices([a,b,a,a,c,b,b,c,a,a,b,c,a,c,b], c, 13),
+    indices([a,b,a,a,b,b,a,c,b,a,a,b,c,a], c, 7),
+    indices([a,b,a,a,b,b,a,c,b,a,a,b,c,a], c, 12),
+    indices([a,b,c,d], b, 1),
+    \+ indices([a,b,a,a,b,b], c, _),
+    \+ indices([], _, _).
+
+% *_*_suchthat(L, F, *, I).
+test_suchthat :- 
+    index_suchthat([0,b,_,0,b,_,a,7,q,_,s,y], var, 2),
+    \+ index_suchthat([0,b,_,0,b,_,a,7,q,_,s,y], var, 5),
+    \+ index_suchthat([0,b,_,0,b,_,a,7,q,_,s,y], var, 9),
+    \+ last_index_suchthat([0,b,_,0,b,_,a,7,q,_,s,y], var, 2),
+    \+ last_index_suchthat([0,b,_,0,b,_,a,7,q,_,s,y], var, 5),
+    last_index_suchthat([0,b,_,0,b,_,a,7,q,_,s,y], var, 9),
+    indices_suchthat([0,b,_,0,b,_,a,7,q,_,s,y], var, 2),
+    indices_suchthat([0,b,_,0,b,_,a,7,q,_,s,y], var, 5),
+    indices_suchthat([0,b,_,0,b,_,a,7,q,_,s,y], var, 9),
+    a_index_suchthat([0,b,_,0,b,_,a,7,q,_,s,y], char_uppercase, 'B', 1),
+    \+ a_index_suchthat([0,b,_,0,b,_,a,7,q,_,s,y], char_uppercase, 'B', 4),
+    \+ a_index_suchthat([0,b,_,0,b,_,a,7,q,_,s,y], char_uppercase, 'B', 5),
+    \+ a_last_index_suchthat([0,b,_,0,b,_,a,7,q,_,s,y], char_uppercase, 'B', 1),
+    \+ a_last_index_suchthat([0,b,_,0,b,_,a,7,q,_,s,y], char_uppercase, 'B', 4),
+    a_last_index_suchthat([0,b,_,0,b,_,a,7,q,_,s,y], char_uppercase, 'B', 9),
+    a_indices_suchthat([0,b,_,0,b,_,a,7,q,_,s,y], char_uppercase, 'B', 1),
+    a_indices_suchthat([0,b,_,0,b,_,a,7,q,_,s,y], char_uppercase, 'B', 4),
+    a_indices_suchthat([0,b,_,0,b,_,a,7,q,_,s,y], char_uppercase, 'B', 9),
+    l_index_suchthat([0,b,_,0,a,_,a,7,q,_,s,y], char_uppercase, ['A'], 2),
+    \+ l_index_suchthat([0,b,_,0,a,_,a,7,q,_,s,y], char_uppercase, ['A'], 4),
+    \+ l_index_suchthat([0,b,_,0,a,_,a,7,q,_,s,y], char_uppercase, ['A'], 5),
+    \+ l_last_index_suchthat([0,b,_,0,a,_,a,7,q,_,s,y], char_uppercase, ['A'], 2),
+    \+ l_last_index_suchthat([0,b,_,0,a,_,a,7,q,_,s,y], char_uppercase, ['A'], 4),
+    l_last_index_suchthat([0,b,_,0,a,_,a,7,q,_,s,y], char_uppercase, ['A'], 9),
+    l_indices_suchthat([0,b,_,0,a,_,a,7,q,_,s,y], char_uppercase, ['A'], 4),
+    l_indices_suchthat([0,b,_,0,a,_,a,7,q,_,s,y], char_uppercase, ['A'], 6),
+    l_indices_suchthat([0,b,_,0,a,_,a,7,q,_,s,y], char_uppercase, ['A'], 9).
+
 test_lists :- test_all([
     test_list_get,
     test_list_set,
-    test_index,
-    test_last_index,
-    test_indices,
     test_prefix,
     test_proper_prefix,
     test_suffix,
@@ -261,7 +297,11 @@ test_lists :- test_all([
     test_deep_flatten,
     test_clear_empty_list,
     test_list_min,
-    test_list_max
+    test_list_max,
+    test_index,
+    test_last_index,
+    test_indices,
+    test_suchthat
 ]).
 
 :- test_lists.

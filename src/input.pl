@@ -13,4 +13,5 @@ read_position(Row, Col) :- var(Row), var(Col),
                            is_numeric(I),
                            read(Row),
                            integer(Row);
+                           var(Row), var(Col),
                            read_position(Row, Col).

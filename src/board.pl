@@ -197,5 +197,23 @@ place_stone(b, Board, [Row, Col], NewBoard, Captures) :-
     matrix_set(Removed, Row, Col, b, NewBoard).
 
 /**
+ * empty_position(+Board, ?[Row, Col]).
+ *   Asserts (Row,Col) is an empty position (c) on the Board.
+ *   Provides all such positions.
+ */
+empty_position(Board, [Row, Col]) :- matrix_indices(Board, c, [Row, Col]).
+
+/**
+ * empty_positions(+Board, ?ListRowCols).
+ *   Gets all empty positions on a list.
+ */
+empty_positions(Board, ListRowCols) :- findall(X, empty_position(Board, X), ListRowCols).
+
+/**
+ * valid_moves(+Board, +Player, ?ListOfMoves).
+ */
+valid_moves(Board, _, ListOfMoves) :- empty_positions(Board, ListOfMoves).
+
+/**
  * move(+Move, +game(Board, White, Black, next), ?game(Board, White, Black, next)).
  */
