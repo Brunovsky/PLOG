@@ -120,7 +120,7 @@ row_rep_index(Size, RepRow, IntRow) :- nonvar(IntRow), RepRow is Size + 1 - IntR
  */
 rep_internal(Size, [RepRow, RepCol], [IntRow, IntCol]) :-
     col_rep_index(RepCol, IntCol),
-    row_rep_index(RepRow, IntRow).
+    row_rep_index(Size, RepRow, IntRow).
 
 /**
  * rep_piece_at(+Board, +Row, +Col, ?E).
