@@ -219,11 +219,11 @@ valid_moves(Board, _, ListOfMoves) :- empty_positions(Board, ListOfMoves).
 /**
  * move(+[Row, Col], +game(Board, White, Black, P), ?game(Board, White, Black, P)).
  */
-move([Row, Col], game(Board, Wc, Bc, w), game(NewBoard, Wc1, Bc, b) :-
+move([Row, Col], game(Board, Wc, Bc, w), game(NewBoard, Wc1, Bc, b)) :-
 		place_stone(w, Board, [Row, Col], NewBoard, Captures),
 		add_captures(Wc, Captures, Wc1).
 
-move([Row, Col], game(Board, Wc, Bc, b), game(NewBoard, Wc, Bc1, w) :-
+move([Row, Col], game(Board, Wc, Bc, b), game(NewBoard, Wc, Bc1, w)) :-
 		place_stone(b, Board, [Row, Col], NewBoard, Captures),
 		add_captures(Bc, Captures, Bc1).
 
