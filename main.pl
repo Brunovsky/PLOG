@@ -4,7 +4,6 @@
 :- use_module(library(between)).
 % Basic operations on lists
 :- use_module(library(lists)).
-% 
 
 % Everything in src/
 :- reconsult('src/board.pl').

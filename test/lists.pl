@@ -190,7 +190,7 @@ test_indices :-
     \+ indices([], _, _).
 
 % *_*_suchthat(L, F, *, I).
-test_suchthat :- 
+test_suchthat :-
     index_suchthat([0,b,_,0,b,_,a,7,q,_,s,y], var, 3),
     \+ index_suchthat([0,b,_,0,b,_,a,7,q,_,s,y], var, 6),
     \+ index_suchthat([0,b,_,0,b,_,a,7,q,_,s,y], var, 10),
@@ -220,7 +220,7 @@ test_suchthat :-
     l_indices_suchthat([0,b,_,0,a,_,a,7,q,_,s,y], char_uppercase, ['A'], 10).
 
 
-test_lists :- test_all([
+:- write('==[TESTS]== lists'), nl, test_all([
     test_list_get,
     test_list_set,
     test_sublist,
@@ -247,5 +247,3 @@ test_lists :- test_all([
     test_indices,
     test_suchthat
 ]).
-
-:- test_lists.
