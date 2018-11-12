@@ -3,27 +3,37 @@
  *   The matrix M is made up of R rows and C columns.
  *   M is a list of lists, all of the same length,
  *   otherwise this predicate fails.
+ *
+ * In the rest of this file, M denotes a matrix, R a row, and C a column.
  */
-matrix_size(M, R, C) :- length(M, R), a_all_of(M, length, C).
+matrix_size([], 0, 0).
+matrix_size(M, R, C) :- proper_length(M, R), a_all_of(M, proper_length, C).
 
 /**
  * is_matrix(+M).
  *   Asserts M is a rectangular matrix.
  */
-is_matrix([]).
 is_matrix(M) :- matrix_size(M, _, _).
 
 /**
- * matrix_get(+M, +R, +C, -E).
- *   E is the element at position (R,C) in matrix M.
+ * matrix_nth0(?R, ?C, ?M, ?Elem).
+ *   Elem is the element at position (R,C) in matrix M.
+ *   Either M is proper or R and C are integers.
  */
-matrix_get(M, R, C, E) :- list_get(M, R, L), !, list_get(L, C, E).
+matrix_nth0(R, C, M, Elem) :- nth0(R, M, L), nth0(C, L, Elem).
+
+/**
+ * matrix_nth1(?R, ?C, ?M, ?Elem).
+ *   Elem is the element at position (R,C) in matrix M.
+ *   Either M is proper or R and C are integers.
+ */
+matrix_nth1(R, C, M, Elem) :- nth1(R, M, L), nth1(C, L, Elem).
 
 /**
  * matrix_set(+M, +R, +C, +E, -N).
  *   Sets E at position (R,C) on matrix M, with result N.
  */
-matrix_set(M, R, C, E, N) :- list_get(M, R, ListRow),
+matrix_set(M, R, C, E, N) :- nth1(R, M, ListRow),
                              list_set(ListRow, C, E, NewRow),
                              list_set(M, R, NewRow, N).
 
@@ -153,14 +163,10 @@ matrix_col_reverse(M, R) :- map(M, reverse, R).
 matrix_reverse(M, R) :- map(M, reverse, T), reverse(T, R).
 
 /**
- * matrix_transpose(+M, ?T).
+ * matrix_transpose(?M, ?T).
  *   T is the transpose matrix of M.
  */
-matrix_transpose([], []).
-matrix_transpose(M, T) :- matrix_col(M, 1, Col0),
-                          matrix_slice(M, 1, 2, N),
-                          matrix_transpose(N, NT),
-                          push_front(NT, Col0, T).
+matrix_transpose(M, T) :- transpose(M, T).
 
 /**
  * matrix_left_diagonals(+M, ?Ds).

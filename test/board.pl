@@ -87,7 +87,7 @@ test_place_stone :-
     place_stone(b, M2, [5,7], M2Result, 6),
     \+ place_stone(w, M1, [4,4], M1Result, 8).
 
-:- write('==[TESTS]== board'), nl, test_all([
+test_board :- write('==[TESTS]== board'), nl, test_all([
     test_make_board,
     test_five_board,
     test_check_dead_stones,

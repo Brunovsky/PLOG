@@ -7,550 +7,682 @@
  */
 
 /**
- * list_get(+L, +N, -C).
- *   C is the element at position N in list L (1-indexing).
- *   N must be an integer.
+ * nth0/[3,4], nth1/[3,4], select/4, selectchk/4
+ *
+ * Get Elem at index N from List: nth0/3, nth1/3
+ *   nth0(+N, +List, -Elem).
+ *   nth1(+N, +List, -Elem).
+ * 
+ * Get first index N only of Elem in List: nth0/3, nth1/3
+ *   nth0(-N, +List, +Elem), !.
+ *   nth1(-N, +List, +Elem), !.
+ * 
+ * Get last index N only of Elem in List: nth0/3, nth1/3, setof/3
+ *   setof(-X, nth0(-X, +List, +Elem), Bag), !, last(Bag, -N), !.
+ *   setof(-X, nth1(-X, +List, +Elem), Bag), !, last(Bag, -N), !.
+ *
+ * Get indices N of Elem in List: nth0/3, nth1/3
+ *   nth0(-N, +List, +Elem).
+ *   nth1(-N, +List, +Elem).
+ *   
+ * Replace element X in List with Elem, getting NewList: selectchk/4
+ *   selectchk(+X, +List, +Elem, -NewList).
+ *
+ * Set element Elem at index N in List, getting NewList: selectchknth0/5, selectchknth1/5
+ *   selectchknth0(_, +List, +Elem, -NewList, +N).
+ *   selectchknth1(_, +List, +Elem, -NewList, +N).
+ *
+ * Remove element X in List, getting NewList: selectchk/3
+ *   selectchk(+X, +List, -NewList).
+ *   delete(+List, +X, 1, -NewList).
+ *
+ * Remove element at index N in List, getting NewList: selectchknth0/4, selectchknth1/4
+ *   selectchknth0(_, +List, -NewList, N).
+ *   selectchknth1(_, +List, -NewList, N).
  */
-list_get(L, N, C) :- is_list(L), integer(N), list_get_aux(L, N, C).
-list_get_aux([H | _], 1, H) :- !.
-list_get_aux([_ | T], N, C) :- N > 1, M is N - 1, list_get_aux(T, M, C), !.
 
 /**
- * list_set(+L, +N, +E, -R).
- *   Sets E at position N of list L, with result R.
- *   N must be an integer.
+ * selectnth0/4, selectnth1/4.
+ * selectnth0(?Element, ?Set, ?Residue, ?N).
+ * selectnth1(?Element, ?Set, ?Residue, ?N).
+ *   Like select/3, but gets the index as well.
  */
-list_set(L, N, E, R) :- is_list(L), integer(N), list_set_aux(L, N, E, R).
-list_set_aux([_ | T], 1, E, [E | T]) :- !.
-list_set_aux([H | T], N, E, [H | R]) :- M is N - 1, list_set_aux(T, M, E, R), !.
+selectnth0(X, [X|R], R, 0).
+selectnth0(X, [A,X|R], [A|R], 1).
+selectnth0(X, [A,B,X|R], [A,B|R], 2).
+selectnth0(X, [A,B,C|L], [A,B,C|R], N) :- selectnth0(X, L, R, M), N is M + 3.
+
+selectnth1(X, [X|R], R, 1).
+selectnth1(X, [A,X|R], [A|R], 2).
+selectnth1(X, [A,B,X|R], [A,B|R], 3).
+selectnth1(X, [A,B,C|L], [A,B,C|R], N) :- selectnth1(X, L, R, M), N is M + 3.
 
 /**
- * sublist(?J, +L).
- *   Asserts J is a sublist of L.
- *   Provides sublists of L (nondeterminate).
+ * selectchknth0/4, selectchknth1/4.
+ * selectchknth0(?Element, ?Set, ?Residue, ?N).
+ * selectchknth1(?Element, ?Set, ?Residue, ?N).
+ *   Like selectchk/3, but gets the index as well.
  */
-sublist(J, L) :- var(J), !, prefix(L, P), suffix(P, J).
-sublist(J, L) :- length(J, N), sublist_n(J, L, N).
+selectchknth0(Element, Set, Residue, N) :- selectnth0(Element, Set, Residue, N), !.
+
+selectchknth1(Element, Set, Residue, N) :- selectnth1(Element, Set, Residue, N), !.
 
 /**
- * sublist(?J, +L, +N).
- *   Asserts J is a sublist of L with length N.
- *   Provides sublists of L with length N (nondeterminate).
+ * selectnth0/5, selectnth1/5.
+ * selectnth0(?X, ?Xlist, ?Y, ?Ylist, ?N).
+ * selectnth1(?X, ?Xlist, ?Y, ?Ylist, ?N).
+ *   Like select/4, but gets the index as well.
  */
-sublist_n(J, L, N) :- prefix(L, J), length(J, N).
-sublist_n(J, [_ | L], N) :- sublist_n(J, L, N).
+selectnth0(X, [X|T], Y, [Y|T], 0).
+selectnth0(X, [A,X|T], Y, [A,Y|T], 1).
+selectnth0(X, [A,B,X|T], Y, [A,B,Y|T], 2).
+selectnth0(X, [A,B,C|Xs], Y, [A,B,C|Ys], N) :- selectnth0(X, Xs, Y, Ys, M), N is M + 3.
+
+selectnth0(X, [X|T], Y, [Y|T], 1).
+selectnth0(X, [A,X|T], Y, [A,Y|T], 2).
+selectnth0(X, [A,B,X|T], Y, [A,B,Y|T], 3).
+selectnth1(X, [A,B,C|Xs], Y, [A,B,C|Ys], N) :- selectnth1(X, Xs, Y, Ys, M), N is M + 3.
 
 /**
- * join(?A, ?B, ?R).
- *   Concatenating A and B results in R.
- *   Alias for append/3.
+ * selectchknth0/5, selectchknth1/5.
+ * selectchknth0(?X, ?Xlist, ?Y, ?Ylist, ?N).
+ * selectchknth1(?X, ?Xlist, ?Y, ?Ylist, ?N).
+ *   Like selectchk/4, but gets the index as well.
  */
-join(A, B, R) :- append(A, B, R).
+selectchknth0(X, Xlist, Y, Ylist, N) :- selectnth0(X, Xlist, Y, Ylist, N), !.
+
+selectchknth1(X, Xlist, Y, Ylist, N) :- selectnth1(X, Xlist, Y, Ylist, N), !.
 
 /**
- * push_front(?L, ?X, ?R).
- *   Pushing X into the front of L results in R.
+ * segment/3, proper_segment/3
+ * segment(?List, ?Segment, ?N).
+ * proper_segment(?List, ?Segment, ?N).
+ *   Like segment/2 and proper_segment/2, but binding the segment length.
  */
-push_front([], X, [X]).
-push_front([H | T], X, [X | [H | T]]).
+segment(List, Segment, N) :- length(Segment, N), segment(List, Segment).
+
+proper_segment(List, Segment, N) :- length(Segment, N), proper_segment(List, Segment).
 
 /**
- * push_back(?L, ?X, ?R).
- *   Pushing X into the back of L results in R.
- */
-push_back([], X, [X]).
-push_back([H | T], X, [H | R]) :- push_back(T, X, R).
-
-/**
- * pop_front(?L, ?R).
- *   Popping the front element of L results in R (i.e. R is the tail of L).
- */
-pop_front([_ | T], T).
-
-/**
- * pop_back(?L, ?R).
- *   Popping the back element of L results in R.
- */
-pop_back([_], []).
-pop_back([H | T], [H | R]) :- pop_back(T, R).
-
-/**
- * back(?L, ?X).
- *   X is the back (last element) of L.
- */
-back([X], X).
-back([_ | T], B) :- back(T, B).
-
-/**
- * fill_n(+N, ?E, ?L).
+ * fill_n/3
+ * fill_n(?N, ?E, ?L).
  *   L is a list with N elements E.
- *   N must be an integer.
  */
-fill_n(0, _, []).
-fill_n(N, E, [E | T]) :- M is N - 1, fill_n(M, E, T).
+fill_n(N, E, L) :- fill_n_aux(N, E, L), !.
+fill_n_aux(0, _, []).
+fill_n_aux(N, E, [E|T]) :- fill_n_aux(M, E, T), N is M + 1.
 
 /**
- * range(+L, +[I, J], -R).
- * range(+L, +I, -R).
- *   Extracts the sublist starting at index I (inclusive) and ending
- *   at index J (inclusive) from L into R.
- *   The second version extracts until the end of the list.
+ * range/3
+ * range(+List, ?[I, J], ?Part).
+ *   Part is the segment between indices I and J (inclusive) in List.
  */
-range(L, I, R) :- is_list(L), integer(I), length(L, N), range_aux(L, [I, N], R).
-range(L, [I, J], R) :- is_list(L), integer(I), integer(J),
-                       N is J - I + 1, range_aux(L, [I, N], R).
+% range(+List, [+I,+J], ?Part)
+range(List, [I,J], Part):- proper_length(List, ListLength),
+                           integer(I), integer(J), !,
+                           I + 1 =< J,
+                           Before is I - 1,
+                           Length is J - Before,
+                           After is ListLength - J,
+                           sublist(List, Part, Before, Length, After).
+
+% range(+List, [+I,-J], ?Part)
+range(List, [I,J], Part) :- is_list(List),
+                            integer(I), !,
+                            Before is I - 1,
+                            sublist(List, Part, Before, Length, _),
+                            J is Before + Length.
+
+% range(+List, [-I,+J], ?Part)
+range(List, [I,J], Part) :- proper_length(List, ListLength),
+                            integer(J), !,
+                            After is ListLength - J,
+                            sublist(List, Part, Before, _, After),
+                            I is Before + 1.
+
+% range(+List, [-I,-J], ?Part). range(+List, -Int, ?Part).
+range(List, [I,J], Part) :- is_list(List), !,
+                            sublist(List, Part, Before, Length, _),
+                            I is Before + 1,
+                            J is Before + Length.
+
+% range(+List, +I, ?Part).
+range(List, I, Part) :- integer(I), !,
+                        length(List, Length),
+                        range(List, [I,Length], Part).
 
 /**
- * range_n(+L, +[I, N], -R).
- * range_n(+L, +I, -R).
- *   Extracts the sublist starting at index I (inclusive) with N
- *   elements, or until the end of the list.
- *   The second version extracts until the end of the list.
+ * consecutive(+List, +Elem, +N).
+ *   Asserts once that List has N consecutive Elem.
  */
-range_n(L, I, R) :- is_list(L), integer(I), length(L, N), range_aux(L, [I, N], R).
-range_n(L, [I, N], R) :- is_list(L), integer(I), integer(N),
-                         range_aux(L, [I, N], R).
+consecutive(List, Elem, N) :- fill_n(N, Elem, EList), !,
+                              segment(List, EList, N), !.
 
 /**
- * range_aux(+L, +[I, N], -R).
- *   Extracts the sublist starting at index I (inclusive) with length
- *   N or until the end of the list, from L into R.
+ * map/3
+ * map(:P, ?Xs, ?Ys).
+ *   Succeeds when P(X, Y) for each corresponding X in Xs and Y in Ys.
+ *   Exactly like maplist/3. One of Xs, Ys must be proper.
  */
-range_aux([], [_, _], []).
-range_aux(_, [_, 0], []).
-range_aux([H | T], [1, N], [H | R]) :- N > 0, Nr is N - 1,
-                                       range_aux(T, [1, Nr], R), !.
-range_aux([_ | T], [I, N], R) :- I > 1, Ir is I - 1,
-                                 range_aux(T, [Ir, N], R), !.
+map(P, Xs, Ys) :-
+    (   foreach(X, Xs),
+        foreach(Y, Ys),
+        param(P)
+    do  call(P, X, Y)
+    ).
 
 /**
- * consecutive(+L, +E, +N).
- *   Asserts that list L has N consecutive elements E.
+ * map/4
+ * map(:P, ?Xs, ?Ys, ?Zs).
+ *   Succeeds when P(X, Y, Z) for each corresponding X in Xs, Y in Ys, Z in Zs.
+ *   Exactly like maplist/4. One of Xs, Ys, Zs must be proper.
  */
-consecutive(L, E, N) :- fill_n(N, E, EList), !, sublist_n(EList, L, N).
+map(P, Xs, Ys, Zs) :-
+    (   foreach(X, Xs),
+        foreach(Y, Ys),
+        foreach(Z, Zs),
+        param(P)
+    do  call(P, X, Y, Z)
+    ).
 
 /**
- * map(+L, :F, ?R).
- *   Calling F once for each element E of L as F(E, Er), so that
- *   R is the list consisting of the resulting Er.
+ * a_map/4
+ * a_map(:P, +A, ?Xs, ?Ys).
+ *   Succeeds when P(X, Y, A) for each corresponding X in Xs and Y in Ys.
+ *   One of Xs, Ys must be proper.
  */
-map([], _, []).
-map([H | T], F, [Hr | Tr]) :- call(F, H, Hr), !, map(T, F, Tr).
+a_map(P, A, Xs, Ys) :-
+    (   foreach(X, Xs),
+        foreach(Y, Ys),
+        param(P),
+        param(A)
+    do  call(P, X, Y, A)
+    ).
 
 /**
- * a_map(+L, :F, +A, ?R).
- *   Calling F once for each element E of L as F(E, A, Er), so that
- *   R is the list consisting of the resulting Er.
+ * a_map/5
+ * a_map(:P, +A, ?Xs, ?Ys, ?Zs).
+ *   Succeeds when P(X, Y, Z, A) for each corresponding X in Xs, Y in Ys, Z in Zs.
+ *   One of Xs, Ys, Zs must be proper.
  */
-a_map([], _, _, []).
-a_map([H | T], F, A, [Hr | Tr]) :- call(F, H, A, Hr), !,
-                                   a_map(T, F, A, Tr).
+a_map(P, A, Xs, Ys, Zs) :-
+    (   foreach(X, Xs),
+        foreach(Y, Ys),
+        foreach(Z, Zs),
+        param(P),
+        param(A)
+    do  call(P, X, Y, Z, A)
+    ).
 
 /**
- * l_map(+L, :F, +Args, ?R).
- *   Calling F once for each element E of L as F(E, Args..., Er), so that
- *   R is the list consisting of the resulting Er.
+ * b_map/4
+ * b_map(:P, +B, ?Xs, ?Ys).
+ *   Succeeds when P(X, B, Y) for each corresponding X in Xs and Y in Ys.
+ *   One of Xs, Ys must be proper.
  */
-l_map([], _, _, []).
-l_map([H | T], F, Args, [Hr | Tr]) :- push_back(Args, Hr, Z),
-                                      apply(F, [H | Z]), !,
-                                      l_map(T, F, Args, Tr).
+b_map(P, B, Xs, Ys) :-
+    (   foreach(X, Xs),
+        foreach(Y, Ys),
+        param(P),
+        param(B)
+    do  call(P, X, B, Y)
+    ).
 
 /**
- * flatten(+L, ?R).
- *   Flattens the list L into list R. This fails if L is not a list of lists.
+ * la_map/4
+ * la_map(:P, +Args, ?Xs, ?Ys).
+ *   Succeeds when P(X, Y, Args...) for each corresponding X in Xs and Y in Ys.
+ *   One of Xs, Ys must be proper.
+ */
+la_map(P, Args, Xs, Ys) :-
+    is_list(Args),
+    (   foreach(X, Xs),
+        foreach(Y, Ys),
+        param(P),
+        param(Args)
+    do  apply(P, [X,Y|Args])
+    ).
+
+/**
+ * la_map/5
+ * la_map(:P, +Args, ?Xs, ?Ys, ?Zs).
+ *   Succeeds when P(X, Y, Z, Args...) for each corresponding X in Xs, Y in Ys, Z in Zs.
+ *   One of Xs, Ys, Zs must be proper.
+ */
+la_map(P, Args, Xs, Ys, Zs) :-
+    is_list(Args),
+    (   foreach(X, Xs),
+        foreach(Y, Ys),
+        foreach(Z, Zs),
+        param(P),
+        param(Args)
+    do  apply(P, [X,Y,Z|Args])
+    ).
+
+/**
+ * lb_map/4
+ * lb_map(:P, +Args, ?Xs, ?Ys).
+ *   Succeeds when P(X, Args..., Y) for each corresponding X in Xs and Y in Ys.
+ *   One of Xs, Ys must be proper.
+ */
+lb_map(P, Args, Xs, Ys) :-
+    is_list(Args),
+    (   foreach(X, Xs),
+        foreach(Y, Ys),
+        param(P),
+        param(Args)
+    do  (append([X|Args], [Y], A), apply(P, A))
+    ).
+
+/**
+ * flatten(+List, -Flat).
+ *   Flattens List into Flat.
+ *   Fails if List is not a list of lists.
  */
 flatten([], []).
-flatten([L | T], R) :- flatten(T, T1), join(L, T1, R).
+flatten([HList|TList], Flat) :- flatten(TList, Rest),
+                                  append(HList, Rest, Flat), !.
 
 /**
- * mixed_flatten(+L, ?R).
- *   Flattens the list L into list R. The non-list elements of L are passed unmodified.
+ * mixed_flatten(+List, -Flat).
+ *   Mix flattens List into Flat.
+ *   The non-list elements of L are passed unmodified.
  */
 mixed_flatten([], []).
-mixed_flatten([L | T], R) :- is_list(L), mixed_flatten(T, T1), join(L, T1, R).
-mixed_flatten([H | T], [H | R]) :- \+ is_list(H), mixed_flatten(T, R).
+mixed_flatten([HList|TList], Flat) :- is_list(HList),
+                                      mixed_flatten(TList, Rest),
+                                      append(HList, Rest, Flat), !.
+mixed_flatten([H|TList], [H|Rest]) :- mixed_flatten(TList, Rest), !.
 
 /**
- * deep_flatten(+L, ?R).
- *   Deep flattens the list L into list R. List elements of list L are flattened themselves.
+ * deep_flatten(+List, -Flat).
+ *   Deep flattens List into Flat.
+ *   List elements of L are flattened themselves.
  */
 deep_flatten([], []).
-deep_flatten([L | T], R) :- is_list(L), deep_flatten(L, L1), deep_flatten(T, T1), join(L1, T1, R).
-deep_flatten([H | T], [H | R]) :- \+ is_list(H), deep_flatten(T, R).
+deep_flatten([HList|TList], Flat) :- is_list(HList),
+                                     deep_flatten(HList, HFlat),
+                                     deep_flatten(TList, Rest),
+                                     append(HFlat, Rest, Flat), !.
+deep_flatten([H|TList], [H|Rest]) :- deep_flatten(TList, Rest), !.
 
 /**
- * clear_empty_list(+L, ?R).
- *   Removes from L elements like [].
+ * clear_empty_list(+List, -Clear).
+ *   Removes from List elements like [].
  */
-clear_empty_list([], []).
-clear_empty_list([[] | T], R) :- clear_empty_list(T, R).
-clear_empty_list([H | T], [H | R]) :- clear_empty_list(T, R).
+clear_empty_list(List, Clear) :- delete(List, [], Clear).
 
 /**
- * unique(+L, ?R).
- *   Removes repeated elements of L.
+ * include_each/3
+ * include_each(:P, +Xs, ?SubList).
+ *   Filter Xs, including only elements X that verify P(X) into SubList.
  */
-unique([], []).
-unique([H | L], R) :- unique(L, R), contains(R, H).
-unique([H | L], [H | R]) :- unique(L, R), \+ contains(R, H).
+include_each(P, Xs, SubList) :-
+    (   foreach(X, Xs),
+        fromto(SubList, S0, S, []),
+        param(P)
+    do  (call(P, X) -> S0 = [X|S]; S0 = S)
+    ).
 
 /**
- * include_each(+L, :F, ?R).
- *   Filter list L, include only elements H that verify F(H) into list R.
+ * a_include_each/4
+ * a_include_each(:P, +A, +Xs, ?SubList).
+ *   Filter Xs, including only elements X that verify P(X, A) into SubList.
  */
-include_each([], _, []).
-include_each([H | T], F, [H | R]) :- call(F, H), include_each(T, F, R).
-include_each([H | T], F, R) :- \+ call(F, H), include_each(T, F, R).
+a_include_each(P, A, Xs, SubList) :-
+    (   foreach(X, Xs),
+        fromto(SubList, S0, S, []),
+        param(P),
+        param(A)
+    do  (call(P, X, A) -> S0 = [X|S]; S0 = S)
+    ).
 
 /**
- * a_include_each(+L, :F, +A, ?R).
- *   Filter list L, include only elements H that verify F(H, A) into list R.
+ * l_include_each/4
+ * l_include_each(:P, +Args, +Xs, ?SubList).
+ *   Filter Xs, including only elements X that verify P(X, Args...) into SubList.
  */
-a_include_each([], _, _, []).
-a_include_each([H | T], F, A, [H | R]) :- call(F, H, A), a_include_each(T, F, A, R).
-a_include_each([H | T], F, A, R) :- \+ call(F, H, A), a_include_each(T, F, A, R).
+l_include_each(P, Args, Xs, SubList) :-
+    is_list(Args),
+    (   foreach(X, Xs),
+        fromto(SubList, S0, S, []),
+        param(P),
+        param(Args)
+    do  (apply(P, [X|Args]) -> S0 = [X|S]; S0 = S)
+    ).
 
 /**
- * l_include_each(+L, :F, +Args, ?R).
- *   Filter list L, include only elements H that verify F(H, Args...) into list R.
+ * exclude_each/3
+ * exclude_each(:P, +Xs, ?SubList).
+ *   Filter Xs, including only elements X that fail P(X) into SubList.
  */
-l_include_each([], _, _, []).
-l_include_each([H | T], F, Args, [H | R]) :- apply(F, [H | Args]), l_include_each(T, F, Args, R).
-l_include_each([H | T], F, Args, R) :- \+ apply(F, [H | Args]), l_include_each(T, F, Args, R).
+exclude_each(P, Xs, SubList) :-
+    (   foreach(X, Xs),
+        fromto(SubList, S0, S, []),
+        param(P)
+    do  (call(P, X) -> S0 = S; S0 = [X|S])
+    ).
 
 /**
- * exclude_each(+L, :F, ?R).
- *   Filter list L, exclude all elements H that verify F(H) from list R.
+ * a_exclude_each/4
+ * a_exclude_each(:P, +A, +Xs, ?SubList).
+ *   Filter Xs, including only elements X that fail P(X, A) into SubList.
  */
-exclude_each([], _, []).
-exclude_each([H | T], F, [H | R]) :- \+ call(F, H), exclude_each(T, F, R).
-exclude_each([H | T], F, R) :- call(F, H), exclude_each(T, F, R).
+a_exclude_each(P, A, Xs, SubList) :-
+    (   foreach(X, Xs),
+        fromto(SubList, S0, S, []),
+        param(P),
+        param(A)
+    do  (call(P, X, A) -> S0 = S; S0 = [X|S])
+    ).
 
 /**
- * a_exclude_each(+L, :F, +A, ?R).
- *   Filter list L, exclude all elements H that verify F(H, A) from list R.
+ * l_exclude_each/4
+ * l_exclude_each(:P, +Args, +Xs, ?SubList).
+ *   Filter Xs, including only elements X that fail P(X, Args...) into SubList.
  */
-a_exclude_each([], _, _, []).
-a_exclude_each([H | T], F, A, [H | R]) :- \+ call(F, H, A), a_exclude_each(T, F, A, R).
-a_exclude_each([H | T], F, A, R) :- call(F, H, A), a_exclude_each(T, F, A, R).
+l_exclude_each(P, Args, Xs, SubList) :-
+    is_list(Args),
+    (   foreach(X, Xs),
+        fromto(SubList, S0, S, []),
+        param(P),
+        param(Args)
+    do  (apply(P, [X|Args]) -> S0 = S; S0 = [X|S])
+    ).
 
 /**
- * l_exclude_each(+L, :F, +Args, ?R).
- *   Filter list L, exclude all elements H that verify F(H, Args...) from list R.
+ * all_of/2
+ * all_of(:P, +Xs).
+ *   All the elements X of Xs verify F(X).
+ *   Exactly like maplist/2.
  */
-l_exclude_each([], _, _, []).
-l_exclude_each([H | T], F, Args, [H | R]) :- \+ apply(F, [H | Args]), l_exclude_each(T, F, Args, R).
-l_exclude_each([H | T], F, Args, R) :- apply(F, [H | Args]), l_exclude_each(T, F, Args, R).
+all_of(P, Xs) :-
+    (   foreach(X, Xs),
+        param(P)
+    do  call(P, X)
+    ), !.
 
 /**
- * all_of(+L, :F).
- *   All the elements H of list L verify F(H).
+ * a_all_of/3
+ * a_all_of(:P, +A, +Xs).
+ *   All the elements X of Xs verify F(X, A).
+ */
+a_all_of(P, A, Xs) :-
+    (   foreach(X, Xs),
+        param(P),
+        param(A)
+    do  call(P, X, A)
+    ), !.
+
+/**
+ * l_all_of/3
+ * l_all_of(:P, +Args, +Xs).
+ *   All the elements X of Xs verify F(X, Args...).
+ */
+l_all_of(P, Args, Xs) :-
+    (   foreach(X, Xs),
+        param(P),
+        param(Args)
+    do  apply(P, [X|Args])
+    ), !.
+
+/**
+ * any_of/2
+ * any_of(:P, +Xs).
+ *   Some element X of Xs verifies P(X).
+ *   Exactly like somechk/2.
+ */
+any_of(P, [X|_]) :- call(P, X), !.
+any_of(P, [_|T]) :- any_of(P, T).
+
+/**
+ * a_any_of/3
+ * a_any_of(:P, +A, +Xs).
+ *   Some element X of Xs verifies P(X, A).
+ */
+a_any_of(P, A, [X|_]) :- call(P, X, A), !.
+a_any_of(P, A, [_|T]) :- a_any_of(P, A, T).
+
+/**
+ * l_any_of/3
+ * l_any_of(:P, +Xs).
+ *   Some element X of Xs verifies P(X, Args...).
+ */
+l_any_of(P, Args, [X|_]) :- apply(P, [X|Args]), !.
+l_any_of(P, Args, [_|T]) :- l_any_of(P, Args, T).
+
+/**
+ * none_of/2
+ * none_of(:P, +Xs).
+ *   none element X of Xs verifies P(X).
+ */
+none_of(P, X) :- \+ any_of(P, X).
+
+/**
+ * a_none_of/3
+ * a_none_of(:P, +A, +Xs).
+ *   none element X of Xs verifies P(X, A).
+ */
+a_none_of(P, A, X) :- \+ a_any_of(P, A, X).
+
+/**
+ * l_none_of/3
+ * l_none_of(:P, +Args, +Xs).
+ *   none element X of Xs verifies P(X, Args...).
+ */
+l_none_of(P, Args, X) :- \+ l_any_of(P, Args, X).
+
+/**
+ * contains(+List, +X).
+ *   List contains X.
  *   Matches only once.
  */
-all_of([], _) :- !.
-all_of([H | T], F) :- call(F, H), all_of(T, F), !.
+contains(List, X) :- memberchk(X, List).
 
 /**
- * a_all_of(+L, :F, +A).
- *   All the elements H of list L verify F(H, A).
+ * contains_all(+List, +Set).
+ *   List contains all elements of list Set.
  *   Matches only once.
  */
-a_all_of([], _, _) :- !.
-a_all_of([H | T], F, A) :- call(F, H, A), a_all_of(T, F, A), !.
+contains_all(List, Set) :- all_of(Set, contains(List)), !.
 
 /**
- * l_all_of(+L, :F, +Args).
- *   All the elements H of list L verify F(H, Args...).
+ * contains_any(+List, +Set).
+ *   List contains at least one element of list Set.
  *   Matches only once.
  */
-l_all_of([], _, _) :- !.
-l_all_of([H | T], F, Args) :- apply(F, [H | Args]), l_all_of(T, F, Args), !.
+contains_any(List, Set) :- any_of(Set, contains(List)), !.
 
 /**
- * any_of(+L, :F).
- *   At least one element H of list L verifies F(H).
- */
-any_of([H | T], F) :- call(F, H), !; any_of(T, F), !.
-
-/**
- * a_any_of(+L, :F, +A).
- *   At least one element H of list L verifies F(H, A).
- */
-a_any_of([H | T], F, A) :- call(F, H, A), !; a_any_of(T, F, A), !.
-
-/**
- * l_any_of(+L, :F, +Args).
- *   At least one element H of list L verifies F(H, Args...).
- */
-l_any_of([H | T], F, Args) :- apply(F, [H | Args]), !; l_any_of(T, F, Args), !.
-
-/**
- * none_of(+L, :F).
- *   No element H of list L verifies F(H).
- */
-none_of([], _).
-none_of([H | T], F) :- \+ call(F, H), none_of(T, F), !.
-
-/**
- * a_none_of(+L, :F, +A).
- *   No element H of list L verifies F(H, A).
- */
-a_none_of([], _, _).
-a_none_of([H | T], F, A) :- \+ call(F, H, A), a_none_of(T, F, A), !.
-
-/**
- * l_none_of(+L, :F, +Args).
- *   No element H of list L verifies F(H, Args...).
- */
-l_none_of([], _, _).
-l_none_of([H | T], F, Args) :- \+ apply(F, [H | Args]), l_none_of(T, F, Args), !.
-
-/**
- * count(+L, :F, ?N).
- *   Count the elements of L that pass F(H) into N.
- */
-count([], _, 0).
-count([H | T], F, N) :- call(F, H), count(T, F, M), N is M + 1.
-count([H | T], F, N) :- \+ call(F, H), count(T, F, N).
-
-/**
- * a_count(+L, :F, +A, ?N).
- *   Count the elements of L that pass F(H, A) into N.
- */
-a_count([], _, _, 0).
-a_count([H | T], F, A, N) :- call(F, H, A), count(T, F, A, M), N is M + 1.
-a_count([H | T], F, A, N) :- \+ call(F, H, A), count(T, F, A, N).
-
-/**
- * l_count(+L, :F, +Args, ?N).
- *   Count the elements of L that pass F(H, Args...) into N.
- */
-l_count([], _, _, 0).
-l_count([H | T], F, Args, N) :- apply(F, [H | Args]), count(T, F, Args, M), N is M + 1.
-l_count([H | T], F, Args, N) :- \+ apply(F, [H | Args]), count(T, F, Args, N).
-
-/**
- * contains(+L, ?X).
- *   List L contains X.
+ * contains_none(+List, +Set).
+ *   List contains no elements from list Set.
  *   Matches only once.
  */
-contains(L, X) :- memberchk(X, L).
+contains_none(List, Set) :- none_of(Set, contains(List)), !.
 
 /**
- * contains_all(+L, +S).
- *   List L contains all elements of list S.
- *   Matches only once.
+ * foreach(:P, +List).
+ *   Call P(H) for each element H of List, irrespective of success.
  */
-contains_all(L, S) :- all_of(S, contains(L)), !.
+foreach(_, []).
+foreach(P, [H|T]) :- (call(P, H) -> true; true), foreach(P, T).
 
 /**
- * contains_any(+L, +S).
- *   List L contains at least one element of list S.
- *   Matches only once.
+ * a_foreach(:P, +List, +A).
+ *   Call P(H, A) for each element H of List, irrespective of success.
  */
-contains_any(L, S) :- any_of(S, contains(L)), !.
+a_foreach(_, [], _).
+a_foreach(P, [H|T], A) :- (apply(P, [H|A]) -> true; true), a_foreach(P, T, A).
 
 /**
- * contains_none(+L, +S).
- *   List L contains no elements from list S.
- *   Matches only once.
+ * la_foreach(:P, +List, +Args).
+ *   Call P(H, Args...) for each element H of List, irrespective of success.
  */
-contains_none(L, S) :- none_of(S, contains(L)), !.
+l_foreach(_, [], _).
+l_foreach(P, [H|T], Args) :- (apply(P, [H|Args]) -> true; true), l_foreach(P, T, Args).
 
 /**
- * foreach(+L, :F).
- *   Call F(H) for each element H of list L, irrespective of success.
- */
-foreach([], _).
-foreach([H | T], F) :- (call(F, H); \+ call(F, H)),
-                       foreach(T, F).
-
-/**
- * la_foreach(+L, :F, +Args).
- *   Call F(H, Args...) for each element H of list L, irrespective of success.
- */
-la_foreach([], _, _).
-la_foreach([H | T], F, Args) :- (apply(F, [H | Args]); \+ apply(F, [H | Args])),
-                                la_foreach(T, F, Args).
-
-/**
- * foreach_increasing(+L, :F, +N).
- *   Call F(H, N) for each element H of list L, with N increasing for each element.
+ * foreach_increasing(+L, :P, +N).
+ *   Call P(H, N) for each element H of list L, with N increasing for each element.
  */
 foreach_increasing([], _, _).
-foreach_increasing([H | T], F, N) :- call(F, H, N), M is N + 1,
-                                     foreach_increasing(T, F, M).
+foreach_increasing([H | T], P, N) :- call(P, H, N), M is N + 1,
+                                     foreach_increasing(T, P, M).
 
 /**
- * la_foreach_increasing(+L, :F, +Args, +N).
- *   Call F(H, N, Args...) for each element H of list L, with N increasing for each element.
+ * la_foreach_increasing(+L, :P, +Args, +N).
+ *   Call P(H, N, Args...) for each element H of list L, with N increasing for each element.
  */
 la_foreach_increasing([], _, _, _).
-la_foreach_increasing([H | T], F, Args, N) :- apply(F, [H, N | Args]),
+la_foreach_increasing([H | T], P, Args, N) :- apply(P, [H, N | Args]),
                                               M is N + 1,
-                                              la_foreach_increasing(T, F, Args, M).
+                                              la_foreach_increasing(T, P, Args, M).
 
 /**
- * lb_foreach_increasing(+L, :F, +Args, +N).
- *   Call F(H, Args..., N) for each element H of list L, with N increasing for each element.
+ * lb_foreach_increasing(+L, :P, +Args, +N).
+ *   Call P(H, Args..., N) for each element H of list L, with N increasing for each element.
  */
 lb_foreach_increasing([], _, _, _).
-lb_foreach_increasing([H | T], F, Args, N) :- push_back(Args, N, B),
-                                              apply(F, [H | B]),
+lb_foreach_increasing([H | T], P, Args, N) :- push_back(Args, N, B),
+                                              apply(P, [H | B]),
                                               M is N + 1,
-                                              lb_foreach_increasing(T, F, Args, M).
+                                              lb_foreach_increasing(T, P, Args, M).
 
 /**
- * foreach_decreasing(+L, :F, +N).
- *   Call F(H, N) for each element H of list L, with N decreasing for each element.
+ * foreach_decreasing(+L, :P, +N).
+ *   Call P(H, N) for each element H of list L, with N decreasing for each element.
  */
 foreach_decreasing([], _, _).
-foreach_decreasing([H | T], F, N) :- call(F, H, N), M is N + 1,
-                                     foreach_decreasing(T, F, M).
+foreach_decreasing([H | T], P, N) :- call(P, H, N), M is N + 1,
+                                     foreach_decreasing(T, P, M).
 
 /**
- * la_foreach_decreasing(+L, :F, +Args, +N).
- *   Call F(H, N, Args...) for each element H of list L, with N decreasing for each element.
+ * la_foreach_decreasing(+L, :P, +Args, +N).
+ *   Call P(H, N, Args...) for each element H of list L, with N decreasing for each element.
  */
 la_foreach_decreasing([], _, _, _).
-la_foreach_decreasing([H | T], F, Args, N) :- apply(F, [H, N | Args]),
+la_foreach_decreasing([H | T], P, Args, N) :- apply(P, [H, N | Args]),
                                               M is N - 1,
-                                              la_foreach_decreasing(T, F, Args, M).
+                                              la_foreach_decreasing(T, P, Args, M).
 
 /**
- * lb_foreach_decreasing(+L, :F, +Args, +N).
- *   Call F(H, Args..., N) for each element H of list L, with N decreasing for each element.
+ * lb_foreach_decreasing(+L, :P, +Args, +N).
+ *   Call P(H, Args..., N) for each element H of list L, with N decreasing for each element.
  */
 lb_foreach_decreasing([], _, _, _).
-lb_foreach_decreasing([H | T], F, Args, N) :- push_back(Args, N, B),
-                                              apply(F, [H | B]),
+lb_foreach_decreasing([H | T], P, Args, N) :- push_back(Args, N, B),
+                                              apply(P, [H | B]),
                                               M is N - 1,
-                                              lb_foreach_decreasing(T, F, Args, M).
+                                              lb_foreach_decreasing(T, P, Args, M).
 
 /**
- * list_min(+L, ?M).
- *   Using < to compare members of a list, bind M to the minimum element.
+ * index(+List, +Elem, ?I).
+ *   Finds the index I of the first occurrence of Elem in List.
+ *   Fails if no such Elem exists.
  */
-list_min([X], X) :- !.
-list_min([H1, H2 | T], Min) :- H1 < H2, !, list_min([H1 | T], Min).
-list_min([_, H2 | T], Min) :- !, list_min([H2 | T], Min).
+index(List, Elem, I) :- is_list(List),
+                        setof(X, nth1(X, List, Elem), Bag), !,
+                        head(Bag, I), !.
 
 /**
- * list_max(+L, ?Max).
- *   Using < to compare members of a list, bind Max to the maximum element.
+ * last_index(+List, +Elem, ?I).
+ *   Finds the index I of the last occurrence of Elem in the List.
+ *   Fails if no such Elem exists.
  */
-list_max([X], X) :- !.
-list_max([H1, H2 | T], Max) :- H1 < H2, !, list_max([H2 | T], Max).
-list_max([H1, _ | T], Max) :- !, list_max([H1 | T], Max).
+last_index(List, Elem, I) :- is_list(List),
+                             setof(X, nth1(X, List, Elem), Bag), !,
+                             last(Bag, I), !.
 
 /**
- * index(+L, +E, ?I).
- *   Finds the index I of the first occurrence of an item E in the list L.
- *   Fails if no such item exists.
- */
-index([E | _], E, 1) :- !.
-index([_ | T], E, I) :- index(T, E, J), I is J + 1, !.
-
-/**
- * last_index(+L, +E, ?I).
- *   Finds the index I of the last occurrence of an item E in the list L.
- *   Fails if no such item exists.
- */
-last_index([E], E, 1) :- !.
-last_index([E | L], E, I) :- last_index(L, E, J), I is J + 1, !.
-last_index([E | _], E, 1) :- !.
-last_index([_ | L], E, I) :- last_index(L, E, J), I is J + 1, !.
-
-/**
- * indices(+L, +E, ?I).
- *   Finds the indices I of the occurrences of an item E in the list L.
+ * indices(+List, +Elem, ?I).
+ *   Finds the indices I of the occurrences of Elem in the List.
  *   Provides indices of such occurrences.
  */
-indices([E | _], E, 1).
-indices([_ | T], E, I) :- indices(T, E, J), I is J + 1.
+indices(List, Elem, I) :- is_list(List),
+                          nth1(I, List, Elem). % no cut
 
 /**
- * index_suchthat(+L, :F, ?I).
- *   Finds the first index I such that F(H) holds for that index.
+ * index_suchthat(:P, +List, ?I).
+ *   Finds the first index I such that P(H) holds for that index.
  */
-index_suchthat([H | _], F, 1) :- call(F, H), !.
-index_suchthat([H | T], F, I) :- \+ call(F, H),
-                                 index_suchthat(T, F, J), I is J + 1, !.
+index_suchthat(P, [H|_], 1) :- call(P, H), !.
+index_suchthat(P, [H|T], I) :- \+ call(P, H),
+                               index_suchthat(P, T, J), I is J + 1, !.
 
 /**
- * a_index_suchthat(+L, :F, +A, ?I).
- *   Finds the first index I such that F(H, A) holds for that index.
+ * a_index_suchthat(:P, +List, +A, ?I).
+ *   Finds the first index I such that P(H, A) holds for that index.
  */
-a_index_suchthat([H | _], F, A, 1) :- call(F, H, A), !.
-a_index_suchthat([H | T], F, A, I) :- \+ call(F, H, A),
-                                      a_index_suchthat(T, F, A, J),
-                                      I is J + 1, !.
-
-/**
- * l_index_suchthat(+L, :F, +Args, ?I).
- *   Finds the first index I such that F(H, Args...) holds for that index.
- */
-l_index_suchthat([H | _], F, Args, 1) :- apply(F, [H | Args]), !.
-l_index_suchthat([H | T], F, Args, I) :- \+ apply(F, [H | Args]),
-                                    l_index_suchthat(T, F, Args, J),
+a_index_suchthat(P, [H|_], A, 1) :- call(P, H, A), !.
+a_index_suchthat(P, [H|T], A, I) :- \+ call(P, H, A),
+                                    a_index_suchthat(P, T, A, J),
                                     I is J + 1, !.
 
 /**
- * last_index_suchthat(+L, :F, ?I).
- *   Finds the last index I such that F(H) holds for that index.
+ * l_index_suchthat(:P, +List, +Args, ?I).
+ *   Finds the first index I such that P(H, Args...) holds for that index.
  */
-last_index_suchthat([H], F, 1) :- call(F, H), !.
-last_index_suchthat([H | L], F, I) :- call(F, H),
-                                      last_index_suchthat(L, F, J),
-                                      I is J + 1, !.
-last_index_suchthat([H | _], F, 1) :- call(F, H), !.
-last_index_suchthat([_ | L], F, I) :- last_index_suchthat(L, F, J),
-                                      I is J + 1, !.
+l_index_suchthat(P, [H|_], Args, 1) :- apply(P, [H|Args]), !.
+l_index_suchthat(P, [H|T], Args, I) :- \+ apply(P, [H|Args]),
+                                       l_index_suchthat(P, T, Args, J),
+                                       I is J + 1, !.
 
 /**
- * last_index_suchthat(+L, :F, A, ?I).
- *   Finds the last index I such that F(H, A) holds for that index.
+ * last_index_suchthat(:P, +List, ?I).
+ *   Finds the last index I such that P(H) holds for that index.
  */
-a_last_index_suchthat([H], F, A, 1) :- call(F, H, A), !.
-a_last_index_suchthat([H | L], F, A, I) :- call(F, H, A),
-                                        a_last_index_suchthat(L, F, A, J),
-                                        I is J + 1, !.
-a_last_index_suchthat([H | _], F, A, 1) :- call(F, H, A), !.
-a_last_index_suchthat([_ | L], F, A, I) :- a_last_index_suchthat(L, F, A, J),
-                                        I is J + 1, !.
+last_index_suchthat(P, [H], 1) :- call(P, H), !.
+last_index_suchthat(P, [H|T], I) :- call(P, H),
+                                    last_index_suchthat(P, T, J),
+                                    I is J + 1, !.
+last_index_suchthat(P, [H|_], 1) :- call(P, H), !.
+last_index_suchthat(P, [_|T], I) :- last_index_suchthat(P, T, J),
+                                    I is J + 1, !.
 
 /**
- * last_index_suchthat(+L, :F, Args, ?I).
- *   Finds the last index I such that F(H, Args...) holds for that index.
+ * last_index_suchthat(:P, +List, A, ?I).
+ *   Finds the last index I such that P(H, A) holds for that index.
  */
-l_last_index_suchthat([H], F, Args, 1) :- apply(F, [H | Args]), !.
-l_last_index_suchthat([H | L], F, Args, I) :- apply(F, [H | Args]),
-                                              l_last_index_suchthat(L, F, Args, J),
-                                              I is J + 1, !.
-l_last_index_suchthat([H | _], F, Args, 1) :- apply(F, [H | Args]), !.
-l_last_index_suchthat([_ | L], F, Args, I) :- l_last_index_suchthat(L, F, Args, J),
-                                              I is J + 1, !.
+a_last_index_suchthat(P, [H], A, 1) :- call(P, H, A), !.
+a_last_index_suchthat(P, [H|T], A, I) :- call(P, H, A),
+                                         a_last_index_suchthat(P, T, A, J),
+                                         I is J + 1, !.
+a_last_index_suchthat(P, [H|_], A, 1) :- call(P, H, A), !.
+a_last_index_suchthat(P, [_|T], A, I) :- a_last_index_suchthat(P, T, A, J),
+                                         I is J + 1, !.
 
 /**
- * indices_suchthat(+L, :F, ?I).
- *   Finds the first index I such that F(H) holds for that index.
+ * last_index_suchthat(:P, +List, Args, ?I).
+ *   Finds the last index I such that P(H, Args...) holds for that index.
  */
-indices_suchthat([H | _], F, 1) :- call(F, H).
-indices_suchthat([_ | T], F, I) :- indices_suchthat(T, F, J), I is J + 1.
+l_last_index_suchthat(P, [H], Args, 1) :- apply(P, [H|Args]), !.
+l_last_index_suchthat(P, [H|T], Args, I) :- apply(P, [H|Args]),
+                                            l_last_index_suchthat(P, T, Args, J),
+                                            I is J + 1, !.
+l_last_index_suchthat(P, [H|_], Args, 1) :- apply(P, [H|Args]), !.
+l_last_index_suchthat(P, [_|T], Args, I) :- l_last_index_suchthat(P, T, Args, J),
+                                            I is J + 1, !.
 
 /**
- * a_indices_suchthat(+L, :F, +A, ?I).
- *   Finds the first index I such that F(H, A) holds for that index.
+ * indices_suchthat(:P, +List, ?I).
+ *   Finds the first index I such that P(H) holds for that index.
  */
-a_indices_suchthat([H | _], F, A, 1) :- call(F, H, A).
-a_indices_suchthat([_ | T], F, A, I) :- a_indices_suchthat(T, F, A, J),
-                                        I is J + 1.
+indices_suchthat(P, [H|_], 1) :- call(P, H).
+indices_suchthat(P, [_|T], I) :- indices_suchthat(P, T, J),
+                                 I is J + 1.
 
 /**
- * l_indices_suchthat(+L, :F, +Args, ?I).
- *   Finds the first index I such that F(H, Args...) holds for that index.
+ * a_indices_suchthat(:P, +List, +A, ?I).
+ *   Finds the first index I such that P(H, A) holds for that index.
  */
-l_indices_suchthat([H | _], F, Args, 1) :- apply(F, [H | Args]).
-l_indices_suchthat([_ | T], F, Args, I) :- l_indices_suchthat(T, F, Args, J),
-                                           I is J + 1.
+a_indices_suchthat(P, [H|_], A, 1) :- call(P, H, A).
+a_indices_suchthat(P, [_|T], A, I) :- a_indices_suchthat(P, T, A, J),
+                                      I is J + 1.
+
+/**
+ * l_indices_suchthat(:P, +List, +Args, ?I).
+ *   Finds the first index I such that P(H, Args...) holds for that index.
+ */
+l_indices_suchthat(P, [H|_], Args, 1) :- apply(P, [H|Args]).
+l_indices_suchthat(P, [_|T], Args, I) :- l_indices_suchthat(P, T, Args, J),
+                                         I is J + 1.

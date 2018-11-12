@@ -157,7 +157,7 @@ test_matrix_max :-
     matrix_max([[4,5,9,3,8,1],[6,0,3,7,8,9]], 9),
     matrix_max([[6,2,7,4,2,7,8],[4,3,6,7,3,9,8]], 9).
 
-:- write('==[TESTS]== matrix'), nl, test_all([
+test_matrix :- write('==[TESTS]== matrix'), nl, test_all([
     test_matrix_size,
     test_matrix_get,
     test_matrix_set,
