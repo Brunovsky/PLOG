@@ -1,3 +1,72 @@
+% nth0(N, List, Elem), nth1(N, List, Elem)
+test_nth :-
+    nth0(3, [0,1,2,3,4,1,2,3,2], 3),
+    nth1(3, [0,1,2,3,4,1,2,3,2], 2),
+    findall(N1, nth0(N1, [0,1,2,3,4,1,2,3,2], 2), [2,6,8]),
+    findall(N2, nth1(N2, [0,1,2,3,4,1,2,3,2], 2), [3,7,9]),
+    findall(X1, nth0(_, [0,1,2,3,4,1,2,3,2], X1), [0,1,2,3,4,1,2,3,2]),
+    findall(X2, nth1(_, [0,1,2,3,4,1,2,3,2], X2), [0,1,2,3,4,1,2,3,2]),
+    findall(N3, nth0(N3, [0,1,2,3,4,1,2,3,2], _), [0,1,2,3,4,5,6,7,8]),
+    findall(N4, nth1(N4, [0,1,2,3,4,1,2,3,2], _), [1,2,3,4,5,6,7,8,9]),
+    setof(X5, N5^nth0(N5, [0,1,2,3,4,1,2,3,2], X5), [0,1,2,3,4]),
+    setof(X6, N6^nth1(N6, [0,1,2,3,4,1,2,3,2], X6), [0,1,2,3,4]).
+
+% select(Elem, Set, Residue), selectchk(Elem, Set, Residue)
+test_select :-
+    select(a, [a,b,c,d,a,b,c,a,b], [b,c,d,a,b,c,a,b]),
+    select(a, [a,b,c,d,a,b,c,a,b], [a,b,c,d,b,c,a,b]),
+    select(a, [a,b,c,d,a,b,c,a,b], [a,b,c,d,a,b,c,b]),
+    selectchk(a, [a,b,c,d,a,b,c,a,b], [b,c,d,a,b,c,a,b]),
+    \+ selectchk(a, [a,b,c,d,a,b,c,a,b], [a,b,c,d,b,c,a,b]),
+    \+ selectchk(a, [a,b,c,d,a,b,c,a,b], [a,b,c,d,a,b,c,b]),
+    setof(X1, select(a, X1, [b,c]), [[a,b,c], [b,a,c], [b,c,a]]),
+    setof(X2, selectchk(a, X2, [b,c]), [[a,b,c]]),
+    setof(X3, select(a, [a,b,c,a,d,a], X3), L3),
+    perm(L3, [[b,c,a,d,a],[a,b,c,d,a],[a,b,c,a,d]]),
+    setof(X4, selectchk(a, [a,b,c,a,d,a], X4), [[b,c,a,d,a]]).
+
+% selectnth0(Elem, Set, Residue, N), selectnth1(Elem, Set, Residue, N)
+test_selectnth4 :-
+    selectnth0(a, [a,b,c,a,d,a], [b,c,a,d,a], 0),
+    selectnth1(a, [a,b,c,a,d,a], [b,c,a,d,a], 1),
+    selectnth0(a, [a,b,c,a,d,a], [a,b,c,d,a], 3),
+    selectnth1(a, [a,b,c,a,d,a], [a,b,c,d,a], 4),
+    selectnth0(a, [a,b,c,a,d,a], [a,b,c,a,d], 5),
+    selectnth1(a, [a,b,c,a,d,a], [a,b,c,a,d], 6),
+    findall(A, selectnth0(A, [a,b,c], _, _), [a,b,c]),
+    findall(B, selectnth1(B, [a,b,c], _, _), [a,b,c]),
+    findall(C, selectnth0(_, [a,b,c], _, C), [0,1,2]),
+    findall(D, selectnth1(_, [a,b,c], _, D), [1,2,3]),
+    findall(E, selectnth0(z, E, [a,b,c], _), [[z,a,b,c],[a,z,b,c],[a,b,z,c],[a,b,c,z]]),
+    findall(F, selectnth1(z, F, [a,b,c], _), [[z,a,b,c],[a,z,b,c],[a,b,z,c],[a,b,c,z]]),
+    findall(G, selectnth0(a, [a,b,c,a,d], G, _), [[b,c,a,d],[a,b,c,d]]),
+    findall(H, selectnth1(a, [a,b,c,a,d], H, _), [[b,c,a,d],[a,b,c,d]]),
+    findall(I, selectnth0(a, [a,b,c,a,d,a,z], _, I), [0,3,5]),
+    findall(J, selectnth1(a, [a,b,c,a,d,a,z], _, J), [1,4,6]),
+    findall(K, selectnth0(z, K, [a,b,c], 2), [[a,b,z,c]]),
+    findall(L, selectnth1(z, L, [a,b,c], 2), [[a,z,b,c]]),
+    findall(M, selectnth0(M, [a,b,c,d], [a,b,d], _), [c]),
+    findall(N, selectnth1(N, [a,b,c,d], [a,b,d], _), [c]),
+    findall(O, selectnth0(_, [a,b,b,b,a], [a,b,b,a], O), [1,2,3]),
+    findall(P, selectnth1(_, [a,b,b,b,a], [a,b,b,a], P), [2,3,4]),
+    findall(Q, selectnth0(_, [a,b,c,d], Q, _), [[b,c,d],[a,c,d],[a,b,d],[a,b,c]]),
+    findall(R, selectnth0(_, [a,b,c,d], R, _), [[b,c,d],[a,c,d],[a,b,d],[a,b,c]]).
+    
+% selectnth0(X, Xlist, Y, Ylist, N), selectnth1(X, Xlist, Y, Ylist, N)
+test_selectnth5 :-
+    selectnth0(c, [a,b,c,d], A, [a,b,A,d], 2),
+    selectnth1(c, [a,b,c,d], B, [a,b,B,d], 3),
+    findall(C, selectnth0(_, [a,b,c,d], _, _, C), [0,1,2,3]),
+    findall(D, selectnth1(_, [a,b,c,d], _, _, D), [1,2,3,4]),
+    findall(E, selectnth0(_, [a,b,c], z, E, _), [[z,b,c],[a,z,c],[a,b,z]]),
+    findall(F, selectnth1(_, [a,b,c], z, F, _), [[z,b,c],[a,z,c],[a,b,z]]),
+    findall(G, selectnth0(a, [a,b,c,a,d,a], z, G, _), [[z,b,c,a,d,a],[a,b,c,z,d,a],[a,b,c,a,d,z]]),
+    findall(H, selectnth1(a, [a,b,c,a,d,a], z, H, _), [[z,b,c,a,d,a],[a,b,c,z,d,a],[a,b,c,a,d,z]]),
+    % replace
+    selectnth0(_, [a,b,c,d,e,f], z, [a,b,c,z,e,f], 3),
+    selectnth1(_, [a,b,c,d,e,f], z, [a,b,c,z,e,f], 4).
+
+
 % fill_n(N, Elem, List).
 test_fill_n :-
     fill_n(4, a, [a,a,a,a]),
@@ -10,12 +79,12 @@ test_fill_n :-
 
 % range(List, I, Part).
 test_range :-
-    range([0,1,2,3,4,5], [3,5], [2,3,4]),
-    range([a,b,c,d,e,f,g], [2,6], [b,c,d,e,f]),
-    \+ range([a,b,c,d], [3,10], [c,d]),
-    \+ range([a,b,c], [4,5], []),
-    range([0,1,2,3,4,5], 4, [3,4,5]),
-    range([a,b,c,d,e,f,g], 5, [e,f,g]).
+    range([0,1,2,3,4,5], [2,3,4], [3,5]),
+    range([a,b,c,d,e,f,g], [b,c,d,e,f], [2,6]),
+    \+ range([a,b,c,d], [c,d], [3,10]),
+    \+ range([a,b,c], [], [4,5]),
+    range([0,1,2,3,4,5], [3,4,5], 4),
+    range([a,b,c,d,e,f,g], [e,f,g], 5).
 
 % consecutive(List, Elem, N).
 test_consecutive :-
@@ -37,7 +106,7 @@ test_map :-
 test_l_map :-
     lb_map(index, [a], [[a,b,a],[b,b,a,b],[c,c,b,a]], [1,3,4]),
     b_map(fill_n, a, [3,4,2], [[a,a,a],[a,a,a,a],[a,a]]),
-    lb_map(range, [[2,3]], [[a,b,c,d],[e,f,g,h]], [[b,c],[f,g]]).
+    la_map(range, [[2,3]], [[a,b,c,d],[e,f,g,h]], [[b,c],[f,g]]).
 
 % flatten(List, Flat).
 test_flatten :-
@@ -132,6 +201,10 @@ test_suchthat :-
 
 
 test_lists :- write('==[TESTS]== lists'), nl, test_all([
+    test_nth,
+    test_select,
+    test_selectnth4,
+    test_selectnth5,
     test_fill_n,
     test_range,
     test_consecutive,

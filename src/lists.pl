@@ -1,27 +1,23 @@
 /**
  * Lists Library Extension
  *
- * List indexing is 1-based (1-indexing). So the head has index 1.
- *
  * Some predicates here are tested in test/lists.pl
  */
 
 /**
- * nth0/[3,4], nth1/[3,4], select/4, selectchk/4
- *
- * Get Elem at index N from List: nth0/3, nth1/3
- *   nth0(+N, +List, -Elem).
- *   nth1(+N, +List, -Elem).
- * 
- * Get first index N only of Elem in List: nth0/3, nth1/3
+ * Get element at index N: nth0/3, nth1/3
+ *   nth0(+N, +List, -Elem), !.
+ *   nth1(+N, +List, -Elem), !.
+ *   
+ * Get first index N (only) of Elem in List: nth0/3, nth1/3
  *   nth0(-N, +List, +Elem), !.
  *   nth1(-N, +List, +Elem), !.
  * 
- * Get last index N only of Elem in List: nth0/3, nth1/3, setof/3
+ * Get last index N (only) of Elem in List: nth0/3, nth1/3, setof/3
  *   setof(-X, nth0(-X, +List, +Elem), Bag), !, last(Bag, -N), !.
  *   setof(-X, nth1(-X, +List, +Elem), Bag), !, last(Bag, -N), !.
  *
- * Get indices N of Elem in List: nth0/3, nth1/3
+ * Get all indices N of Elem in List: nth0/3, nth1/3
  *   nth0(-N, +List, +Elem).
  *   nth1(-N, +List, +Elem).
  *   
@@ -36,36 +32,13 @@
  *   selectchk(+X, +List, -NewList).
  *   delete(+List, +X, 1, -NewList).
  *
+ * Remove all elements X in List, getting NewList: selectchk/3
+ *   delete(+List, +X, -NewList).
+ *
  * Remove element at index N in List, getting NewList: selectchknth0/4, selectchknth1/4
- *   selectchknth0(_, +List, -NewList, N).
- *   selectchknth1(_, +List, -NewList, N).
+ *   nth0(N, +List, _, -NewList).
+ *   nth1(N, +List, _, -NewList).
  */
-
-/**
- * selectnth0/4, selectnth1/4.
- * selectnth0(?Element, ?Set, ?Residue, ?N).
- * selectnth1(?Element, ?Set, ?Residue, ?N).
- *   Like select/3, but gets the index as well.
- */
-selectnth0(X, [X|R], R, 0).
-selectnth0(X, [A,X|R], [A|R], 1).
-selectnth0(X, [A,B,X|R], [A,B|R], 2).
-selectnth0(X, [A,B,C|L], [A,B,C|R], N) :- selectnth0(X, L, R, M), N is M + 3.
-
-selectnth1(X, [X|R], R, 1).
-selectnth1(X, [A,X|R], [A|R], 2).
-selectnth1(X, [A,B,X|R], [A,B|R], 3).
-selectnth1(X, [A,B,C|L], [A,B,C|R], N) :- selectnth1(X, L, R, M), N is M + 3.
-
-/**
- * selectchknth0/4, selectchknth1/4.
- * selectchknth0(?Element, ?Set, ?Residue, ?N).
- * selectchknth1(?Element, ?Set, ?Residue, ?N).
- *   Like selectchk/3, but gets the index as well.
- */
-selectchknth0(Element, Set, Residue, N) :- selectnth0(Element, Set, Residue, N), !.
-
-selectchknth1(Element, Set, Residue, N) :- selectnth1(Element, Set, Residue, N), !.
 
 /**
  * selectnth0/5, selectnth1/5.
@@ -78,9 +51,9 @@ selectnth0(X, [A,X|T], Y, [A,Y|T], 1).
 selectnth0(X, [A,B,X|T], Y, [A,B,Y|T], 2).
 selectnth0(X, [A,B,C|Xs], Y, [A,B,C|Ys], N) :- selectnth0(X, Xs, Y, Ys, M), N is M + 3.
 
-selectnth0(X, [X|T], Y, [Y|T], 1).
-selectnth0(X, [A,X|T], Y, [A,Y|T], 2).
-selectnth0(X, [A,B,X|T], Y, [A,B,Y|T], 3).
+selectnth1(X, [X|T], Y, [Y|T], 1).
+selectnth1(X, [A,X|T], Y, [A,Y|T], 2).
+selectnth1(X, [A,B,X|T], Y, [A,B,Y|T], 3).
 selectnth1(X, [A,B,C|Xs], Y, [A,B,C|Ys], N) :- selectnth1(X, Xs, Y, Ys, M), N is M + 3.
 
 /**
@@ -114,49 +87,141 @@ fill_n_aux(N, E, [E|T]) :- fill_n_aux(M, E, T), N is M + 1.
 
 /**
  * range/3
- * range(+List, ?[I, J], ?Part).
- *   Part is the segment between indices I and J (inclusive) in List.
+ * range(+List, ?Segment, ?[I, J]).
+ *   Segment is the segment between indices I (inclusive) and J (inclusive) in List.
  */
-% range(+List, [+I,+J], ?Part)
-range(List, [I,J], Part):- proper_length(List, ListLength),
-                           integer(I), integer(J), !,
-                           I + 1 =< J,
-                           Before is I - 1,
-                           Length is J - Before,
-                           After is ListLength - J,
-                           sublist(List, Part, Before, Length, After).
+% range(+List, ?Segment, [+I,+J])
+range(List, Segment, [I,J]) :- proper_length(List, ListLength),
+                               integer(I), integer(J), !,
+                               I + 1 =< J,
+                               Before is I - 1,
+                               Length is J - Before,
+                               After is ListLength - J,
+                               sublist(List, Segment, Before, Length, After).
 
-% range(+List, [+I,-J], ?Part)
-range(List, [I,J], Part) :- is_list(List),
-                            integer(I), !,
-                            Before is I - 1,
-                            sublist(List, Part, Before, Length, _),
-                            J is Before + Length.
+% range(+List, ?Segment, [+I,-J])
+range(List, Segment, [I,J]) :- is_list(List),
+                               integer(I), !,
+                               Before is I - 1,
+                               sublist(List, Segment, Before, Length, _),
+                               J is Before + Length.
 
-% range(+List, [-I,+J], ?Part)
-range(List, [I,J], Part) :- proper_length(List, ListLength),
-                            integer(J), !,
-                            After is ListLength - J,
-                            sublist(List, Part, Before, _, After),
-                            I is Before + 1.
+% range(+List, ?Segment, [-I,+J])
+range(List, Segment, [I,J]) :- proper_length(List, ListLength),
+                               integer(J), !,
+                               After is ListLength - J,
+                               sublist(List, Segment, Before, _, After),
+                               I is Before + 1.
 
-% range(+List, [-I,-J], ?Part). range(+List, -Int, ?Part).
-range(List, [I,J], Part) :- is_list(List), !,
-                            sublist(List, Part, Before, Length, _),
-                            I is Before + 1,
-                            J is Before + Length.
+% range(+List, ?Segment, [-I,-J]).
+range(List, Segment, [I,J]) :- is_list(List), !,
+                               sublist(List, Segment, Before, Length, _),
+                               I is Before + 1,
+                               J is Before + Length.
 
-% range(+List, +I, ?Part).
-range(List, I, Part) :- integer(I), !,
-                        length(List, Length),
-                        range(List, [I,Length], Part).
+% range(+List, ?Segment, +I).
+range(List, Segment, I) :- proper_length(List, ListLength),
+                           integer(I), !,
+                           range(List, Segment, [I,ListLength]).
+
+/**
+ * remove/3
+ * remove(+I, +List, -NewList).
+ *   Remove I from List, getting NewList.
+ */
+remove(1, [_|List], List) :- !.
+remove(I, [H|List], [H|New]) :- I1 is I - 1, remove(I1, List, New).
+
+/**
+ * rangeremove/3
+ * rangeremove(+[I,J], +List, -NewList).
+ *   Deletes range [I,J] from List, resulting in NewList.
+ */
+rangeremove([1,0], List, List) :- !.
+rangeremove([1,J], [_|Tail], New) :-
+    J1 is J - 1,
+    rangeremove([1,J1], Tail, New).
+rangeremove([I,J], [H|Tail], [H|New]) :-
+    I1 is I - 1,
+    J1 is J - 1,
+    rangeremove([I1,J1], Tail, New).
+
+/**
+ * rangeselect/4
+ * rangeselect(?XSegment, ?Xlist, ?YSegment, ?Ylist).
+ *   True when Xlist and Ylist are the same, except for a range [I,J]
+ *   where they are XSegment and YSegment respectively.
+ */
+rangeselect([], List, [], List) :- is_list(List).
+rangeselect([X|Xs], [X|Xlist], [Y|Ys], [Y|Ylist]) :- rangeselect(Xs, Xlist, Ys, Ylist).
+rangeselect(Xs, [H|Xlist], Ys, [H|Ylist]) :- rangeselect(Xs, Xlist, Ys, Ylist).
+
+/**
+ * rangeselectchk/4
+ * rangeselectchk(?XSegment, +Xlist, ?YSegment, +Ylist).
+ *   Is to rangeselect/4 what selectchk/4 is to select/4.
+ */
+rangeselectchk([], List, [], List) :- is_list(List), !.
+rangeselectchk([X|Xs], [X|Xlist], [Y|Ys], [Y|Ylist]) :- rangeselectchk(Xs, Xlist, Ys, Ylist), !.
+rangeselectchk(Xs, [H|Xlist], Ys, [H|Ylist]) :- rangeselectchk(Xs, Xlist, Ys, Ylist), !.
+
+/**
+ * rangeselectnth0/5
+ * rangeselectnth0(?Xsegment, ?Xlist, ?YSegment, ?Ylist, ?[I,J]).
+ *   True when Xlist and Ylist are the same, except for nonempty range [I,J]
+ *   where they are XSegment and YSegment respectively.
+ *   May be used to replace a subsegment of Xlist.
+ */
+rangeselectnth0([X], [X|List], [Y], [Y|List], [0,0]).
+rangeselectnth0([X|Xs], [X|Xlist], [Y|Ys], [Y|Ylist], [0,J]) :-
+    rangeselectnth0(Xs, Xlist, Ys, Ylist, [0,V]), J is V + 1.
+rangeselectnth0([X|Xs], [H|Xlist], [Y|Ys], [H|Ylist], [I,J]) :-
+    rangeselectnth0([X|Xs], Xlist, [Y|Ys], Ylist, [U,V]), I is U + 1, J is V + 1.
+
+/**
+ * rangeselectnth1/5
+ * rangeselectnth1(?Xsegment, ?Xlist, ?YSegment, ?Ylist, ?[I,J]).
+ *   True when Xlist and Ylist are the same, except for nonempty range [I,J]
+ *   where they are XSegment and YSegment respectively.
+ *   May be used to replace a subsegment of Xlist.
+ */
+rangeselectnth1([X], [X|List], [Y], [Y|List], [1,1]).
+rangeselectnth1([X|Xs], [X|Xlist], [Y|Ys], [Y|Ylist], [1,J]) :-
+    rangeselectnth1(Xs, Xlist, Ys, Ylist, [1,V]), J is V + 1.
+rangeselectnth1([X|Xs], [H|Xlist], [Y|Ys], [H|Ylist], [I,J]) :-
+    rangeselectnth1([X|Xs], Xlist, [Y|Ys], Ylist, [U,V]), I is U + 1, J is V + 1.
+
+/**
+ * rangeselectchknth0/5
+ * rangeselectchknth0(?Xsegment, ?Xlist, ?YSegment, ?Ylist, ?[I,J]).
+ *   True when Xlist and Ylist are the same, except for nonempty range [I,J]
+ *   where they are XSegment and YSegment respectively.
+ *   May be used to replace a subsegment of Xlist.
+ */
+rangeselectchknth0([X], [X|List], [Y], [Y|List], [0,0]) :- !.
+rangeselectchknth0([X|Xs], [X|Xlist], [Y|Ys], [Y|Ylist], [0,J]) :-
+    rangeselectchknth0(Xs, Xlist, Ys, Ylist, [0,V]), J is V + 1, !.
+rangeselectchknth0([X|Xs], [H|Xlist], [Y|Ys], [H|Ylist], [I,J]) :-
+    rangeselectchknth0([X|Xs], Xlist, [Y|Ys], Ylist, [U,V]), I is U + 1, J is V + 1, !.
+
+/**
+ * rangeselectchknth1/5
+ * rangeselectchknth1(?Xsegment, ?Xlist, ?YSegment, ?Ylist, ?[I,J]).
+ *   True when Xlist and Ylist are the same, except for nonempty range [I,J]
+ *   where they are XSegment and YSegment respectively.
+ *   May be used to replace a subsegment of Xlist.
+ */
+rangeselectchknth1([X], [X|List], [Y], [Y|List], [1,1]) :- !.
+rangeselectchknth1([X|Xs], [X|Xlist], [Y|Ys], [Y|Ylist], [1,J]) :-
+    rangeselectchknth1(Xs, Xlist, Ys, Ylist, [1,V]), J is V + 1, !.
+rangeselectchknth1([X|Xs], [H|Xlist], [Y|Ys], [H|Ylist], [I,J]) :-
+    rangeselectchknth1([X|Xs], Xlist, [Y|Ys], Ylist, [U,V]), I is U + 1, J is V + 1, !.
 
 /**
  * consecutive(+List, +Elem, +N).
  *   Asserts once that List has N consecutive Elem.
  */
-consecutive(List, Elem, N) :- fill_n(N, Elem, EList), !,
-                              segment(List, EList, N), !.
+consecutive(List, Elem, N) :- fill_n(N, Elem, EList), !, segment(List, EList, N), !.
 
 /**
  * map/3
@@ -445,7 +510,7 @@ a_any_of(P, A, [_|T]) :- a_any_of(P, A, T).
 
 /**
  * l_any_of/3
- * l_any_of(:P, +Xs).
+ * l_any_of(:P, +Args, +Xs).
  *   Some element X of Xs verifies P(X, Args...).
  */
 l_any_of(P, Args, [X|_]) :- apply(P, [X|Args]), !.
