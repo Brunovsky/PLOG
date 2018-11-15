@@ -433,8 +433,8 @@ segment_any_col(Matrix, Segment) :-
     a_any_of(segment, Segment, Transpose), !.
 
 /**
- * segment_any_diagonal(+Matrix, +E, +N).
- *   Asserts Matrix has N consecutive elements E along any diagonal.
+ * segment_any_diagonal(+Matrix, +Segment).
+ *   Asserts Matrix has Segment somewhere along any diagonal.
  */
 segment_any_diagonal(Matrix, Segment) :-
     is_list(Segment),
@@ -442,8 +442,8 @@ segment_any_diagonal(Matrix, Segment) :-
     a_any_of(segment, Segment, Diagonals), !.
 
 /**
- * segment_matrix(+Matrix, +E, +N).
- *   Asserts Matrix has N consecutive elements E along any row, column or diagonal.
+ * segment_matrix(+Matrix, +Segment).
+ *   Asserts Matrix has Segment somewhere along any row, column or diagonal.
  */
 segment_matrix(Matrix, Segment) :-
     segment_any_row(Matrix, Segment);
