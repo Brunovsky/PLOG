@@ -176,7 +176,7 @@ print_board(Board, w) :-
 
 print_board(Board, b) :-
     matrix_size(Board, RowSize, ColSize),
-    matrix_reverse(Board, Reversed),
+    matrix_rowcol_reverse(Board, Reversed),
     write_board_top(b, ColSize),
     lb_foreach_decreasing(Reversed, write_board_line, [b, [RowSize, ColSize]], RowSize).
 

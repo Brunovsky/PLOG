@@ -592,80 +592,89 @@ l_foreach(P, [H|T], Args) :- (apply(P, [H|Args]) -> true; true), l_foreach(P, T,
  *   Call P(H, N) for each element H of list L, with N increasing for each element.
  */
 foreach_increasing([], _, _).
-foreach_increasing([H | T], P, N) :- call(P, H, N), M is N + 1,
-                                     foreach_increasing(T, P, M).
+foreach_increasing([H | T], P, N) :-
+    call(P, H, N), M is N + 1,
+    foreach_increasing(T, P, M).
 
 /**
  * la_foreach_increasing(+L, :P, +Args, +N).
  *   Call P(H, N, Args...) for each element H of list L, with N increasing for each element.
  */
 la_foreach_increasing([], _, _, _).
-la_foreach_increasing([H | T], P, Args, N) :- apply(P, [H, N | Args]),
-                                              M is N + 1,
-                                              la_foreach_increasing(T, P, Args, M).
+la_foreach_increasing([H | T], P, Args, N) :-
+    apply(P, [H, N | Args]),
+    M is N + 1,
+    la_foreach_increasing(T, P, Args, M).
 
 /**
  * lb_foreach_increasing(+L, :P, +Args, +N).
  *   Call P(H, Args..., N) for each element H of list L, with N increasing for each element.
  */
 lb_foreach_increasing([], _, _, _).
-lb_foreach_increasing([H | T], P, Args, N) :- push_back(Args, N, B),
-                                              apply(P, [H | B]),
-                                              M is N + 1,
-                                              lb_foreach_increasing(T, P, Args, M).
+lb_foreach_increasing([H | T], P, Args, N) :-
+    last(Args, N, B),
+    apply(P, [H | B]),
+    M is N + 1,
+    lb_foreach_increasing(T, P, Args, M).
 
 /**
  * foreach_decreasing(+L, :P, +N).
  *   Call P(H, N) for each element H of list L, with N decreasing for each element.
  */
 foreach_decreasing([], _, _).
-foreach_decreasing([H | T], P, N) :- call(P, H, N), M is N + 1,
-                                     foreach_decreasing(T, P, M).
+foreach_decreasing([H | T], P, N) :-
+    call(P, H, N), M is N + 1,
+    foreach_decreasing(T, P, M).
 
 /**
  * la_foreach_decreasing(+L, :P, +Args, +N).
  *   Call P(H, N, Args...) for each element H of list L, with N decreasing for each element.
  */
 la_foreach_decreasing([], _, _, _).
-la_foreach_decreasing([H | T], P, Args, N) :- apply(P, [H, N | Args]),
-                                              M is N - 1,
-                                              la_foreach_decreasing(T, P, Args, M).
+la_foreach_decreasing([H | T], P, Args, N) :-
+    apply(P, [H, N | Args]),
+    M is N - 1,
+    la_foreach_decreasing(T, P, Args, M).
 
 /**
  * lb_foreach_decreasing(+L, :P, +Args, +N).
  *   Call P(H, Args..., N) for each element H of list L, with N decreasing for each element.
  */
 lb_foreach_decreasing([], _, _, _).
-lb_foreach_decreasing([H | T], P, Args, N) :- push_back(Args, N, B),
-                                              apply(P, [H | B]),
-                                              M is N - 1,
-                                              lb_foreach_decreasing(T, P, Args, M).
+lb_foreach_decreasing([H | T], P, Args, N) :-
+    last(Args, N, B),
+    apply(P, [H | B]),
+    M is N - 1,
+    lb_foreach_decreasing(T, P, Args, M).
 
 /**
  * index(+List, +Elem, ?I).
  *   Finds the index I of the first occurrence of Elem in List.
  *   Fails if no such Elem exists.
  */
-index(List, Elem, I) :- is_list(List),
-                        setof(X, nth1(X, List, Elem), Bag), !,
-                        head(Bag, I), !.
+index(List, Elem, I) :-
+    is_list(List),
+    setof(X, nth1(X, List, Elem), Bag), !,
+    head(Bag, I), !.
 
 /**
  * last_index(+List, +Elem, ?I).
  *   Finds the index I of the last occurrence of Elem in the List.
  *   Fails if no such Elem exists.
  */
-last_index(List, Elem, I) :- is_list(List),
-                             setof(X, nth1(X, List, Elem), Bag), !,
-                             last(Bag, I), !.
+last_index(List, Elem, I) :-
+    is_list(List),
+    setof(X, nth1(X, List, Elem), Bag), !,
+    last(Bag, I), !.
 
 /**
  * indices(+List, +Elem, ?I).
  *   Finds the indices I of the occurrences of Elem in the List.
  *   Provides indices of such occurrences.
  */
-indices(List, Elem, I) :- is_list(List),
-                          nth1(I, List, Elem). % no cut
+indices(List, Elem, I) :-
+    is_list(List),
+    nth1(I, List, Elem). % no cut
 
 /**
  * index_suchthat(:P, +List, ?I).
