@@ -196,7 +196,7 @@ matrix_left_diagonal([R,C], Matrix, Diagonal) :-
     matrix_main_diagonal(Matrix, Diagonal).
 
 matrix_right_diagonal([R,C], Matrix, Diagonal) :-
-    matrix_proper_length(Matrix, MRows, MCols),
+    matrix_proper_length(Matrix, _, MCols),
     Cl is MCols - C + 1,
     matrix_col_reverse(Matrix, ColReversed),
     matrix_left_diagonal([R,Cl], ColReversed, Diagonal).
