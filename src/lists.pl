@@ -93,7 +93,7 @@ fill_n_aux(N, E, [E|T]) :- fill_n_aux(M, E, T), N is M + 1.
 % range(+List, ?Segment, [+I,+J])
 range(List, Segment, [I,J]) :- proper_length(List, ListLength),
                                integer(I), integer(J), !,
-                               I + 1 =< J,
+                               I =< J,
                                Before is I - 1,
                                Length is J - Before,
                                After is ListLength - J,
@@ -129,6 +129,7 @@ range(List, Segment, I) :- proper_length(List, ListLength),
  * remove(+I, +List, -NewList).
  *   Remove I from List, getting NewList.
  */
+remove(I, [], []) :- I >= 0.
 remove(1, [_|List], List) :- !.
 remove(I, [H|List], [H|New]) :- I1 is I - 1, remove(I1, List, New).
 

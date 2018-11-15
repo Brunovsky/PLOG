@@ -24,33 +24,6 @@ test_select :-
     setof(X3, select(a, [a,b,c,a,d,a], X3), L3),
     perm(L3, [[b,c,a,d,a],[a,b,c,d,a],[a,b,c,a,d]]),
     setof(X4, selectchk(a, [a,b,c,a,d,a], X4), [[b,c,a,d,a]]).
-
-% selectnth0(Elem, Set, Residue, N), selectnth1(Elem, Set, Residue, N)
-test_selectnth4 :-
-    selectnth0(a, [a,b,c,a,d,a], [b,c,a,d,a], 0),
-    selectnth1(a, [a,b,c,a,d,a], [b,c,a,d,a], 1),
-    selectnth0(a, [a,b,c,a,d,a], [a,b,c,d,a], 3),
-    selectnth1(a, [a,b,c,a,d,a], [a,b,c,d,a], 4),
-    selectnth0(a, [a,b,c,a,d,a], [a,b,c,a,d], 5),
-    selectnth1(a, [a,b,c,a,d,a], [a,b,c,a,d], 6),
-    findall(A, selectnth0(A, [a,b,c], _, _), [a,b,c]),
-    findall(B, selectnth1(B, [a,b,c], _, _), [a,b,c]),
-    findall(C, selectnth0(_, [a,b,c], _, C), [0,1,2]),
-    findall(D, selectnth1(_, [a,b,c], _, D), [1,2,3]),
-    findall(E, selectnth0(z, E, [a,b,c], _), [[z,a,b,c],[a,z,b,c],[a,b,z,c],[a,b,c,z]]),
-    findall(F, selectnth1(z, F, [a,b,c], _), [[z,a,b,c],[a,z,b,c],[a,b,z,c],[a,b,c,z]]),
-    findall(G, selectnth0(a, [a,b,c,a,d], G, _), [[b,c,a,d],[a,b,c,d]]),
-    findall(H, selectnth1(a, [a,b,c,a,d], H, _), [[b,c,a,d],[a,b,c,d]]),
-    findall(I, selectnth0(a, [a,b,c,a,d,a,z], _, I), [0,3,5]),
-    findall(J, selectnth1(a, [a,b,c,a,d,a,z], _, J), [1,4,6]),
-    findall(K, selectnth0(z, K, [a,b,c], 2), [[a,b,z,c]]),
-    findall(L, selectnth1(z, L, [a,b,c], 2), [[a,z,b,c]]),
-    findall(M, selectnth0(M, [a,b,c,d], [a,b,d], _), [c]),
-    findall(N, selectnth1(N, [a,b,c,d], [a,b,d], _), [c]),
-    findall(O, selectnth0(_, [a,b,b,b,a], [a,b,b,a], O), [1,2,3]),
-    findall(P, selectnth1(_, [a,b,b,b,a], [a,b,b,a], P), [2,3,4]),
-    findall(Q, selectnth0(_, [a,b,c,d], Q, _), [[b,c,d],[a,c,d],[a,b,d],[a,b,c]]),
-    findall(R, selectnth0(_, [a,b,c,d], R, _), [[b,c,d],[a,c,d],[a,b,d],[a,b,c]]).
     
 % selectnth0(X, Xlist, Y, Ylist, N), selectnth1(X, Xlist, Y, Ylist, N)
 test_selectnth5 :-
@@ -200,10 +173,9 @@ test_suchthat :-
     l_indices_suchthat(char_uppercase, [0,b,_,0,a,_,a,7,q,_,s,y], ['A'], 10).
 
 
-test_lists :- write('==[TESTS]== lists'), nl, test_all([
+test_lists :- test_all(lists, [
     test_nth,
     test_select,
-    test_selectnth4,
     test_selectnth5,
     test_fill_n,
     test_range,

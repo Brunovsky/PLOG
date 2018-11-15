@@ -3,14 +3,19 @@
  * is_matrix(?Matrix).
  *   True if Matrix is a (rectangular) matrix.
  */
-is_matrix(Matrix) :- is_list(Matrix), a_all_of(proper_length, C, Matrix), C > 0.
+is_matrix(Matrix) :-
+    is_list(Matrix),
+    a_all_of(proper_length, _, Matrix),
+    clear_empty_list(Matrix, Matrix).
 
 /**
  * is_list_of_lists/1
  * is_list_of_lists(?L).
  *   True if L is a proper list of proper lists.
  */
-is_list_of_lists(L) :- is_list(L), all_of(is_list, L).
+is_list_of_lists(L) :-
+    is_list(L),
+    all_of(is_list, L).
 
 /**
  * matrix_size/3, matrix_length/3, matrix_proper_size/3, matrix_proper_length/3
@@ -20,37 +25,48 @@ is_list_of_lists(L) :- is_list(L), all_of(is_list, L).
  * matrix_proper_length(+Matrix, ?R, ?C).
  *   The matrix Matrix is made up of R rows and C columns.
  */
-matrix_size(Matrix, R, C) :- length(Matrix, R), a_all_of(length, C, Matrix).
+matrix_size(Matrix, R, C) :-
+    length(Matrix, R),
+    a_all_of(length, C, Matrix).
 
-matrix_length(Matrix, R, C) :- length(Matrix, R), a_all_of(length, C, Matrix).
+matrix_length(Matrix, R, C) :-
+    length(Matrix, R),
+    a_all_of(length, C, Matrix).
 
-matrix_proper_size(Matrix, R, C) :- proper_length(Matrix, R),
-                                    a_all_of(proper_length, C, Matrix).
+matrix_proper_size(Matrix, R, C) :-
+    proper_length(Matrix, R),
+    a_all_of(proper_length, C, Matrix).
 
-matrix_proper_length(Matrix, R, C) :- proper_length(Matrix, R),
-                                      a_all_of(proper_length, C, Matrix).
+matrix_proper_length(Matrix, R, C) :-
+    proper_length(Matrix, R),
+    a_all_of(proper_length, C, Matrix).
 
 /**
  * matrixnth0/3
  * matrixnth0(?[R,C], ?Matrix, ?Elem).
  *   Get element at position (R,C) in Matrix, 0-indexed.
  */
-matrixnth0([R,C], Matrix, Elem) :- nth0(R, Matrix, RowList), nth0(C, RowList, Elem).
+matrixnth0([R,C], Matrix, Elem) :-
+    nth0(R, Matrix, RowList),
+    nth0(C, RowList, Elem).
 
 /**
  * matrixnth1/3
  * matrixnth1(?[R,C], ?Matrix, ?Elem).
  *   Get element at position (R,C) in Matrix, 1-indexed.
  */
-matrixnth1([R,C], Matrix, Elem) :- nth1(R, Matrix, RowList), nth1(C, RowList, Elem).
+matrixnth1([R,C], Matrix, Elem) :-
+    nth1(R, Matrix, RowList),
+    nth1(C, RowList, Elem).
 
 /**
  * matrix_select/4
  * matrix_select(?X, ?XMatrix, ?Y, ?YMatrix).
  *   Like select/4 but for matrices.
  */
-matrix_select(X, XMatrix, Y, YMatrix) :- select(Xlist, XMatrix, Ylist, YMatrix),
-                                         select(X, Xlist, Y, Ylist).
+matrix_select(X, XMatrix, Y, YMatrix) :-
+    select(Xlist, XMatrix, Ylist, YMatrix),
+    select(X, Xlist, Y, Ylist).
 
 /**
  * matrix_selectnth0/5, matrix_selectnth1/5
@@ -61,7 +77,6 @@ matrix_select(X, XMatrix, Y, YMatrix) :- select(Xlist, XMatrix, Ylist, YMatrix),
 matrix_selectnth0(X, XMatrix, Y, YMatrix, [R,C]) :-
     selectnth0(Xlist, XMatrix, Ylist, YMatrix, R),
     selectnth0(X, Xlist, Y, Ylist, C).
-
 
 matrix_selectnth1(X, XMatrix, Y, YMatrix, [R,C]) :-
     selectnth1(Xlist, XMatrix, Ylist, YMatrix, R),
@@ -86,12 +101,14 @@ matrix_selectchknth1(X, XMatrix, Y, YMatrix, [R,C]) :-
  * matrix_cell(+[R,C], +Matrix, -Cell).
  *   Conventions the use of 1-indexing for matrices.
  */
-matrix_row(R, Matrix, RowList) :- nth1(R, Matrix, RowList), !.
+matrix_row(R, Matrix, RowList) :-
+    nth1(R, Matrix, RowList), !.
 
-matrix_col(C, Matrix, ColList) :- map(nth1(C), Matrix, ColList), !.
+matrix_col(C, Matrix, ColList) :-
+    map(nth1(C), Matrix, ColList), !.
 
-matrix_cell([R,C], Matrix, Cell) :- nth1(R, Matrix, RowList), !,
-                                    nth1(C, RowList, Cell), !.
+matrix_cell([R,C], Matrix, Cell) :-
+    matrixnth1([R,C], Matrix, Cell), !.
 
 /**
  * matrix_remove_row/3, matrix_remove_col/3, matrix_remove_rowcol/3,
@@ -132,14 +149,14 @@ matrix_remove_rowscols([R,C], Matrix, NewMatrix) :-
  *   Reverses matrix horizontally, vertically, and both, respectively.
  */
 matrix_row_reverse(Matrix, RowReversed) :-
-    reverse(Matrix, RowReversed).
+    reverse(Matrix, RowReversed), !.
 
 matrix_col_reverse(Matrix, ColReversed) :-
-    map(reverse, Matrix, ColReversed).
+    map(reverse, Matrix, ColReversed), !.
 
 matrix_rowcol_reverse(Matrix, RowColReversed) :-
-    reverse(Matrix, RowReversed),
-    map(reverse, RowReversed, RowColReversed).
+    reverse(Matrix, RowReversed), !,
+    map(reverse, RowReversed, RowColReversed), !.
 
 /**
  * matrix_range/3
@@ -179,8 +196,10 @@ matrix_left_diagonal([R,C], Matrix, Diagonal) :-
     matrix_main_diagonal(Matrix, Diagonal).
 
 matrix_right_diagonal([R,C], Matrix, Diagonal) :-
+    matrix_proper_length(Matrix, MRows, MCols),
+    Cl is MCols - C + 1,
     matrix_col_reverse(Matrix, ColReversed),
-    matrix_left_diagonal([R,C], ColReversed, Diagonal).
+    matrix_left_diagonal([R,Cl], ColReversed, Diagonal).
 
 /**
  * matrix_left_diagonals/2, matrix_right_diagonals/2, matrix_diagonals/2
@@ -430,9 +449,3 @@ segment_matrix(Matrix, Segment) :-
     segment_any_row(Matrix, Segment);
     segment_any_col(Matrix, Segment);
     segment_any_diagonal(Matrix, Segment).
-
-
-
-
-new :- reconsult('src/newmatrix.pl').
-

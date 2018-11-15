@@ -12,12 +12,12 @@
 :- reconsult('src/general.pl').
 :- reconsult('src/input.pl').
 :- reconsult('src/lists.pl').
-:- reconsult('src/newmatrix.pl').
+:- reconsult('src/matrix.pl').
 :- reconsult('src/menus.pl').
 :- reconsult('src/print-board.pl').
 :- reconsult('src/strings.pl').
 
 % Shorthands
 re :- reconsult('main.pl').
-test :- reconsult('test/test.pl').
-retest :- re, test.
+te :- reconsult('test/test.pl').
+rete :- re, te.
