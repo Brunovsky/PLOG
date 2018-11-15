@@ -50,7 +50,7 @@ add_captures(P, Captures, Np) :- Np is P + Captures.
 game_loop(game(B, Pw, Pb, w), Size) :- 
 	  display_game(B, Pw, Pb, w),
 		read_position(Row, Col),
-		rep_piece_at(B, Row, Col, E),
+		rep_piece_at(B, [Row,Col], E),
 		E == c, !,
 		rep_internal(Size, [Row, Col], [RowI, ColI]),
 		move([RowI, ColI], game(B, Pw, Pb, w), game(NewBoard, Npw, _, Next)),
@@ -59,7 +59,7 @@ game_loop(game(B, Pw, Pb, w), Size) :-
 game_loop(game(B, Pw, Pb, b), Size) :- 
 	  display_game(B, Pw, Pb, b),
 		read_position(Row, Col),
-		rep_piece_at(B, Row, Col, E),
+		rep_piece_at(B, [Row,Col], E),
 		E == c, !,
 		rep_internal(Size, [Row, Col], [RowI, ColI]),
 		move([RowI, ColI], game(B, Pw, Pb, b), game(NewBoard, _, Npb, Next)),
