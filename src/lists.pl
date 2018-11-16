@@ -41,7 +41,7 @@
  */
 
 /**
- * selectnth0/5, selectnth1/5.
+ * selectnth0/5, selectnth1/5
  * selectnth0(?X, ?Xlist, ?Y, ?Ylist, ?N).
  * selectnth1(?X, ?Xlist, ?Y, ?Ylist, ?N).
  *   Like select/4, but gets the index as well.
@@ -57,7 +57,7 @@ selectnth1(X, [A,B,X|T], Y, [A,B,Y|T], 3).
 selectnth1(X, [A,B,C|Xs], Y, [A,B,C|Ys], N) :- selectnth1(X, Xs, Y, Ys, M), N is M + 3.
 
 /**
- * selectchknth0/5, selectchknth1/5.
+ * selectchknth0/5, selectchknth1/5
  * selectchknth0(?X, ?Xlist, ?Y, ?Ylist, ?N).
  * selectchknth1(?X, ?Xlist, ?Y, ?Ylist, ?N).
  *   Like selectchk/4, but gets the index as well.
@@ -72,9 +72,21 @@ selectchknth1(X, Xlist, Y, Ylist, N) :- selectnth1(X, Xlist, Y, Ylist, N), !.
  * proper_segment(?List, ?Segment, ?N).
  *   Like segment/2 and proper_segment/2, but binding the segment length.
  */
-segment(List, Segment, N) :- length(Segment, N), segment(List, Segment).
+segment(List, Segment, N) :-
+    length(Segment, N), !,
+    segment(List, Segment).
 
-proper_segment(List, Segment, N) :- length(Segment, N), proper_segment(List, Segment).
+proper_segment(List, Segment, N) :-
+    length(Segment, N), !,
+    proper_segment(List, Segment).
+
+/**
+ * countsegment/3
+ * countsegment(+List, +Segment, -N).
+ *   Counts the number of times Segment appears in List.
+ */
+countsegment(List, Segment, N) :-
+    countfindall(Segment, segment(List, Segment), N).
 
 /**
  * fill_n/3
@@ -341,6 +353,7 @@ lb_map(P, Args, Xs, Ys) :-
     ).
 
 /**
+ * flatten/2
  * flatten(+List, -Flat).
  *   Flattens List into Flat.
  *   Fails if List is not a list of lists.
@@ -350,6 +363,7 @@ flatten([HList|TList], Flat) :- flatten(TList, Rest),
                                   append(HList, Rest, Flat), !.
 
 /**
+ * mixed_flatten/2
  * mixed_flatten(+List, -Flat).
  *   Mix flattens List into Flat.
  *   The non-list elements of L are passed unmodified.
@@ -361,6 +375,7 @@ mixed_flatten([HList|TList], Flat) :- is_list(HList),
 mixed_flatten([H|TList], [H|Rest]) :- mixed_flatten(TList, Rest), !.
 
 /**
+ * deep_flatten/2
  * deep_flatten(+List, -Flat).
  *   Deep flattens List into Flat.
  *   List elements of L are flattened themselves.
@@ -373,6 +388,7 @@ deep_flatten([HList|TList], Flat) :- is_list(HList),
 deep_flatten([H|TList], [H|Rest]) :- deep_flatten(TList, Rest), !.
 
 /**
+ * clear_empty_list/2
  * clear_empty_list(+List, -Clear).
  *   Removes from List elements like [].
  */
@@ -539,6 +555,7 @@ a_none_of(P, A, X) :- \+ a_any_of(P, A, X).
 l_none_of(P, Args, X) :- \+ l_any_of(P, Args, X).
 
 /**
+ * contains/2
  * contains(+List, +X).
  *   List contains X.
  *   Matches only once.
@@ -546,6 +563,7 @@ l_none_of(P, Args, X) :- \+ l_any_of(P, Args, X).
 contains(List, X) :- memberchk(X, List).
 
 /**
+ * contains_all/2
  * contains_all(+List, +Set).
  *   List contains all elements of list Set.
  *   Matches only once.
@@ -553,6 +571,7 @@ contains(List, X) :- memberchk(X, List).
 contains_all(List, Set) :- all_of(Set, contains(List)), !.
 
 /**
+ * contains_any/2
  * contains_any(+List, +Set).
  *   List contains at least one element of list Set.
  *   Matches only once.
@@ -560,6 +579,7 @@ contains_all(List, Set) :- all_of(Set, contains(List)), !.
 contains_any(List, Set) :- any_of(Set, contains(List)), !.
 
 /**
+ * contains_none/2
  * contains_none(+List, +Set).
  *   List contains no elements from list Set.
  *   Matches only once.
@@ -567,6 +587,7 @@ contains_any(List, Set) :- any_of(Set, contains(List)), !.
 contains_none(List, Set) :- none_of(Set, contains(List)), !.
 
 /**
+ * foreach/2
  * foreach(:P, +List).
  *   Call P(H) for each element H of List, irrespective of success.
  */
@@ -574,6 +595,7 @@ foreach(_, []).
 foreach(P, [H|T]) :- (call(P, H) -> true; true), foreach(P, T).
 
 /**
+ * a_foreach/3
  * a_foreach(:P, +List, +A).
  *   Call P(H, A) for each element H of List, irrespective of success.
  */
@@ -581,6 +603,7 @@ a_foreach(_, [], _).
 a_foreach(P, [H|T], A) :- (apply(P, [H|A]) -> true; true), a_foreach(P, T, A).
 
 /**
+ * la_foreach/3
  * la_foreach(:P, +List, +Args).
  *   Call P(H, Args...) for each element H of List, irrespective of success.
  */
@@ -588,6 +611,7 @@ l_foreach(_, [], _).
 l_foreach(P, [H|T], Args) :- (apply(P, [H|Args]) -> true; true), l_foreach(P, T, Args).
 
 /**
+ * foreach_increasing/3
  * foreach_increasing(+L, :P, +N).
  *   Call P(H, N) for each element H of list L, with N increasing for each element.
  */
@@ -597,6 +621,7 @@ foreach_increasing([H | T], P, N) :-
     foreach_increasing(T, P, M).
 
 /**
+ * la_foreach_increasing/4
  * la_foreach_increasing(+L, :P, +Args, +N).
  *   Call P(H, N, Args...) for each element H of list L, with N increasing for each element.
  */
@@ -607,6 +632,7 @@ la_foreach_increasing([H | T], P, Args, N) :-
     la_foreach_increasing(T, P, Args, M).
 
 /**
+ * lb_foreach_increasing/4
  * lb_foreach_increasing(+L, :P, +Args, +N).
  *   Call P(H, Args..., N) for each element H of list L, with N increasing for each element.
  */
@@ -618,6 +644,7 @@ lb_foreach_increasing([H | T], P, Args, N) :-
     lb_foreach_increasing(T, P, Args, M).
 
 /**
+ * foreach_decreasing/3
  * foreach_decreasing(+L, :P, +N).
  *   Call P(H, N) for each element H of list L, with N decreasing for each element.
  */
@@ -627,6 +654,7 @@ foreach_decreasing([H | T], P, N) :-
     foreach_decreasing(T, P, M).
 
 /**
+ * la_foreach_decreasing/4
  * la_foreach_decreasing(+L, :P, +Args, +N).
  *   Call P(H, N, Args...) for each element H of list L, with N decreasing for each element.
  */
@@ -637,6 +665,7 @@ la_foreach_decreasing([H | T], P, Args, N) :-
     la_foreach_decreasing(T, P, Args, M).
 
 /**
+ * lb_foreach_decreasing/4
  * lb_foreach_decreasing(+L, :P, +Args, +N).
  *   Call P(H, Args..., N) for each element H of list L, with N decreasing for each element.
  */
@@ -648,6 +677,7 @@ lb_foreach_decreasing([H | T], P, Args, N) :-
     lb_foreach_decreasing(T, P, Args, M).
 
 /**
+ * index/3
  * index(+List, +Elem, ?I).
  *   Finds the index I of the first occurrence of Elem in List.
  *   Fails if no such Elem exists.
@@ -658,6 +688,7 @@ index(List, Elem, I) :-
     head(Bag, I), !.
 
 /**
+ * last_index/3
  * last_index(+List, +Elem, ?I).
  *   Finds the index I of the last occurrence of Elem in the List.
  *   Fails if no such Elem exists.
@@ -668,6 +699,7 @@ last_index(List, Elem, I) :-
     last(Bag, I), !.
 
 /**
+ * indices/3
  * indices(+List, +Elem, ?I).
  *   Finds the indices I of the occurrences of Elem in the List.
  *   Provides indices of such occurrences.
@@ -677,6 +709,7 @@ indices(List, Elem, I) :-
     nth1(I, List, Elem). % no cut
 
 /**
+ * index_suchthat/3
  * index_suchthat(:P, +List, ?I).
  *   Finds the first index I such that P(H) holds for that index.
  */
@@ -685,6 +718,7 @@ index_suchthat(P, [H|T], I) :- \+ call(P, H),
                                index_suchthat(P, T, J), I is J + 1, !.
 
 /**
+ * a_index_suchthat/4
  * a_index_suchthat(:P, +List, +A, ?I).
  *   Finds the first index I such that P(H, A) holds for that index.
  */
@@ -694,6 +728,7 @@ a_index_suchthat(P, [H|T], A, I) :- \+ call(P, H, A),
                                     I is J + 1, !.
 
 /**
+ * l_index_suchthat/4
  * l_index_suchthat(:P, +List, +Args, ?I).
  *   Finds the first index I such that P(H, Args...) holds for that index.
  */
@@ -703,6 +738,7 @@ l_index_suchthat(P, [H|T], Args, I) :- \+ apply(P, [H|Args]),
                                        I is J + 1, !.
 
 /**
+ * last_index_suchthat/3
  * last_index_suchthat(:P, +List, ?I).
  *   Finds the last index I such that P(H) holds for that index.
  */
@@ -715,7 +751,8 @@ last_index_suchthat(P, [_|T], I) :- last_index_suchthat(P, T, J),
                                     I is J + 1, !.
 
 /**
- * last_index_suchthat(:P, +List, A, ?I).
+ * a_last_index_suchthat/4
+ * a_last_index_suchthat(:P, +List, A, ?I).
  *   Finds the last index I such that P(H, A) holds for that index.
  */
 a_last_index_suchthat(P, [H], A, 1) :- call(P, H, A), !.
@@ -727,7 +764,8 @@ a_last_index_suchthat(P, [_|T], A, I) :- a_last_index_suchthat(P, T, A, J),
                                          I is J + 1, !.
 
 /**
- * last_index_suchthat(:P, +List, Args, ?I).
+ * l_last_index_suchthat/4
+ * l_last_index_suchthat(:P, +List, Args, ?I).
  *   Finds the last index I such that P(H, Args...) holds for that index.
  */
 l_last_index_suchthat(P, [H], Args, 1) :- apply(P, [H|Args]), !.
@@ -739,6 +777,7 @@ l_last_index_suchthat(P, [_|T], Args, I) :- l_last_index_suchthat(P, T, Args, J)
                                             I is J + 1, !.
 
 /**
+ * indices_suchthat/3
  * indices_suchthat(:P, +List, ?I).
  *   Finds the first index I such that P(H) holds for that index.
  */
@@ -747,6 +786,7 @@ indices_suchthat(P, [_|T], I) :- indices_suchthat(P, T, J),
                                  I is J + 1.
 
 /**
+ * a_indices_suchthat/4
  * a_indices_suchthat(:P, +List, +A, ?I).
  *   Finds the first index I such that P(H, A) holds for that index.
  */
@@ -755,9 +795,18 @@ a_indices_suchthat(P, [_|T], A, I) :- a_indices_suchthat(P, T, A, J),
                                       I is J + 1.
 
 /**
+ * l_indices_suchthat/4
  * l_indices_suchthat(:P, +List, +Args, ?I).
  *   Finds the first index I such that P(H, Args...) holds for that index.
  */
 l_indices_suchthat(P, [H|_], Args, 1) :- apply(P, [H|Args]).
 l_indices_suchthat(P, [_|T], Args, I) :- l_indices_suchthat(P, T, Args, J),
                                          I is J + 1.
+
+/**
+ * is_palindrome/1
+ * is_palindrome(+List).
+ *   Asserts that the list is a palindrome.
+ */
+is_palindrome(List) :- is_list(List), reverse(List, List).
+

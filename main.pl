@@ -16,6 +16,7 @@
 :- reconsult('src/menus.pl').
 :- reconsult('src/print-board.pl').
 :- reconsult('src/strings.pl').
+:- reconsult('src/value.pl').
 
 % Shorthands
 re :- reconsult('main.pl').

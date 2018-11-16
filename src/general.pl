@@ -5,6 +5,14 @@
 apply(F, L) :- T =.. [F | L], call(T).
 
 /**
+ * countfindall(+Template, +Generator, -Count).
+ *   Count the number of choice points of Generator.
+ */
+countfindall(Template, Generator, Count) :-
+    findall(Template, Generator, ChoicePoints),
+    length(ChoicePoints, Count).
+
+/**
  * forloop_increasing(:F, +I, +E).
  *   Call F(N) for N in the range [I, E], with N increasing.
  */
@@ -73,3 +81,11 @@ untilloop_aux(C, F, _, R) :- call(F, Y), !, untilloop_aux(C, F, Y, R).
  */
 untilloop_fail(C, F) :- \+ call(C, X), call(F, X), untilloop_fail(C, F, X).
 untilloop_fail(C, F, X) :- !, \+ call(C, X), call(F, Y), !, untilloop_fail(C, F, Y).
+
+/**
+ * plus/3, mult/3
+ * plus(+A, +B, -C).
+ * mult(+A, +B, -C).
+ */
+plus(A, B, C) :- C is A + B.
+mult(A, B, C) :- C is A * B.

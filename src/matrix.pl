@@ -160,13 +160,22 @@ matrix_rowcol_reverse(Matrix, RowColReversed) :-
 
 /**
  * matrix_range/3
- * matrix_range(+Matrix, ?SubMatrix, ?[[RBegin,REnd],[CBegin,CEnd]]).
+ * matrix_range(+Matrix, ?SubMatrix, ?[RowRange,ColRange]).
  *   Extracts a submatrix from Matrix. Like range/3 but for matrices.
  */
-matrix_range(Matrix, SubMatrix, [R,C]) :-
-    range(Matrix, Intermediate, R),
-    a_map(range, C, Intermediate, Unclean),
+matrix_range(Matrix, SubMatrix, [RowRange,ColRange]) :-
+    range(Matrix, Intermediate, RowRange),
+    a_map(range, ColRange, Intermediate, Unclean),
     clear_empty_list(Unclean, SubMatrix).
+
+/**
+ * submatrix/4
+ * submatrix(+Matrix, ?SubMatrix, ?[RBegin,RLength,RAfter], ?[CBegin,CLength,CAfter]).
+ *   Like sublist/5 but for matrices.
+ */
+submatrix(Matrix, SubMatrix, [RBegin, RLength, RAfter], [CBegin, CLength, CAfter]) :-
+    sublist(Matrix, RowsSublist, RBegin, RLength, RAfter),
+    la_map(sublist, [CBegin, CLength, CAfter], RowsSublist, SubMatrix).
 
 /**
  * matrix_main_diagonal/2
@@ -180,11 +189,9 @@ matrix_main_diagonal(Matrix, [E|Tail]) :-
     matrix_main_diagonal(Minor, Tail).
 
 /**
- * matrix_left_diagonal/3, matrix_right_diagonal/3
+ * matrix_left_diagonal/3
  * matrix_left_diagonal(+[R,C], +Matrix, -Diagonal).
  *   Extracts a diagonal parallel to the main diagonal passing through (R,C).
- * matrix_right_diagonal(+[R,C], +Matrix, -Diagonal).
- *   Extracts a diagonal perpendicular to the main diagonal passing through (R,C).
  */
 matrix_left_diagonal([R,C], Matrix, Diagonal) :-
     R > C, !, I is R - C,
@@ -195,6 +202,11 @@ matrix_left_diagonal([R,C], Matrix, Diagonal) :-
     matrix_main_diagonal(Right, Diagonal);
     matrix_main_diagonal(Matrix, Diagonal).
 
+/**
+ * matrix_right_diagonal/3
+ * matrix_right_diagonal(+[R,C], +Matrix, -Diagonal).
+ *   Extracts a diagonal perpendicular to the main diagonal passing through (R,C).
+ */
 matrix_right_diagonal([R,C], Matrix, Diagonal) :-
     matrix_proper_length(Matrix, _, MCols),
     Cl is MCols - C + 1,
@@ -202,21 +214,48 @@ matrix_right_diagonal([R,C], Matrix, Diagonal) :-
     matrix_left_diagonal([R,Cl], ColReversed, Diagonal).
 
 /**
- * matrix_left_diagonals/2, matrix_right_diagonals/2, matrix_diagonals/2
- * matrix_left_diagonals(+Matrix, -LeftDiagonals). 
- * matrix_right_diagonals(+Matrix, -RightDiagonals).
- * matrix_diagonals(+Matrix, -Diagonals).
- *   Extracts the matrix's diagonals in a list.
+ * matrix_left_diagonal_index/3
+ * matrix_left_diagonal_index(?I, ?[R,C], +ColSize).
+ *   Associates with every left diagonal an index I.
+ *   If (R,C) is given, I is calculated for the diagonal passing
+ *   through said position. If I is given, (R,C) is chosen lying on
+ *   the first row or the first column.
  */
-matrix_diagonal_index(0, [1,1]).
-matrix_diagonal_index(I, [R,1]) :- I > 0, R is I + 1.
-matrix_diagonal_index(I, [1,C]) :- I < 0, C is 1 - I.
+matrix_left_diagonal_index(I, [R,C], ColSize) :-
+    var(I), !,
+    I is ColSize - C + R.
 
+matrix_left_diagonal_index(I, [1,C], ColSize) :-
+    integer(I), I < ColSize, !,
+    C is ColSize - I + 1.
+
+matrix_left_diagonal_index(I, [R,1], ColSize) :-
+    integer(I), I >= ColSize, !,
+    R is I - ColSize + 1.
+
+/**
+ * matrix_right_diagonal/3
+ */
+matrix_right_diagonal_index(I, [R,C], _) :-
+    var(I), !,
+    I is R + C - 1.
+
+matrix_right_diagonal_index(I, [1,C], ColSize) :-
+    integer(I), I < ColSize, !,
+    C is I.
+
+matrix_right_diagonal_index(I, [R,ColSize], ColSize) :-
+    itneger(I), I >= ColSize, !,
+    R is I - ColSize + 1.
+
+/**
+ * matrix_left_diagonals/2, matrix_right_diagonals/2, matrix_diagonals/2
+ */
 matrix_left_diagonals(Matrix, LeftDiagonals) :-
     matrix_proper_length(Matrix, R, C),
-    Lower is 1 - C, Upper is R - 1,
-    numlist(Lower, Upper, Is),
-    map(matrix_diagonal_index, Is, RCs),
+    Upper is R + C - 1,
+    numlist(1, Upper, Is),
+    a_map(matrix_left_diagonal_index, C, Is, RCs),
     b_map(matrix_left_diagonal, Matrix, RCs, LeftDiagonals).
 
 matrix_right_diagonals(Matrix, RightDiagonals) :-
@@ -227,6 +266,16 @@ matrix_diagonals(Matrix, Diagonals) :-
     matrix_left_diagonals(Matrix, Lefts),
     matrix_right_diagonals(Matrix, Rights),
     append(Lefts, Rights, Diagonals).
+
+/**
+ * matrix_lists/2
+ * matrix_lists(+Matrix, -Lists).
+ *   Extracts a list containing the matrix's rows, columns and diagonals, unidentified.
+ */
+matrix_lists(Matrix, Lists) :-
+    transpose(Matrix, Transpose),
+    matrix_diagonals(Matrix, Diagonals),
+    append([Matrix, Transpose, Diagonals], Lists).
 
 /**
  * matrix_map/3
@@ -346,7 +395,7 @@ matrix_la_map(P, Args, XMatrix, YMatrix) :-
 /**
  * matrix_la_map/5
  * matrix_la_map(:P, ?Args, ?XMatrix, ?YMatrix, ?ZMatrix).
- *   Succeeds when P(X, Y, Args...) for each corresponding X in XMatrix, Y in YMatrix, Z in ZMatrix.
+ *   Succeeds when P(X, Y, Z, Args...) for each corresponding X in XMatrix, Y in YMatrix, Z in ZMatrix.
  *   Like la_map/5 but for matrices.
  */
 matrix_la_map(P, Args, XMatrix, YMatrix, ZMatrix) :-

@@ -1,4 +1,5 @@
 /**
+ * player/2
  * player(?Color, ?Captures).
  *   A player of Pente, with a color, a certain number of Captures
  *   and a series of plays.
@@ -8,18 +9,21 @@
 player(_, _).
 
 /**
- * other_player(+P1, ?P2).
+ * other_player/2
+ * other_player(?P1, ?P2).
  */
 other_player(w, b).
 other_player(b, w).
 
 /**
+ * is_player/1
  * is_player(?P).
  */
 is_player(w).
 is_player(b).
 
 /**
+ * game/4
  * game(?Board, ?Wc, ?Bc, ?next).
  *   A game of Pente.
  *   > The current Board is represented by a 19x19 matrix, consisting of
@@ -30,23 +34,24 @@ is_player(b).
 game(_, _, _, _).
 
 /**
-* start_game(+S, player, player)
-*   Starts a player vs player pente game with a board with size S
-*/
+ * start_game/3
+ * start_game(+S, player, player)
+ *   Starts a player vs player pente game with a board with size S
+ */
 start_game(S, player, player) :-
 	  make_board(S, B),
 		game_loop(game(B, 0, 0, w), S).
 
 /**
-* add_captures(+P, +Captures, -Np)
-*   Adds a given number (Captures) to the given player captures (P)
-*/
+ * add_captures(+P, +Captures, -Np)
+ *   Adds a given number (Captures) to the given player captures (P)
+ */
 add_captures(P, Captures, Np) :- Np is P + Captures.
 
 /**
-* game_loop(+game(B, Pw, Pb, Next))
-*   Next iteration of the game 
-*/
+ * game_loop(+game(B, Pw, Pb, Next))
+ *   Next iteration of the game 
+ */
 game_loop(game(B, Pw, Pb, w), Size) :- 
 	  display_game(B, Pw, Pb, w),
 		read_position(Row, Col),
@@ -78,9 +83,9 @@ game_loop_aux(game(B, Pw, Pb, _), _Size) :-
 game_loop_aux(game(B, Pw, Pb, Next), Size) :- game_loop(game(B, Pw, Pb, Next), Size).
 
 /**
-* victory(P)
-* displays a victory message for the player P (w or b)
-*/
+ * victory(P)
+ * displays a victory message for the player P (w or b)
+ */
 victory(w):- write('White player won!'), nl.
 victory(b):- write('Black player won!'), nl.
 
