@@ -43,12 +43,6 @@ start_game(S, player, player) :-
 		game_loop(game(B, 0, 0, w), S).
 
 /**
- * add_captures(+P, +Captures, -Np)
- *   Adds a given number (Captures) to the given player captures (P)
- */
-add_captures(P, Captures, Np) :- Np is P + Captures.
-
-/**
  * add_captures/4
  * add_captures(+P, +Captures, +[Wc,Bc], -[NewWc,NewBc]).
  */
@@ -59,35 +53,23 @@ add_captures(b, Captures, [Wc,Bc], [Wc,NewBc]) :- NewBc is Bc + Captures.
  * game_loop(+game(B, Pw, Pb, Next))
  *   Next iteration of the game 
  */
-game_loop(game(B, Pw, Pb, w), Size) :- 
-	  display_game(B, Pw, Pb, w),
-		read_position(Row, Col),
-		rep_piece_at(B, [Row,Col], E),
-		E == c, !,
-		rep_internal(Size, [Row, Col], [RowI, ColI]),
-		move([RowI, ColI], game(B, Pw, Pb, w), game(NewBoard, Npw, _, Next)),
-		game_loop_aux(game(NewBoard, Npw, Pb, Next), Size).
 
-game_loop(game(B, Pw, Pb, b), Size) :- 
-	  display_game(B, Pw, Pb, b),
-		read_position(Row, Col),
-		rep_piece_at(B, [Row,Col], E),
-		E == c, !,
-		rep_internal(Size, [Row, Col], [RowI, ColI]),
-		move([RowI, ColI], game(B, Pw, Pb, b), game(NewBoard, _, Npb, Next)),
-		game_loop_aux(game(NewBoard, Pw, Npb, Next), Size).
+game_loop(game(B, Wc, Bc, Next), Size) :-
+	display_game(B, Wc, Bc, Next),
+	read_position(Row, Col),
+	rep_piece_at(B, [Row, Col], E),
+	E == c, !,
+	rep_internal(Size, [Row, Col], [RowI, ColI]),
+	move([RowI, ColI], game(B, Wc, Bc, Next), game(NewBoard, Nwc, Nbc, Nnext)),
+	game_loop_aux(game(NewBoard, Nwc, Nbc, Nnext), Size).
 
-game_loop_aux(game(B, Pw, Pb, _), _Size) :-
-	  game_over(game(B, Pw, Pb, _), w), !,
-		display_game(B, Pw, Pb, w),
-		victory(w).
+game_loop_aux(game(B, Wc, Bc, _), _) :-
+	is_player(P),
+	game_over(game(B, Wc, Bc, _), P), !,
+	display_game(B, Wc, Bc, P),
+	victory(P).
 
-game_loop_aux(game(B, Pw, Pb, _), _Size) :-	
-	  game_over(game(B, Pw, Pb, _), b), !,
-		display_game(B, Pw, Pb, b),
-		victory(b).
-
-game_loop_aux(game(B, Pw, Pb, Next), Size) :- game_loop(game(B, Pw, Pb, Next), Size).
+game_loop_aux(game(B, Wc, Bc, Next), Size) :- game_loop(game(B, Wc, Bc, Next), Size).
 
 /**
  * victory(P)

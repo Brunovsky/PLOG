@@ -257,10 +257,7 @@ valid_moves(Board, _, ListOfMoves) :- empty_positions(Board, ListOfMoves).
  * move/3
  * move(+[R,C], +game(Board, Wc, Bc, P), -game(Board, Wc, Bc, P)).
  */
-move([R,C], game(Board, Wc, Bc, w), game(NewBoard, Wc1, Bc, b)) :-
-    place_stone(w, Board, [R,C], NewBoard, Captures),
-    add_captures(Wc, Captures, Wc1).
-
-move([R,C], game(Board, Wc, Bc, b), game(NewBoard, Wc, Bc1, w)) :-
-    place_stone(b, Board, [R,C], NewBoard, Captures),
-    add_captures(Bc, Captures, Bc1).
+move([R,C], game(Board, Wc, Bc, P), game(NewBoard, Wc1, Bc1, Next)) :-
+    place_stone(P, Board, [R,C], NewBoard, Captures),
+    add_captures(P, Captures, [Wc, Bc], [Wc1, Bc1]),
+    other_player(P, Next).
