@@ -466,8 +466,7 @@ include/3 succeeds when SubList is the sublist of Xs containing all the elements
 
     partition(:Pred, +List, ?Less, ?Equal, ?Greater).
 
-Call Pred(X, R) for each element X of List, and map X to Less, Equal or Greater according to
-R being <, = or > (atoms).
+Call Pred(X, R) for each element X of List, and map X to Less, Equal or Greater according to R being <, = or > (atoms).
 
 ### group/4
 

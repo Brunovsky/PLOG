@@ -810,3 +810,23 @@ l_indices_suchthat(P, [_|T], Args, I) :- l_indices_suchthat(P, T, Args, J),
  */
 is_palindrome(List) :- is_list(List), reverse(List, List).
 
+/**
+ * different/4
+ * different(?X, ?Xs, ?Y, ?Ys).
+ *   True when Xs and Ys are lists which differ in a certain position,
+ *   where Xs has element X and Ys has element Y.
+ */
+different(X, [X|_], Y, [Y|_]) :- X \= Y.
+different(X, [_|Xs], Y, [_|Ys]) :- different(X, Xs, Y, Ys).
+
+/**
+ * differentnth0/5, differentnth1/5
+ * differentnth0(?X, ?Xs, ?Y, ?Ys, ?N).
+ * differentnth0(?X, ?Xs, ?Y, ?Ys, ?N).
+ *   Like different/4 but gets the index as well.
+ */
+differentnth0(X, [X|_], Y, [Y|_], 0) :- X \= Y.
+differentnth0(X, [_|Xs], Y, [_|Ys], N) :- differentnth0(X, Xs, Y, Ys, M), N is M + 1.
+
+differentnth1(X, [X|_], Y, [Y|_], 1) :- X \= Y.
+differentnth1(X, [_|Xs], Y, [_|Ys], N) :- differentnth1(X, Xs, Y, Ys, M), N is M + 1.

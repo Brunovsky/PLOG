@@ -11,12 +11,22 @@ make_board(Size, Board) :- Size > 0, fill_n(Size, c, Row), fill_n(Size, Row, Boa
  */
 board_size(Board, Size) :- matrix_proper_length(Board, Size, Size).
 
+
 /**
- * player_reversal/2
- * player_reversal(?WBoard, ?BBoard).
+ * list_reversal/2, board_reversal/2
+ * list_reversal(?WList, ?BList).
+ * board_reversal(?WBoard, ?BBoard).
  *   Changes white pieces to black pieces and vice versa.
  */
-player_reversal(WBoard, BBoard) :- map(other_player, WBoard, BBoard).
+reversal(c, c).
+reversal(w, b).
+reversal(b, w).
+reversal('W', 'B').
+reversal('B', 'W').
+
+list_reversal(WList, BList) :- map(reversal, WList, BList).
+
+board_reversal(WBoard, BBoard) :- matrix_map(reversal, WBoard, BBoard).
 
 /**
  * five_board/2

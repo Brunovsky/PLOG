@@ -498,3 +498,26 @@ segment_matrix(Matrix, Segment) :-
     segment_any_row(Matrix, Segment);
     segment_any_col(Matrix, Segment);
     segment_any_diagonal(Matrix, Segment).
+
+/**
+ * matrix_different/4
+ * matrix_different(?X, ?XMatrix, ?Y, ?YMatrix).
+ *   Like different/4 but for matrices.
+ */
+matrix_different(X, XMatrix, Y, YMatrix) :-
+    different(XRow, XMatrix, YRow, YMatrix),
+    different(X, XRow, Y, YRow).
+
+/**
+ * matrix_differentnth0/5, matrix_differentnth1/5
+ * matrix_differentnth0(?X, ?XMatrix, ?Y, ?YMatrix, ?[R,C]).
+ * matrix_differentnth1(?X, ?XMatrix, ?Y, ?YMatrix, ?[R,C]).
+ *   Like differentnth0/5 and differentnth1/5 but for matrices.
+ */
+matrix_differentnth0(X, XMatrix, Y, YMatrix, [R,C]) :-
+    differentnth0(XRow, XMatrix, YRow, YMatrix, R),
+    differentnth0(X, XRow, Y, YRow, C).
+
+matrix_differentnth1(X, XMatrix, Y, YMatrix, [R,C]) :-
+    differentnth1(XRow, XMatrix, YRow, YMatrix, R),
+    differentnth1(X, XRow, Y, YRow, C).

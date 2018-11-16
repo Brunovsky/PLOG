@@ -49,6 +49,13 @@ start_game(S, player, player) :-
 add_captures(P, Captures, Np) :- Np is P + Captures.
 
 /**
+ * add_captures/4
+ * add_captures(+P, +Captures, +[Wc,Bc], -[NewWc,NewBc]).
+ */
+add_captures(w, Captures, [Wc,Bc], [NewWc,Bc]) :- NewWc is Wc + Captures.
+add_captures(b, Captures, [Wc,Bc], [Wc,NewBc]) :- NewBc is Bc + Captures.
+
+/**
  * game_loop(+game(B, Pw, Pb, Next))
  *   Next iteration of the game 
  */
@@ -70,7 +77,7 @@ game_loop(game(B, Pw, Pb, b), Size) :-
 		move([RowI, ColI], game(B, Pw, Pb, b), game(NewBoard, _, Npb, Next)),
 		game_loop_aux(game(NewBoard, Pw, Npb, Next), Size).
 
-game_loop_aux(game(B, Pw, Pb, _), _Size) :-	
+game_loop_aux(game(B, Pw, Pb, _), _Size) :-
 	  game_over(game(B, Pw, Pb, _), w), !,
 		display_game(B, Pw, Pb, w),
 		victory(w).
