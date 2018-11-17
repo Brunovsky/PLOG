@@ -347,7 +347,7 @@ multiscore(List, Pattern, TotalScore) :-
  * captures_score(Wc, Bc, Score).
  *   Setting a score to a pair of captures (Wc,Bc).
  */
-captures_score([C,C], 0).
+captures_score([C,C], 0) :- 0 is mod(C, 2), C < 10, C >= 0.
 
 captures_score([2,0], 2 ** 25).
 captures_score([4,0], 2 ** 37).
