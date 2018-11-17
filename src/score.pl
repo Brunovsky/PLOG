@@ -363,7 +363,7 @@ captures_score([10,_], 2 ** 90).
 
 captures_score([Wc,Bc], Score) :-
     Wc < Bc,
-    captures_score(Bc, Wc, WScore),
+    captures_score([Bc,Wc], WScore),
     Score is -WScore.
 
 /**

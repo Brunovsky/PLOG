@@ -93,9 +93,17 @@ countsegment(List, Segment, N) :-
  * fill_n(?N, ?E, ?L).
  *   L is a list with N elements E.
  */
-fill_n(N, E, L) :- fill_n_aux(N, E, L), !.
-fill_n_aux(0, _, []).
-fill_n_aux(N, E, [E|T]) :- fill_n_aux(M, E, T), N is M + 1.
+fill_n(0, _, []).
+
+fill_n(N, E, [E|T]) :-
+    integer(N), !,
+    M is N - 1,
+    fill_n(M, E, T), !.
+
+fill_n(N, E, [E|L]) :-
+    var(N), !,
+    fill_n(M, E, L), !,
+    N is M + 1.
 
 /**
  * range/3

@@ -15,7 +15,10 @@
 :- reconsult('src/matrix.pl').
 :- reconsult('src/menus.pl').
 :- reconsult('src/print-board.pl').
+:- reconsult('src/score.pl').
 :- reconsult('src/strings.pl').
+:- reconsult('src/tree-opt.pl').
+:- reconsult('src/tree.pl').
 :- reconsult('src/value.pl').
 
 % Shorthands
