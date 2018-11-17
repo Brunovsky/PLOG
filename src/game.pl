@@ -49,11 +49,9 @@ start_game(S, player, player) :-
 
 game_loop(game(B, Wc, Bc, Next), Size) :-
 	display_game(B, Wc, Bc, Next),
-	read_position(Row, Col),
-	rep_piece_at(B, [Row, Col], E),
-	E == c, !,
-	rep_internal(Size, [Row, Col], [RowI, ColI]),
-	move([RowI, ColI], game(B, Wc, Bc, Next), game(NewBoard, Nwc, Nbc, Nnext)),
+	read_position(RepRow, RepCol),
+	rep_internal(Size, [RepRow, RepCol], [R, C]),
+	move([R, C], game(B, Wc, Bc, Next), game(NewBoard, Nwc, Nbc, Nnext)),
 	game_loop_aux(game(NewBoard, Nwc, Nbc, Nnext), Size).
 
 game_loop_aux(game(B, Wc, Bc, _), _) :-

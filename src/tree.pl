@@ -28,6 +28,23 @@
  */
 
 /**
+ * print_node/1
+ * print_node(+Node).
+ *   For debugging purposes only.
+ */
+print_node(Node) :-
+    Node = node(Board, P, Val, [Wc,Bc], Children, Worth),
+    write('===== ===== ===== ===== node/6 ===== ===== ===== ====='), nl,
+    display_game(Board, Wc, Bc, P),
+    print_val(Val), nl,
+    format('Node Worth: ~D', Worth), nl,
+    length(Children, C),
+    format('-- Children: ~d', C), nl,
+    (   foreach(Value-(Move-_), Children)
+    do  format('  Value ~D~n  Move: ~w~n', [Value, Move])
+    ), !.
+
+/**
  * Accessors and other quick utilities.
  */
 node_board(node(Board, _, _, _, _, _), Board).
@@ -48,14 +65,12 @@ child_node(_-(_-Child), Child).
  *   Build a node/6 from scratch.
  */
 build_start_node(Board, Node) :-
-    build_start_node(Board, w, [0,0], Node).
+    build_start_node(Board, w, [0,0], Node), !.
 
 build_start_node(Board, P, Cap, Node) :-
     Node = node(Board, P, Val, Cap, [], Total),
     evaluate_board(Board, Val),
-    total_val(Val, ValValue),
-    captures_score(Cap, CapValue),
-    Total is ValValue + CapValue.
+    totalval(Val, Cap, Total), !.
 
 /**
  * build_child_node/3
@@ -65,11 +80,11 @@ build_start_node(Board, P, Cap, Node) :-
 build_child_node(Move, ParentNode, ChildNode) :-
     other_player(P, Other),
     ParentNode = node(Board, P, Val, Cap, _, _),
-    ChildNode = node(ChildBoard, Other, ChildVal, ChildCap, [], TotalValue),
+    ChildNode = node(ChildBoard, Other, ChildVal, ChildCap, [], Worth),
     place_stone(P, Board, Move, ChildBoard, Captures),
     add_captures(P, Captures, Cap, ChildCap),
     reevaluate_board(Board, ChildBoard, Val, ChildVal),
-    totalval(Val, Cap, TotalValue).
+    totalval(ChildVal, ChildCap, Worth), !.
 
 /**
  * order_children/3

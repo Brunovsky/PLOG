@@ -43,6 +43,21 @@
  */
 
 /**
+ * print_val/1
+ * print_val(+Val).
+ *   For debugging purposes only.
+ */
+print_val(Val) :-
+    Val = val(RowV,ColV,LeftV,RightV),
+    write('===== ===== ===== ===== val/4 ===== ===== ===== ====='), nl,
+    write(' RowV:   '), write(RowV), nl,
+    write(' ColV:   '), write(ColV), nl,
+    write(' LeftV:  '), write(LeftV), nl,
+    write(' RightV: '), write(RightV), nl,
+    sumval(Val, Total),
+    format(' Total: ~D', Total), nl, !.
+
+/**
  * sumval/2
  * sumval(+Val, -TotalValue).
  *   Sums up the values in a val/4.
@@ -52,7 +67,7 @@ sumval(Val, TotalValue) :-
     sumlist(RowV, RowTotal),
     sumlist(ColV, ColTotal),
     sumlist(LeftV, LeftTotal),
-    sumlist(RightV, RightTotal),
+    sumlist(RightV, RightTotal), !,
     TotalValue is RowTotal + ColTotal + LeftTotal + RightTotal, !.
 
 /**
@@ -63,7 +78,7 @@ sumval(Val, TotalValue) :-
 totalval(Val, Cap, TotalValue) :-
     sumval(Val, ValValue),
     captures_score(Cap, CapValue),
-    TotalValue is ValValue + CapValue.
+    TotalValue is ValValue + CapValue, !.
 
 /**
  * evaluate_board/2
@@ -77,10 +92,10 @@ evaluate_board(Board, Val) :-
     transpose(Board, ColList),
     matrix_left_diagonals(Board, LeftList),
     matrix_right_diagonals(Board, RightList),
-    map(evaluate, Board, RowV),
-    map(evaluate, ColList, ColV),
-    map(evaluate, LeftList, LeftV),
-    map(evaluate, RightList, RightV).
+    map(evaluate, Board, RowV), !,
+    map(evaluate, ColList, ColV), !,
+    map(evaluate, LeftList, LeftV), !,
+    map(evaluate, RightList, RightV), !.
 
 /**
  * reevaluate_cell/4
@@ -90,18 +105,18 @@ evaluate_board(Board, Val) :-
  */
 reevaluate_cell([R,C], Board, OldVal, NewVal) :-
     OldVal = val(RowV,ColV,LeftV,RightV),
-    NewVal = val(NewRowV,NewColV,NewLeftV,NewRightV),
+    NewVal = val(NewRowV,NewColV,NewLeftV,NewRightV), !,
     matrix_length(Board, _, ColSize),
     matrix_left_diagonal_index(LeftI, [R,C], ColSize),
-    matrix_right_diagonal_index(RightI, [R,C], ColSize),
+    matrix_right_diagonal_index(RightI, [R,C], ColSize), !,
     matrix_row(R, Board, RowList),
     matrix_col(C, Board, ColList),
     matrix_left_diagonal([R,C], Board, LeftList),
-    matrix_right_diagonal([R,C], Board, RightList),
-    evaluate(RowList, RowValue),
-    evaluate(ColList, ColValue),
-    evaluate(LeftList, LeftValue),
-    evaluate(RightList, RightValue),
+    matrix_right_diagonal([R,C], Board, RightList), !,
+    evaluate(RowList, RowValue), !,
+    evaluate(ColList, ColValue), !,
+    evaluate(LeftList, LeftValue), !,
+    evaluate(RightList, RightValue), !,
     selectnth1(_, RowV, RowValue, NewRowV, R),
     selectnth1(_, ColV, ColValue, NewColV, C),
     selectnth1(_, LeftV, LeftValue, NewLeftV, LeftI),

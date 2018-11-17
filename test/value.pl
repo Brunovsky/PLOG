@@ -3,6 +3,7 @@ test_sumval :-
     Val1 = val([5,73,60], [173,561,-430], [34,51,-70,-54,30], [-34,0,82,52,-90]),
     Val2 = val([0,100,10000], [400,4000,40000], [0,0,0,0,0], [0,0,0,0,0]),
     Val3 = val([0,-100,-10000], [-400,-4000,-40000], [500,500,500,500,500], [0,0,0,0,0]),
+    %print_val(Val1), nl, print_val(Val2), nl, print_val(Val3), nl,
     sumval(Val1, 443),
     sumval(Val2, 54500),
     sumval(Val3, -52000).
@@ -15,7 +16,9 @@ test_evaluate_board :-
         [w,c,w,w],
         [b,w,c,c]
     ],
-    evaluate_board(Board, val(RowV,ColV,LeftV,RightV)),
+    evaluate_board(Board, Val),
+    %print_val(Val), nl,
+    Val = val(RowV,ColV,LeftV,RightV),
     RowV = [Row1,Row2,Row3,Row4],
     ColV = [Col1,Col2,Col3,Col4],
     LeftV = [Left1,Left2,Left3,Left4,Left5,Left6,Left7],
@@ -66,7 +69,7 @@ test_reevaluate :-
         [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
         [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c]
     ],
-    place_stone(w, Board, [10,13], NewBoard, _), !,
+    place_stone(w, Board, [10,13], NewBoard, _), !, % does not capture
     evaluate_board(Board, OldVal), !,
     evaluate_board(NewBoard, Val), !,
     reevaluate_board(Board, NewBoard, OldVal, Val), !,
