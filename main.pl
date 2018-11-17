@@ -19,7 +19,7 @@
 :- reconsult('src/print-board.pl').
 :- reconsult('src/score.pl').
 :- reconsult('src/strings.pl').
-:- reconsult('src/tree-opt.pl').
+:- reconsult('src/options.pl').
 :- reconsult('src/tree.pl').
 :- reconsult('src/value.pl').
 :- reconsult('src/random.pl').
@@ -29,3 +29,7 @@
 re :- reconsult('main.pl').
 te :- reconsult('test/test.pl').
 rete :- re, te.
+
+play :- pente.
+play(Options) :- pente(Options).
+help :- help_menu.

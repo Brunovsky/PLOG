@@ -881,11 +881,11 @@ between([I,J], N) :- between(I, J, N).
  */
 getopt(OptionsList, OptName, OptValue) :-
     Elem =.. [OptName, OptValue],
-    memberchk(Elem, OptionsList).
+    memberchk(Elem, OptionsList), !.
 
 getopt(OptionsList, OptName, Default, OptValue) :-
-    getopt(OptionsList, OptName, OptValue);
-    OptValue = Default.
+    getopt(OptionsList, OptName, OptValue), !;
+    OptValue = Default, !.
 
 /**
  * extra_prefix_length/3, extra_suffix_length/3
