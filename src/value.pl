@@ -53,10 +53,10 @@ sumval(Val, TotalValue) :-
     sumlist(ColV, ColTotal),
     sumlist(LeftV, LeftTotal),
     sumlist(RightV, RightTotal),
-    TotalValue is RowTotal + ColTotal + LeftTotal + RightTotal.
+    TotalValue is RowTotal + ColTotal + LeftTotal + RightTotal, !.
 
 /**
- * totalval/4
+ * totalval/3
  * totalval(+Val, +Cap, -TotalValue).
  *   Sums up the values in a val/4 and a cap [Wc,Bc].
  */
