@@ -11,7 +11,6 @@ make_board(Size, Board) :- Size > 0, fill_n(Size, c, Row), fill_n(Size, Row, Boa
  */
 board_size(Board, Size) :- matrix_proper_length(Board, Size, Size).
 
-
 /**
  * list_reversal/2, board_reversal/2
  * list_reversal(?WList, ?BList).
@@ -241,6 +240,27 @@ empty_positions(Board, Range, FilteredListOfMoves) :-
     include(matrix_between(Range), ListOfMoves, FilteredListOfMoves).
 
 /**
+ * valid_move/3
+ * valid_move(+Board, +Turn, +[R,C]).
+ *    Check if a given move [R,C] is valid in the given Turn
+ */
+valid_move(Board, 0, [R,C]) :-
+    !, R is C,
+    board_size(Board, S),
+    R is integer((S+1)/2).
+
+valid_move(Board, 2, [R,C]) :-
+    !, board_size(Board, S),
+    Center is integer((S+1)/2),
+    Min is Center-3, Max is Center+3,
+    empty_position(Board, ListOfMoves),
+    empty_positions(Board, [[Min, Max], [Min, Max]], InvalidMoves),
+    exclude(contains(ListOfMoves), InvalidMoves, FilteredListOfMoves), !,
+    contains(FilteredListOfMoves, [R,C]).
+
+valid_move(_, _, _).
+
+/**
  * valid_moves/3
  * valid_moves(+Board, +Player, ?ListOfMoves).
  *   Gets a list with all the valid moves (does not depend on the player).
@@ -249,12 +269,13 @@ valid_moves(Board, _, ListOfMoves) :- empty_positions(Board, ListOfMoves).
 
 /**
  * move/3
- * move(+[R,C], +game(Board, Wc, Bc, P), -game(Board, Wc, Bc, P)).
+ * move(+[R,C], +game(Board, Wc, Bc, P, Turn), -game(Board, Wc, Bc, P, Turn)).
  */
-move([R,C], game(Board, Wc, Bc, P), game(NewBoard, Wc1, Bc1, Next)) :-
+move([R,C], game(Board, Wc, Bc, P, Turn), game(NewBoard, Wc1, Bc1, Next, NTurn)) :-
     place_stone(P, Board, [R,C], NewBoard, Captures),
     add_captures(P, Captures, [Wc, Bc], [Wc1, Bc1]),
-    other_player(P, Next).
+    other_player(P, Next),
+    NTurn is Turn + 1.
 
 /**
  * add_captures/4

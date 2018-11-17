@@ -87,9 +87,57 @@ test_place_stone :-
     place_stone(b, M2, [5,7], M2Result, 6),
     \+ place_stone(w, M1, [4,4], M1Result, 8).
 
+% valid_move(Board, Turn, [R,C])
+test_valid_move :-
+    M1 = [
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c]
+    ],
+
+    \+ valid_move(M1, 0, [7,8]),
+    \+ valid_move(M1, 0, [17,6]),
+    \+ valid_move(M1, 0, [12,12]),
+    valid_move(M1, 0, [10,10]),
+
+    valid_move(M1, 2, [7,7]),
+    valid_move(M1, 2, [13,13]),
+    valid_move(M1, 2, [7,13]),
+    valid_move(M1, 2, [13,7]),
+    valid_move(M1, 2, [12,11]),
+    valid_move(M1, 2, [8,10]),
+    \+ valid_move(M1, 2, [14,7]),
+    \+ valid_move(M1, 2, [7,6]),
+    \+ valid_move(M1, 2, [16,10]),
+    \+ valid_move(M1, 2, [10,14]),
+
+    valid_move(M1, 7, [1,6]),
+    valid_move(M1, 16, [7,2]),
+    valid_move(M1, 19, [12,8]),
+    valid_move(M1, 1, [13,13]),
+    valid_move(M1, 9, [5,16]).
+    
+
 test_board :- test_all(board, [
     test_make_board,
     test_five_board,
     test_check_dead_stones,
-    test_place_stone
+    test_place_stone,
+    test_valid_move
 ]).
