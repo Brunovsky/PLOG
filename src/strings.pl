@@ -114,13 +114,13 @@ row_rep_index(Size, RepRow, IntRow) :- nonvar(RepRow), IntRow is Size + 1 - RepR
 row_rep_index(Size, RepRow, IntRow) :- nonvar(IntRow), RepRow is Size + 1 - IntRow.
 
 /**
- * rep_internal(+Size, ?Rep, ?Int).
+ * rep_internal(+RowSize, ?Rep, ?Int).
  *   Matches, for a given board size, an internal [IntRow,IntCol]
  *   with a UI [RepRow,RepCol]
  */
-rep_internal(Size, [RepRow,RepCol], [IntRow,IntCol]) :-
+rep_internal(RowSize, [RepRow,RepCol], [IntRow,IntCol]) :-
     col_rep_index(RepCol, IntCol),
-    row_rep_index(Size, RepRow, IntRow).
+    row_rep_index(RowSize, RepRow, IntRow).
 
 /**
  * rep_piece_at(+Board, +[Row,Col], ?E).
@@ -128,6 +128,6 @@ rep_internal(Size, [RepRow,RepCol], [IntRow,IntCol]) :-
  *   Row and Col are representative.
  */
 rep_piece_at(Board, [Row,Col], E) :-
-    matrix_proper_length(Board, Size, _),
-    rep_internal(Size, [Row,Col], [R,C]),
+    matrix_proper_length(Board, RowSize, _),
+    rep_internal(RowSize, [Row,Col], [R,C]),
     matrixnth1([R,C], Board, E).

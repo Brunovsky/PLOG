@@ -878,3 +878,18 @@ getopt(OptionsList, OptName, OptValue) :-
 getopt(OptionsList, OptName, Default, OptValue) :-
     getopt(OptionsList, OptName, OptValue);
     OptValue = Default.
+
+/**
+ * extra_prefix_length/3, extra_suffix_length/3
+ * extra_prefix_length(?List, ?Prefix, ?N).
+ * extra_suffix_length(?List, ?Suffix, ?N).
+ *   Like their library counterparts, but if N is larger than the List length,
+ *   then Prefix/Suffix must be the full list.
+ */
+extra_prefix_length(List, List, N) :- length(List, Length), N > Length.
+
+extra_prefix_length(List, Prefix, N) :- prefix_length(List, Prefix, N).
+
+extra_suffix_length(List, List, N) :- length(List, Length), N > Length.
+
+extra_suffix_length(List, Suffix, N) :- suffix_length(List, Suffix, N).
