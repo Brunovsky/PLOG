@@ -68,13 +68,9 @@ test_reevaluate :-
     ],
     place_stone(w, Board, [10,13], NewBoard, _), !,
     evaluate_board(Board, OldVal), !,
-    evaluate_board(NewBoard, Val1), !,
-    reevaluate_board(Board, NewBoard, OldVal, Val2), !,
-    reevaluate_cell([10,13], NewBoard, OldVal, Val3), !,
-    %write(Val1), nl, write(Val2), nl, write(Val3), nl,
-    Val1 = Val2, Val2 = Val3.
-
-
+    evaluate_board(NewBoard, Val), !,
+    reevaluate_board(Board, NewBoard, OldVal, Val), !,
+    reevaluate_cell([10,13], NewBoard, OldVal, Val).
 
 test_value :- test_all(value, [
     test_sumval,
