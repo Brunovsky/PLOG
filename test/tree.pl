@@ -60,6 +60,8 @@ test_build_child_node :-
     ChildNode = NewNode.
 
 % order_children/3
+test_order_children.
+    
 
 test_tree :- test_all(tree, [
     test_build_start_node,

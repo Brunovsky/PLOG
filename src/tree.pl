@@ -141,7 +141,7 @@ build_children(Node, NewNode, Options) :-
 recurse_children(Node, NewNode, Options) :-
     next_depth(Options, OptionsChildren),
     Node = node(Board, P, Val, Cap, Children, _),
-    NewNode = node(Board, P, Val, Cap, NewChildren, NewWorth),
+    NewNode = node(Board, P, Val, Cap, NewChildren, BestWorth),
     % Recurse
     (   foreach(_-(Move-Child), Children),
         fromto([], NewChilds, [NewWorth-(Move-NewChild)|NewChilds], NewUnordered),
@@ -152,7 +152,7 @@ recurse_children(Node, NewNode, Options) :-
     ),
     order_children(P, NewUnordered, NewChildren),
     head(NewChildren, BestChild),
-    child_value(BestChild, NewWorth).
+    child_value(BestChild, BestWorth).
 
 /**
  * build_tree/3

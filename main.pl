@@ -1,4 +1,4 @@
-% Libraries
+% ***** Libraries
 
 % Generating integers
 :- use_module(library(between)).
@@ -7,25 +7,36 @@
 % Random
 :- use_module(library(random)).
 
-% Everything in src/
-:- reconsult('src/board.pl').
-:- reconsult('src/examples.pl').
-:- reconsult('src/game.pl').
-:- reconsult('src/general.pl').
-:- reconsult('src/input.pl').
-:- reconsult('src/lists.pl').
-:- reconsult('src/matrix.pl').
-:- reconsult('src/menus.pl').
-:- reconsult('src/print-board.pl').
-:- reconsult('src/score.pl').
-:- reconsult('src/strings.pl').
-:- reconsult('src/tree-opt.pl').
-:- reconsult('src/tree.pl').
-:- reconsult('src/value.pl').
-:- reconsult('src/random.pl').
-:- reconsult('src/score.pl').
+% ***** User
 
-% Shorthands
-re :- reconsult('main.pl').
-te :- reconsult('test/test.pl').
-rete :- re, te.
+% Library extensions
+:- compile('src/general.pl').
+:- compile('src/lists.pl').
+:- compile('src/matrix.pl').
+:- compile('src/random.pl').
+
+% Board mini lib
+:- compile('src/board.pl').
+
+% Board display
+:- compile('src/strings.pl').
+:- compile('src/print-board.pl').
+
+% Player Bot
+:- compile('src/score.pl').
+:- compile('src/value.pl').
+:- compile('src/tree-opt.pl').
+:- compile('src/tree.pl').
+
+% Game logic
+:- compile('src/game.pl').
+:- compile('src/input.pl').
+:- compile('src/menus.pl').
+
+% Examples
+:- compile('src/examples.pl').
+
+% ***** Shorthands
+
+re :- compile('main.pl').
+te :- compile('test/test.pl').
