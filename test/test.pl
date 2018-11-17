@@ -14,5 +14,6 @@ test_all(Name, Tests) :-
 :- reconsult('lists.pl').
 :- reconsult('matrix.pl').
 :- reconsult('board.pl').
+:- reconsult('score.pl').
 
-test :- test_lists, test_matrix, test_board.
+test :- test_lists, test_matrix, test_board, test_score.

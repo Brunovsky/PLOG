@@ -4,6 +4,8 @@
 :- use_module(library(between)).
 % Basic operations on lists
 :- use_module(library(lists)).
+% Random
+:- use_module(library(random)).
 
 % Everything in src/
 :- reconsult('src/board.pl').
@@ -17,6 +19,8 @@
 :- reconsult('src/print-board.pl').
 :- reconsult('src/strings.pl').
 :- reconsult('src/value.pl').
+:- reconsult('src/random.pl').
+:- reconsult('src/score.pl').
 
 % Shorthands
 re :- reconsult('main.pl').
