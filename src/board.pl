@@ -36,18 +36,6 @@ board_reversal(WBoard, BBoard) :- matrix_map(reversal, WBoard, BBoard).
 five_board(Board, P) :- consecutive_matrix(Board, P, 5).
 
 /**
- * game_over/2
- * game_over(+game(Board, White, Black, next), ?P).
- *   Verifies if the game is over with winner P (w or b).
- */
-game_over(game(Board, Wc, _Bc, _Next), w) :-
-    five_board(Board, w);
-    Wc >= 10.
-game_over(game(Board, _Wc, Bc, _Next), b) :-
-    five_board(Board, b); 
-    Bc >= 10.
-
-/**
  * check_dead_stones_left/2
  * check_dead_stones_left(+P, +L).
  *   Remember: suicides are not allowed! That's what the caps
@@ -240,11 +228,17 @@ place_stone(b, Board, [R,C], NewBoard, Captures) :-
 empty_position(Board, [R,C]) :- matrixnth1([R,C], Board, c).
 
 /**
- * empty_positions/2
- * empty_positions(+Board, ?ListRowCols).
- *   Gets all empty positions on a list.
+ * empty_positions/[2,3]
+ * empty_positions(+Board, ?ListOfMoves).
+ * empty_positions(+Board, +Range, ?ListOfMoves).
+ *   Gets all empty positions on the board, possible only within a range.
  */
-empty_positions(Board, ListRowCols) :- findall(X, empty_position(Board, X), ListRowCols).
+empty_positions(Board, ListOfMoves) :-
+    findall(X, empty_position(Board, X), ListOfMoves).
+
+empty_positions(Board, Range, FilteredListOfMoves) :-
+    empty_positions(Board, ListOfMoves),
+    include(matrix_between(Range), ListOfMoves, FilteredListOfMoves).
 
 /**
  * valid_moves/3
@@ -261,3 +255,34 @@ move([R,C], game(Board, Wc, Bc, P), game(NewBoard, Wc1, Bc1, Next)) :-
     place_stone(P, Board, [R,C], NewBoard, Captures),
     add_captures(P, Captures, [Wc, Bc], [Wc1, Bc1]),
     other_player(P, Next).
+
+/**
+ * add_captures/4
+ * add_captures(+P, +Captures, +[Wc,Bc], -[NewWc,NewBc]).
+ */
+add_captures(w, Captures, [Wc,Bc], [NewWc,Bc]) :- NewWc is Wc + Captures.
+add_captures(b, Captures, [Wc,Bc], [Wc,NewBc]) :- NewBc is Bc + Captures.
+
+/**
+ * board_boundary/[2,3]
+ * board_boundary(+Board, -Range).
+ * board_boundary(+Board, +Padding, -Range).
+ *   
+ */
+board_boundary(Board, Range) :-
+    matrix_boundary(Board, c, Range).
+
+board_boundary(Board, Padding, Range) :-
+    matrix_boundary(Board, c, Padding, Range).
+
+/**
+ * empty_positions_within_boundary/2
+ * empty_positions_within_boundary(+Board, -ListOfMoves).
+ */
+empty_positions_within_boundary(Board, ListOfMoves) :-
+    board_boundary(Board, 0, Range),
+    empty_positions(Board, Range, ListOfMoves).
+
+empty_positions_within_boundary(Board, Padding, ListOfMoves) :-
+    board_boundary(Board, Padding, Range),
+    empty_positions(Board, Range, ListOfMoves).

@@ -43,13 +43,6 @@ start_game(S, player, player) :-
 		game_loop(game(B, 0, 0, w), S).
 
 /**
- * add_captures/4
- * add_captures(+P, +Captures, +[Wc,Bc], -[NewWc,NewBc]).
- */
-add_captures(w, Captures, [Wc,Bc], [NewWc,Bc]) :- NewWc is Wc + Captures.
-add_captures(b, Captures, [Wc,Bc], [Wc,NewBc]) :- NewBc is Bc + Captures.
-
-/**
  * game_loop(+game(B, Pw, Pb, Next))
  *   Next iteration of the game 
  */
@@ -79,3 +72,15 @@ victory(w):- write('White player won!'), nl.
 victory(b):- write('Black player won!'), nl.
 
 s_g(S):- start_game(S, player, player).
+
+/**
+ * game_over/2
+ * game_over(+game(Board, White, Black, next), ?P).
+ *   Verifies if the game is over with winner P (w or b).
+ */
+game_over(game(Board, Wc, _Bc, _Next), w) :-
+    five_board(Board, w);
+    Wc >= 10.
+game_over(game(Board, _Wc, Bc, _Next), b) :-
+    five_board(Board, b); 
+    Bc >= 10.

@@ -360,7 +360,7 @@ lb_map(P, Args, Xs, Ys) :-
  */
 flatten([], []).
 flatten([HList|TList], Flat) :- flatten(TList, Rest),
-                                  append(HList, Rest, Flat), !.
+                                append(HList, Rest, Flat), !.
 
 /**
  * mixed_flatten/2
@@ -536,21 +536,21 @@ l_any_of(P, Args, [_|T]) :- l_any_of(P, Args, T).
 /**
  * none_of/2
  * none_of(:P, +Xs).
- *   none element X of Xs verifies P(X).
+ *   No element X of Xs verifies P(X).
  */
 none_of(P, X) :- \+ any_of(P, X).
 
 /**
  * a_none_of/3
  * a_none_of(:P, +A, +Xs).
- *   none element X of Xs verifies P(X, A).
+ *   No element X of Xs verifies P(X, A).
  */
 a_none_of(P, A, X) :- \+ a_any_of(P, A, X).
 
 /**
  * l_none_of/3
  * l_none_of(:P, +Args, +Xs).
- *   none element X of Xs verifies P(X, Args...).
+ *   No element X of Xs verifies P(X, Args...).
  */
 l_none_of(P, Args, X) :- \+ l_any_of(P, Args, X).
 
@@ -830,3 +830,51 @@ differentnth0(X, [_|Xs], Y, [_|Ys], N) :- differentnth0(X, Xs, Y, Ys, M), N is M
 
 differentnth1(X, [X|_], Y, [Y|_], 1) :- X \= Y.
 differentnth1(X, [_|Xs], Y, [_|Ys], N) :- differentnth1(X, Xs, Y, Ys, M), N is M + 1.
+
+/**
+ * boundary/[3,4]
+ * boundary(+List, +Elem, -[I,J]).
+ * boundary(+List, +Elem, +Padding, -[I,J]).
+ *   Get a segment of List for which all elements before and after the segment
+ *   are Elem, with a certain Padding.
+ */
+boundary_left([E|Tail], E, I) :- boundary_left(Tail, E, J), I is J + 1.
+boundary_left([H|_], E, 1) :- H \= E.
+
+boundary_right([_|Tail], E, J) :- boundary_right(Tail, E, K), J is K + 1, !.
+boundary_right([H|_], E, 1) :- H \= E.
+
+boundary(List, E, [I,J]) :-
+    boundary_left(List, E, I),
+    boundary_right(List, E, J).
+
+boundary(List, Elem, Padding, [I,J]) :-
+    integer(Padding), !,
+    boundary(List, Elem, [Padding,Padding], [I,J]).
+
+boundary(List, Elem, [PadLeft,PadRight], [I,J]) :-
+    boundary(List, Elem, [I0,J0]),
+    proper_length(List, Length),
+    I is max(1, I0 - PadLeft),
+    J is min(Length, J0 + PadRight).
+
+/**
+ * between/2
+ * between(+[I,J], ?N).
+ *   Same as between(I, J, N) from the library.
+ */
+between([I,J], N) :- between(I, J, N).
+
+/**
+ * getopt/[3,4]
+ * getopt(+OptionsList, +OptName, -OptValue).
+ * getopt(+OptionsList, +OptName, +Default, -OptValue).
+ *   Gets an options from an options list.
+ */
+getopt(OptionsList, OptName, OptValue) :-
+    Elem =.. [OptName, OptValue],
+    memberchk(Elem, OptionsList).
+
+getopt(OptionsList, OptName, Default, OptValue) :-
+    getopt(OptionsList, OptName, OptValue);
+    OptValue = Default.

@@ -297,7 +297,8 @@ matrix_map(P, XMatrix, YMatrix) :-
 /**
  * matrix_map/4
  * matrix_map(:P, ?XMatrix, ?YMatrix, ?ZMatrix).
- *   Succeeds when P(X, Y, Z) for each corresponding X in XMatrix, Y in YMatrix, Z in ZMatrix.
+ *   Succeeds when P(X, Y, Z) for each corresponding X in XMatrix,º
+ *   Y in YMatrix, Z in ZMatrix.
  *   Like map/4 but for matrices.
  */
 matrix_map(P, XMatrix, YMatrix, ZMatrix) :-
@@ -335,7 +336,8 @@ matrix_a_map(P, A, XMatrix, YMatrix) :-
 /**
  * matrix_a_map/5
  * matrix_a_map(:P, ?A, ?XMatrix, ?YMatrix, ?ZMatrix).
- *   Succeeds when P(X, Y, A) for each corresponding X in XMatrix, Y in YMatrix, Z in ZMatrix.
+ *   Succeeds when P(X, Y, A) for each corresponding X in XMatrix,
+ *   Y in YMatrix, Z in ZMatrix.
  *   Like a_map/5 but for matrices.
  */
 matrix_a_map(P, A, XMatrix, YMatrix, ZMatrix) :-
@@ -395,7 +397,8 @@ matrix_la_map(P, Args, XMatrix, YMatrix) :-
 /**
  * matrix_la_map/5
  * matrix_la_map(:P, ?Args, ?XMatrix, ?YMatrix, ?ZMatrix).
- *   Succeeds when P(X, Y, Z, Args...) for each corresponding X in XMatrix, Y in YMatrix, Z in ZMatrix.
+ *   Succeeds when P(X, Y, Z, Args...) for each corresponding X in XMatrix,
+ *   Y in YMatrix, Z in ZMatrix.
  *   Like la_map/5 but for matrices.
  */
 matrix_la_map(P, Args, XMatrix, YMatrix, ZMatrix) :-
@@ -521,3 +524,35 @@ matrix_differentnth0(X, XMatrix, Y, YMatrix, [R,C]) :-
 matrix_differentnth1(X, XMatrix, Y, YMatrix, [R,C]) :-
     differentnth1(XRow, XMatrix, YRow, YMatrix, R),
     differentnth1(X, XRow, Y, YRow, C).
+
+/**
+ * matrix_boundary/[3,4]
+ * matrix_boundary(+Matrix, +Elem, -[RowRange,ColRange]).
+ * matrix_boundary(+Matrix, +Elem, +Padding, -[RowRange,ColRange]).
+ */
+matrix_boundary(Matrix, Elem, [RowRange,ColRange]) :-
+    matrix_proper_length(Matrix, RowSize, ColSize),
+    transpose(Matrix, Transposed),
+    fill_n(ColSize, Elem, RowElem),
+    fill_n(RowSize, Elem, ColElem),
+    boundary(Matrix, RowElem, RowRange),
+    boundary(Transposed, ColElem, ColRange).
+
+matrix_boundary(Matrix, Elem, Padding, [RowRange,ColRange]) :-
+    integer(Padding), !,
+    matrix_boundary(Matrix, Elem, [Padding,Padding], [RowRange,ColRange]).
+
+matrix_boundary(Matrix, Elem, [PadRows,PadCols], [RowRange,ColRange]) :-
+    matrix_proper_length(Matrix, RowSize, ColSize),
+    transpose(Matrix, Transposed),
+    fill_n(ColSize, Elem, RowElem),
+    fill_n(RowSize, Elem, ColElem),
+    boundary(Matrix, RowElem, PadRows, RowRange),
+    boundary(Transposed, ColElem, PadCols, ColRange).
+
+/**
+ * matrix_between/2
+ * matrix_between(+[RowRange,ColRange], ?[R,C]).
+ *   Like between/2 but for matrices.
+ */
+matrix_between([RowRange,ColRange], [R,C]) :- between(RowRange, R), between(ColRange, C).

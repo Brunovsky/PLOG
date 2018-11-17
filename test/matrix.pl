@@ -101,6 +101,31 @@ test_matrix_segment :-
     \+ segment_any_diagonal([[1,2,3,4],[5,6,7,8],[a,b,c,d]], [3,7]),
     segment_matrix([[1,2,3,4],[5,6,7,8],[a,b,c,d]], [3,8]).
 
+% matrix_boundary/4
+test_matrix_boundary :-
+    M = [
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,b,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,b,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,w,c,c,c,c,c,c,c],
+        [c,c,c,c,c,b,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,w,c,b,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,b,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,w,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c]
+    ],
+    matrix_boundary(M, c, 0, [[5,14],[6,10]]),
+    matrix_boundary(M, c, 1, [[4,15],[5,11]]),
+    matrix_boundary(M, c, 10, [[1,15],[1,15]]),
+    matrix_boundary(M, c, [0,3], [[5,14],[3,13]]),
+    matrix_boundary(M, c, [[3,0],[4,2]], [[2,14],[2,12]]).
+
 test_matrix :- test_all(matrix, [
     test_is_matrix,
     test_matrixnth,
@@ -113,5 +138,6 @@ test_matrix :- test_all(matrix, [
     test_matrix_diagonal,
     test_matrix_diagonals,
     test_matrix_map,
-    test_matrix_segment
+    test_matrix_segment,
+    test_matrix_boundary
 ]).
