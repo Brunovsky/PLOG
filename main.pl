@@ -12,39 +12,39 @@
 % ***** User
 
 % Library extensions
-:- reconsult('src/general.pl').
-:- reconsult('src/lists.pl').
-:- reconsult('src/matrix.pl').
-:- reconsult('src/random.pl').
+:- compile('src/general.pl').
+:- compile('src/lists.pl').
+:- compile('src/matrix.pl').
+:- compile('src/random.pl').
 
 % Board mini lib
-:- reconsult('src/board.pl').
+:- compile('src/board.pl').
 
 % Board display
-:- reconsult('src/strings.pl').
-:- reconsult('src/print-board.pl').
-:- reconsult('src/help.pl').
+:- compile('src/strings.pl').
+:- compile('src/print.pl').
+:- compile('src/help.pl').
 
 % Player Bot
-:- reconsult('src/score.pl').
-:- reconsult('src/value.pl').
-:- reconsult('src/tree.pl').
+:- compile('src/score.pl').
+:- compile('src/value.pl').
+:- compile('src/tree.pl').
 
 % Options
-:- reconsult('src/options.pl').
+:- compile('src/options.pl').
 
 % Game logic
-:- reconsult('src/game.pl').
-:- reconsult('src/input.pl').
-:- reconsult('src/menus.pl').
+:- compile('src/game.pl').
+:- compile('src/input.pl').
+:- compile('src/menus.pl').
 
 % Examples
-:- reconsult('src/examples.pl').
+:- compile('src/examples.pl').
 
 % ***** Shorthands
 
-re :- reconsult('main.pl').
-te :- reconsult('test/test.pl').
+re :- compile('main.pl').
+te :- compile('test/test.pl').
 
 play :- pente.
 play(Options) :- pente(Options).

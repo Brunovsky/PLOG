@@ -19,6 +19,7 @@
 /**
  * default/2
  * default(+Opt, -DefaultValue).
+ *   Establishes the default values for all options.
  */
 default(board_size, 19).
 default(difficulty, 3).
@@ -36,12 +37,13 @@ default(width, WidthList) :-
 
 /**
  * difficulty_set/4
- * difficulty_set(Level, Depth, Padding, WidthList).
+ * difficulty_set(+Level, ?Depth, ?Padding, ?WidthList).
+ *   Established the difficulty sets used.
  */
-difficulty_set(1, 1, 3, [3]).
+difficulty_set(1, 1, 1, [3]).
 difficulty_set(2, 2, 3, [5,3]).
-difficulty_set(3, 4, 3, [5,3,2]).
-difficulty_set(4, 4, 3, [10,7,5]).
+difficulty_set(3, 4, 3, [4,2,2,2]).
+difficulty_set(4, 4, 2, [5,5,3,2]).
 difficulty_set(5, 6, 2, [10,10,8,6,5]).
 
 /**
@@ -53,7 +55,7 @@ difficulty_set(5, 6, 2, [10,10,8,6,5]).
 /**
  * sanitize_options/2
  * sanitize_options(+Options, -NewOptions).
- *   Sanitizes a given Options list into NewOptions.
+ *   Sanitizes a user given Options List.
  */
 sanitize_options(Options, NewOptions) :- 
     sanitize_board_size(Options, Size), !,
@@ -75,7 +77,7 @@ sanitize_options(Options, NewOptions) :-
 /**
  * sanitize_board_size/2
  * sanitize_board_size(+Options, -Size).
- *   Sanitizes Options' game_board option into Size.
+ *   Deduces option board_size(Size).
  */
 sanitize_board_size(Options, Size) :-
     default(board_size, DefaultSize),
@@ -86,7 +88,7 @@ sanitize_board_size(Options, Size) :-
 /**
  * sanitize_difficulty/4
  * sanitize_difficulty(+Options, -DDepth, -DPadding, -DWidth).
- *   Sanitizes Options' difficulty option into its 3 components (Depth, Padding, Width).
+ *   Deduces option difficulty into its 3 components (DDepth, DPadding, DWidth).
  */
 sanitize_difficulty(Options, DDepth, DPadding, DWidth) :-
     default(difficulty, DefaultDifficulty),
@@ -99,7 +101,7 @@ sanitize_difficulty(Options, DDepth, DPadding, DWidth) :-
 /**
  * sanitize_depth/3
  * sanitize_depth(+Options, +DDepth, -Depth).
- *   Deduce depth option into Depth using DDepth as default.
+ *   Deduces option depth(Depth), with default value that given by the difficulty.
  */
 sanitize_depth(Options, DDepth, Depth) :-
     getopt(Options, depth, DDepth, Depth), !,
@@ -109,7 +111,7 @@ sanitize_depth(Options, DDepth, Depth) :-
 /**
  * sanitize_padding/3
  * sanitize_padding(+Options, +DPadding, -Padding).
- *   Deduce padding option into Padding using DPadding as default.
+ *   Deduces option padding(Padding), with default value that given by the difficulty.
  */
 sanitize_padding(Options, DPadding, Padding) :-
     getopt(Options, padding, DPadding, Padding), !,
@@ -130,7 +132,7 @@ validate_widthlist(Width, [Width]) :-
 /**
  * sanitize_width/3
  * sanitize_width(+Options, +DWidth, -WidthList).
- *   Deduce width option into WidthList using DWidth as default.
+ *   Deduces option width(Width), with default value that given by the difficulty.
  */
 sanitize_width(Options, DWidth, WidthList) :-
     getopt(Options, width, DWidth, Opt), !,
@@ -140,7 +142,7 @@ sanitize_width(Options, DWidth, WidthList) :-
 /**
  * sanitize_flip_board/3
  * sanitize_flip_board(+Options, -Flip),
- *   Deduce the flip (board) option.
+ *   Deduce option flip_board(Flip).
  */
 sanitize_flip_board(Options, Flip) :-
     default(flip_board, DefaultFlip),

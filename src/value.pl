@@ -43,21 +43,6 @@
  */
 
 /**
- * print_val/1
- * print_val(+Val).
- *   For debugging purposes only.
- */
-print_val(Val) :-
-    Val = val(RowV,ColV,LeftV,RightV),
-    write('===== ===== ===== val/4 ===== ===== ====='), nl,
-    write(' RowV:   '), write(RowV), nl,
-    write(' ColV:   '), write(ColV), nl,
-    write(' LeftV:  '), write(LeftV), nl,
-    write(' RightV: '), write(RightV), nl,
-    sumval(Val, Total),
-    format(' Total: ~D', Total), nl, !.
-
-/**
  * sumval/2
  * sumval(+Val, -TotalValue).
  *   Sums up the values in a val/4.

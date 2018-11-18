@@ -217,11 +217,11 @@
     pattern([w,c,w,c,w,c,w],     2 ** 37). % SENTE
 
 % - w w - w w - CHECK 12,7M - 1,2B
-    pattern([c,w,w,c,w,w,c], 2 ** 30). % STRONG SENTE
-    pattern([c,w,w,c,w,w],   2 ** 21). % STRONG SENTE
+    pattern([c,w,w,c,w,w,c], 2 ** 30). % BAD STRONG SENTE
+    pattern([c,w,w,c,w,w],   2 ** 21). % BAD STRONG SENTE
 
-    pattern([w,w,c,w,w,c],    2 ** 21). % STRONG SENTE
-    pattern([w,w,c,w,w], -1 * 2 ** 27). % STRONG SENTE
+    pattern([w,w,c,w,w,c],    2 ** 21). % BAD STRONG SENTE
+    pattern([w,w,c,w,w], -1 * 2 ** 27). % BAD STRONG SENTE
 
 /**
  * Pure Pattern with 5 stones.
@@ -246,13 +246,13 @@
     pattern([w,w,c,w,c,w,w], -1 * 2 ** 33).
 
 % - - w w w - w w -   @   - w w - w w w - -
-    pattern([c,c,w,w,w,c,w,w,c], 2 ** 41.5). % SENTE 2
-    pattern([c,w,w,w,c,w,w,c],   2 ** 34). % SENTE
-    pattern([w,w,w,c,w,w,c],     2 ** 34). % SENTE
+    pattern([c,c,w,w,w,c,w,w,c], 2 ** 41.5). % STRONG SENTE 2
+    pattern([c,w,w,w,c,w,w,c],   2 ** 34). % STRONG SENTE
+    pattern([w,w,w,c,w,w,c],     2 ** 34). % STRONG SENTE
 
-    pattern([c,c,w,w,w,c,w,w],  2 ** 39). % BAD SENTE 2
-    %pattern([c,w,w,w,c,w,w], 0). % BAD SENTE
-    pattern([w,w,w,c,w,w], -1 * 2 ** 33). % BAD SENTE
+    pattern([c,c,w,w,w,c,w,w],  2 ** 39). % BAD STRONG SENTE 2
+    %pattern([c,w,w,w,c,w,w], 0). % BAD STRONG SENTE
+    pattern([w,w,w,c,w,w], -1 * 2 ** 33). % BAD STRONG SENTE
 
     pattern([c,w,w,c,w,w,w,c,c], 2 ** 41.5). % SENTE 2
     pattern([c,w,w,c,w,w,w,c],   2 ** 34). % SENTE
@@ -370,7 +370,7 @@
 multiscore(List, Pattern, TotalScore) :-
     score(Pattern, Score),
     countsegment(List, Pattern, N),
-    TotalScore is Score * N.
+    TotalScore is integer(Score) * N.
 
 /**
  * captures_score/4
@@ -411,6 +411,14 @@ losing_value(w, Value) :- winning_value(b, Value).
 losing_value(b, Value) :- winning_value(w, Value).
 
 /**
+ * end_value/[1,2]
+ * end_value(+Value).
+ * end_value(+P, +Value).
+ */
+end_value(Value) :- winning_value(w, Value); winning_value(b, Value).
+end_value(P, Value) :- winning_value(P, Value); losing_value(P, Value).
+
+/**
  * best_value/4
  * best_value(+P, +Val1, +Val2, -Best).
  */
@@ -436,125 +444,9 @@ worst_value(b, Val1, Val2, Val2) :- Val1 =< Val2.
  :- abolish(evaluate/2). % reload
  :- dynamic evaluate/2.
 
-evaluate(List, Value) :-
+evaluate(List, IntegerValue) :-
     score_list(Patterns),
     map(multiscore(List), Patterns, Scores), !, % very expensive
     scanlist(plus, Scores, 0, Value),
-    asserta((evaluate(List, Value))), !. % store for future calls on the same list.
-
-/**
- * ===== ===== ===== ===== ===== === ===== ===== ===== ===== =====
- * ===== ===== ===== ===== STUDYING SCORES ===== ===== ===== =====
- * ===== ===== ===== ===== ===== === ===== ===== ===== ===== =====
- */
-
-/**
- * write_board_line_crude/1
- * write_board_line_crude(+L).
- */
-write_board_line_crude(L) :-
-    length(L, ColSize),
-    ColSize2 is ColSize + 2,
-    lb_foreach_increasing(L, write_board_unit, [[3,ColSize2], 2], 2).
-
-/**
- * print_pattern_values/1
- * print_pattern_values(+Pattern).
- */
-print_pattern_scores(Pattern, [PadLeft,PadRight]) :-
-    numlist(0, PadLeft, LeftsReversed),
-    numlist(0, PadRight, RightsReversed),
-    reverse(LeftsReversed, Lefts), reverse(RightsReversed, Rights),
-    (   foreach(Left, Lefts),
-        param(Pattern),
-        param(PadLeft),
-        param(PadRight),
-        param(Rights)
-    do  (   foreach(Right, Rights),
-            param(Pattern),
-            param(PadLeft),
-            param(PadRight),
-            param(Left)
-        do  fill_n(Left, c, CLeft),
-            fill_n(Right, c, CRight),
-            append([CLeft, Pattern, CRight], FullPattern),
-            evaluate(FullPattern, Value),
-
-            LeftSpaces is 2 * (PadLeft - Left),
-            RightSpaces is 2 * (PadRight - Right),
-            
-
-            pretty_print_pattern(FullPattern, [LeftSpaces, RightSpaces]),
-            format(' -- ~d~n', Value)
-        )
-    ).
-
-/**
- * pretty_print_pattern/2
- * pretty_print_pattern(+Pattern, +Length).
- */
-pretty_print_pattern(Pattern, [LeftSpaces, RightSpaces]) :-
-    fill_n(LeftSpaces, ' ', LeftSpacesList),
-    atom_chars(LeftString, LeftSpacesList),
-    fill_n(RightSpaces, ' ', RightSpacesList),
-    atom_chars(RightString, RightSpacesList),
-    write(LeftString),
-    write_board_line_crude(Pattern),
-    write(RightString).
-
-pretty_print_pattern(Pattern, Length) :-
-    integer(Length), !,
-    length(Pattern, PatternLength),
-    FillSpaces is Length - PatternLength,
-    fill_n(FillSpaces, ' ', SpacesList),
-    atom_chars(SpaceString, SpacesList),
-    write(SpaceString),
-    write_board_line_crude(Pattern),
-    write(SpaceString).
-
-/**
- * check_evaluate/1
- * check_evaluate(+Pattern).
- */
-check_evaluate(List) :-
-    length(List, Length),
-    count_element(w, List, Whites),
-    score_list(Patterns),
-    (   foreach(Pattern, Patterns),
-        param(List),
-        param(Length),
-        param(Whites)
-    do  score(Pattern, Score),
-        countsegment(List, Pattern, N),
-        count_element(w, Pattern, PWhites),
-        (N > 0, PWhites = Whites ->
-            pretty_print_pattern(Pattern, Length),
-            evaluate(Pattern, V),
-            format('~t  --~t~6| ~d~t~6+| ~D~t~20+| ~D~n', [N, Score, V]);
-            true
-        )
-    ),
-    evaluate(List, Value),
-    format('Total Value: ~d~n', Value).
-
-check_evaluate_all(List) :-
-    length(List, Length),
-    score_list(Patterns),
-    (   foreach(Pattern, Patterns),
-        param(List),
-        param(Length)
-    do  score(Pattern, Score),
-        countsegment(List, Pattern, N),
-        (N > 0 ->
-            pretty_print_pattern(Pattern, Length),
-            evaluate(Pattern, V),
-            format('~t  --~t~6| ~d~t~6+| ~D~t~20+| ~D~n', [N, Score, V]);
-            true
-        )
-    ),
-    evaluate(List, Value),
-    format('Total Value: ~D~n', Value).
-
-p(Pattern, Pad) :- print_pattern_scores(Pattern, Pad).
-e(List) :- check_evaluate(List).
-a(List) :- check_evaluate_all(List).
+    IntegerValue is integer(Value),
+    asserta((evaluate(List, IntegerValue))), !. % store for future calls on the same list.
