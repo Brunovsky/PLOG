@@ -205,13 +205,15 @@ next_depth(Options, NewOptions) :-
     opt_totaldepth(Options, TotalDepth),
     opt_padding(Options, Padding),
     opt_widthlist(Options, WidthList),
+    opt_tournament(Options, Tournament),
     D is Depth + 1,
     NewOptions = [
         turn(Turn),
         current(D),
         depth(TotalDepth),
         padding(Padding),
-        width(WidthList)
+        width(WidthList),
+        tournament(Tournament)
     ], !.
 
 /**

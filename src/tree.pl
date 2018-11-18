@@ -51,12 +51,9 @@ print_children(Children) :- print_children(Children, 19).
 print_children(Children, RowSize) :-
     length(Children, C),
     format('===== ===== Children: ~d ===== =====', C), nl,
-    (   foreach(Value-(Move-Child), Children),
+    (   foreach(Worth-(Move-_), Children),
         param(RowSize)
-    do  (   format('  Value ~D~n  Move: ', Value),
-            mainline(Child, Moves),
-            print_moves([Move|Moves], RowSize), nl
-        )
+    do  format('  Worth ~D~n  Move: ~w~n', [Worth, Move])
     ), !.
 
 /**
@@ -72,18 +69,6 @@ print_moves(Moves, RowSize) :-
             format('~w~d  ', [RepCol,RepRow])
         )
     ), !.
-
-/**
- * mainline/2
- * mainline(+Node, -Moves).
- */
-mainline(Node, []) :-
-    \+ node_bestchild(Node, _).
-
-mainline(Node, [Move|ChildMoves]) :-
-    node_bestchild(Node, BestChild),
-    BestChild = _-(Move-ChildNode),
-    mainline(ChildNode, ChildMoves).
 
 /**
  * Accessors and other quick utilities.
@@ -126,6 +111,7 @@ build_child_node(Move, ParentNode, ChildNode) :-
     place_stone(P, Board, Move, ChildBoard, Captures), !,
     add_captures(P, Captures, Cap, ChildCap),
     reevaluate_board(Board, ChildBoard, Val, ChildVal), !,
+    %evaluate_board(ChildBoard, ChildVal), !,
     totalval(ChildVal, ChildCap, Worth), !.
 
 /**
@@ -158,21 +144,31 @@ organize_children(P, Width, Unordered, BestOrdered, BestWorth) :-
     child_value(BestChild, BestWorth), !.
 
 /**
- * build_children_loop_moves
- * build_children_loop_moves()
+ * choose_if_best/4
+ * choose_if_best(+P, +Child, +RestChildren, -ChildOrChildren).
  */
+choose_if_best(P, _, [Worth-(_-_)], [Worth-(_-_)]) :- winning_value(P, Worth), !.
+
+choose_if_best(_, Child, Children, [Child|Children]).
+
+/**
+ * build_children_loop_moves/3
+ * build_children_loop_moves(Node, MoveList, Children).
+ */
+% no more children
 build_children_loop_moves(_, [], []).
 
-build_children_loop_moves(Node, [Move|_], [Worth-(Move-Child)]) :-
-    build_child_node(Move, Node, Child),
-    node_worth(Child, Worth),
+% not winning move
+build_children_loop_moves(Node, [Move|RestMoves], Best) :-
+    build_child_node(Move, Node, ChildNode),
+    node_worth(ChildNode, Worth),
     node_player(Node, P),
-    winning_value(P, Worth), !.
-
-build_children_loop_moves(Node, [Move|ListMoves], [Worth-(Move-Child)|Children]) :-
-    build_child_node(Move, Node, Child),
-    node_worth(Child, Worth),
-    build_children_loop_moves(Node, ListMoves, Children).
+    Child = Worth-(Move-ChildNode),
+    (   winning_value(P, Worth) ->
+        Best = [Child];
+        build_children_loop_moves(Node, RestMoves, RestChildren),
+        choose_if_best(P, Child, RestChildren, Best)
+    ), !.
 
 /**
  * build_children/3
@@ -188,9 +184,9 @@ build_children(Node, NewNode, Options) :-
     opt_tournament(Options, Tournament),
     Node = node(Board, P, Val, Cap, _, _),
     NewNode = node(Board, P, Val, Cap, Children, NewWorth),
-    valid_moves_within_boundary(Board, Padding, Turn, Tournament, ListOfMoves),
-    build_children_loop_moves(Node, ListOfMoves, Unordered),
-    organize_children(P, Width, Unordered, Children, NewWorth).
+    valid_moves_within_boundary(Board, Padding, Turn, Tournament, ListOfMoves), !,
+    build_children_loop_moves(Node, ListOfMoves, Unordered), !,
+    organize_children(P, Width, Unordered, Children, NewWorth), !.
 
 /**
  * recurse_children/3
@@ -199,10 +195,14 @@ build_children(Node, NewNode, Options) :-
  *   whose children have been recursed according to the given options.
  *   See build_tree/3 for Options.
  */
+recurse_children(Node, Node, _) :-
+    Node = node(_, P, _, _, [Worth-(_-_)], Worth),
+    winning_value(P, Worth), !.
+
 recurse_children(Node, NewNode, Options) :-
     next_depth(Options, OptionsChildren),
     Node = node(Board, P, Val, Cap, OldChildren, _),
-    NewNode = node(Board, P, Val, Cap, NewChildren, BestWorth),
+    NewNode = node(Board, P, Val, Cap, NewChildren, BestWorth), !,
     (   foreach(_-(Move-Child), OldChildren),
         fromto([], NewChilds, [NewWorth-(Move-NewChild)|NewChilds], Unordered),
         param(OptionsChildren)

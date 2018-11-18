@@ -98,15 +98,19 @@ test_build_children :-
         [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
         [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c]
     ],
-    build_start_node(Board, b, [0,0], Node),
-    print_node(Node), nl,
-    build_children(Node, NewNode, Options),
-    print_node(NewNode), nl,
+    build_start_node(Board, b, [0,0], BNode),
+    print_node(BNode),
+    build_start_node(Board, w, [0,0], WNode),
+    print_node(WNode),
+    build_children(BNode, NewBNode, Options),
+    print_node(NewBNode),
+    build_children(WNode, NewWNode, Options),
+    print_node(NewWNode),
     true.
 
 % build_tree/3
 test_build_tree :-
-    Options = [turn(73), padding(3), width([3,5,5,5]), current(0), depth(4), rule(true)],
+    Options = [turn(73), padding(3), width([10,5,5,5]), current(0), depth(4), rule(true)],
     Board = [
         [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
         [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
@@ -129,9 +133,9 @@ test_build_tree :-
         [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c]
     ],
     build_start_node(Board, b, [0,0], Node),
-    %print_node(Node), nl, !,
+    print_node(Node), nl, !,
     build_tree(Node, Tree, Options), !,
-    %print_node(Tree), nl,
+    print_node(Tree), nl,
     Tree = Tree,
     true.
 

@@ -353,23 +353,6 @@ valid_moves(Board, Turn, _, ListOfMoves) :-
     empty_positions(Board, ListOfMoves).
 
 /**
- * valid_moves/4
- * valid_moves(+Board, +Range, +Turn, -ListOfMoves).
- *   Gets a list with all the valid moves within a given range
- *   (does not depend on the player).
- */
-valid_moves(Board, _, 0, [Center]) :- board_center(Board, Center).
-
-valid_moves(Board, Range, 2, ListOfMoves) :-
-    board_center_range(Board, CenterRange),
-    empty_positions(Board, CenterRange, ExcludedMoves),
-    empty_positions(Board, Range, AllMoves),
-    exclude(contains(ExcludedMoves), AllMoves, ListOfMoves), !.
-
-valid_moves(Board, Range, _, ListOfMoves) :-
-    empty_positions(Board, Range, ListOfMoves).
-
-/**
  * valid_moves/5
  * valid_moves(+Board, +Range, +Turn, +Tournament, -ListOfMoves).
  *   Gets a list with all the valid moves within a given range
@@ -390,7 +373,6 @@ valid_moves(Board, Range, 2, false, ListOfMoves) :-
 valid_moves(Board, Range, _, _, ListOfMoves) :-
     empty_positions(Board, Range, ListOfMoves).
 
-
 /**
  * valid_moves_within_boundary/[3-5]
  * valid_moves_within_boundary(+Board, +Turn, -ListOfMoves).
@@ -399,11 +381,11 @@ valid_moves(Board, Range, _, _, ListOfMoves) :-
  */
 valid_moves_within_boundary(Board, Turn, ListOfMoves) :-
     board_boundary(Board, 0, Range),
-    valid_moves(Board, Range, Turn, ListOfMoves).
+    valid_moves(Board, Range, Turn, true, ListOfMoves).
 
 valid_moves_within_boundary(Board, Padding, Turn, ListOfMoves) :-
     board_boundary(Board, Padding, Range),
-    valid_moves(Board, Range, Turn, ListOfMoves).
+    valid_moves(Board, Range, Turn, true, ListOfMoves).
 
 valid_moves_within_boundary(Board, Padding, Turn, Tournament, ListOfMoves) :-
     board_boundary(Board, Padding, Range),
