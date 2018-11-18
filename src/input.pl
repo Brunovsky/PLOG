@@ -1,4 +1,5 @@
 /**
+ * read_position/2
  * read_position(-Row, -Col).
  *   Read a board position from standard input.
  *   The position must be in the form E12, A7, B8, etc,
@@ -7,7 +8,6 @@
  *        A14.
  *        Z9.
  */
-
 read_position(Row, Col) :-
     catch(read_position_aux(Row, Col), _, read_position(Row, Col)).
 
@@ -24,6 +24,7 @@ read_position_aux(Row, Col) :-
 /**
  * get_move/2
  * get_move(+Size, -Move).
+ *   Wrapper around read_position, transforming representations.
  */
 get_move(Size, Move) :-
     read_position(RepRow, RepCol),

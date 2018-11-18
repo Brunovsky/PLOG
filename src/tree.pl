@@ -312,16 +312,25 @@ analyze_tree(Game, Tree) :-
     Game = game(Board, P, Cap, Turn, UserOptions),
     tree_parseopt(UserOptions, Turn, Options),
     build_start_node(Board, P, Cap, Node),
-    build_tree(Node, Tree, Options).
+    build_tree(Node, Tree, Options),
+    print_tree_deep(Tree).
 
 /**
  * ===== ===== ===== CHOOSING MOVE ===== ===== =====
  */
 
 /**
- * choose_move_best/2
- * choose_move_best(+Tree, -[R,C]).
- *   Choose the best move [R,C] to a given Tree.
+ * choose_move/3
+ * choose_move(+Tree, -Move, +Options).
+ *   Choose move according to Options.
  */
-choose_move_best(Tree, Move) :-
+choose_move(Tree, Move, Options) :-
+    choose_move_best(Tree, Move, Options).
+
+/**
+ * choose_move_best/2
+ * choose_move_best(+Tree, -Move).
+ *   Choose the best move Move to a given Tree.
+ */
+choose_move_best(Tree, Move, _) :-
     node_bestchild(Tree, _-(Move-_)).

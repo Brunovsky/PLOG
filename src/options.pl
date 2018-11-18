@@ -42,7 +42,7 @@ default(width, WidthList) :-
  */
 difficulty_set(1, 1, 1, [3]).
 difficulty_set(2, 2, 3, [5,3]).
-difficulty_set(3, 4, 3, [4,2,2,2]).
+difficulty_set(3, 5, 2, [4,3,2]).
 difficulty_set(4, 4, 2, [5,5,3,2]).
 difficulty_set(5, 6, 2, [10,10,8,6,5]).
 
@@ -209,8 +209,9 @@ next_depth(Options, NewOptions) :-
     opt_widthlist(Options, WidthList),
     opt_tournament(Options, Tournament),
     D is Depth + 1,
+    T is Turn + 1,
     NewOptions = [
-        turn(Turn),
+        turn(T),
         current(D),
         depth(TotalDepth),
         padding(Padding),

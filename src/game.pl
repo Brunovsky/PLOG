@@ -1,3 +1,7 @@
+/**
+ * pente/[1,2]
+ *   Entry points.
+ */
 pente :- 
 	sanitize_options([], Options), !,
 	main_menu(Options).
@@ -21,8 +25,8 @@ is_player(w).
 is_player(b).
 
 /**
- * game/4
- * game(?Board, ?P, ?[Wc,Bc], ?Turn).
+ * game/5
+ * game(+Board, +P, +[Wc,Bc], +Turn, +Options).
  *   A game of Pente.
  *   > The current Board is represented by a SizexSize matrix, consisting of
  *     characters c for empty slots, w for White's pieces and b for Black's pieces.
@@ -38,7 +42,7 @@ is_player(b).
  * start_game(player, bot, +Options)
  * start_game(bot, player, +Options)
  * start_game(bot, bot, +Options)
- *   Starts a pente game
+ *   Starts a pente game.
  */
 start_game(player, player, Options) :-
 	getopt(Options, board_size, Size),
@@ -60,73 +64,79 @@ start_game(bot, bot, Options) :-
 	make_board(Size, Board),
 	gloop_bot_bot(game(Board, w, [0,0], 0, Options)).
 
-cls :- write('\e[2J').
+cls :- repeat_call(nl, 5).
+%cls :- write('\e[2J').
 
 /**
- * gloop_player_player/2, gloop_player_bot/2, gloop_bot_player/2, gloop_bot_bot/2
- * gloop_*_*(+Game, +Options).
+ * gloop_player_player/1, gloop_player_bot/1, gloop_bot_player/1, gloop_bot_bot/1
+ * gloop_*_*(+Game).
  *   Next iteration of the game.
  */
 % PLAYER vs PLAYER
 gloop_player_player(Game) :-
-	Game = game(Board, _, _, Turn, Options), cls,
-    display_game(Game),
+	Game = game(Board, _, _, Turn, Options), cls, !,
     board_size(Board, Size), !,
+    opt_tournament(Options, Tournament), !,
+    display_game(Game), !,
     get_move(Size, Move),
-    opt_tournament(Options, Tournament),
 	valid_move(Board, Turn, Tournament, Move), !,
 	move(Move, Game, NewGame), !,
-	game_loop_aux(gloop_player_player, NewGame).
+	game_loop_aux(gloop_player_player, NewGame), !.
 
 % PLAYER vs BOT,  PLAYER's turn
 gloop_player_bot(Game) :-
-    Game = game(Board, w, _, Turn, Options), cls,
-    display_game(Game),
+    Game = game(Board, w, _, Turn, Options), cls, !,
     board_size(Board, Size), !,
+    opt_tournament(Options, Tournament), !,
+    display_game(Game), !,
     get_move(Size, Move),
-    opt_tournament(Options, Tournament),
     valid_move(Board, Turn, Tournament, Move), !,
     move(Move, Game, NewGame), !,
-    game_loop_aux(gloop_player_bot, NewGame).
+    game_loop_aux(gloop_player_bot, NewGame), !.
 
 % PLAYER vs BOT,  BOT's turn
 gloop_player_bot(Game) :-
-    Game = game(_, b, _, _, _), cls,
-    display_game(Game),
+    Game = game(_, b, _, _, Options), cls, !,
+    display_game(Game), !,
 	analyze_tree(Game, Tree),
-	choose_move(Tree, Move),
-	move(Move, Game, NewGame),
-	game_loop_aux(gloop_player_bot, NewGame).
+	choose_move(Tree, Move, Options),
+	move(Move, Game, NewGame), !,
+	game_loop_aux(gloop_player_bot, NewGame), !.
 
 % BOT vs PLAYER,  BOT's turn
 gloop_bot_player(Game) :-
-    Game = game(_, w, _, _, _), cls,
-    display_game(Game),
+    Game = game(_, w, _, _, Options), cls, !,
+    display_game(Game), !,
     analyze_tree(Game, Tree),
-    choose_move(Tree, Move),
-    move(Move, Game, NewGame),
-    game_loop_aux(gloop_bot_player, NewGame).
+    choose_move(Tree, Move, Options),
+    move(Move, Game, NewGame), !,
+    game_loop_aux(gloop_bot_player, NewGame), !.
 
 % BOT vs PLAYER,  PLAYER's turn
 gloop_bot_player(Game) :-
-    Game = game(Board, b, _, Turn, Options), cls,
-    display_game(Game),
+    Game = game(Board, b, _, Turn, Options), cls, !,
     board_size(Board, Size), !,
+    opt_tournament(Options, Tournament), !,
+    display_game(Game), !,
     get_move(Size, Move),
-    opt_tournament(Options, Tournament),
     valid_move(Board, Turn, Tournament, Move), !,
     move(Move, Game, NewGame), !,
-    game_loop_aux(gloop_bot_player, NewGame).
+    game_loop_aux(gloop_bot_player, NewGame), !.
 
 % BOT vs BOT
 gloop_bot_bot(Game) :-
-    Game = game(_, _, _, _, _), cls,
-    display_game(Game),
+    Game = game(_, _, _, _, Options), cls, !,
+    display_game(Game), !,
     analyze_tree(Game, Tree),
-    choose_move(Tree, Move),
-    move(Move, Game, NewGame),
+    choose_move(Tree, Move, Options),
+    move(Move, Game, NewGame), !,
     game_loop_aux(gloop_bot_bot, NewGame).
 
+/**
+ * game_loop_aux/2
+ * game_loop_aux(+Loop, +Game).
+ *   Exit if game is over, otherwise reenter loop.
+ */
 game_loop_aux(Loop, Game) :-
     is_player(P),
 	game_over(Game, P),
@@ -137,8 +147,8 @@ game_loop_aux(Loop, Game) :-
 
 /**
  * victory/1
- * victory(P)
- * displays a victory message for the player P (w or b)
+ * victory(+P)
+ *   Displays a victory message for the player P (w or b)
  */
 victory(w):- write('White player won!'), nl.
 victory(b):- write('Black player won!'), nl.

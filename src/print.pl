@@ -1,4 +1,8 @@
 /**
+ * ===== ===== ===== BOARD ===== ===== =====
+ */
+
+/**
  * UNICODE BOX DRAWING
  * http://jrgraphix.net/r/Unicode/2500-257F
  *
@@ -244,6 +248,10 @@ display_game(Board, P, Cap) :-
     write_bottom(P, Cap), !.
 
 /**
+ * ===== ===== ===== VALUE ===== ===== =====
+ */
+
+/**
  * print_val/1
  * print_val(+Val).
  *   For debugging purposes only.
@@ -259,33 +267,85 @@ print_val(Val) :-
     format(' Total: ~D', Total), nl, !.
 
 /**
+ * ===== ===== ===== TREE ===== ===== =====
+ */
+
+/**
  * print_node/1
  * print_node(+Node).
  *   For debugging purposes only.
  */
 print_node(Node) :-
-    Node = node(Board, P, Val, Cap, Children, Worth),
+    Node = node(Board, P, Val, Cap, _, Worth),
     write('===== ===== ===== ===== node/6 ===== ===== ===== ====='), nl,
     display_game(Board, P, Cap),
     print_val(Val), nl,
     format('Node Worth: ~D', Worth), nl,
-    matrix_length(Board, RowSize, _),
-    print_children(Children, RowSize), !.
+    print_children(Node), nl, !.
+
+/**
+ * print_tree/1
+ * print_tree(+Tree).
+ *   For debugging purposes only.
+ */
+print_tree(Node) :-
+    Node = node(_, _, Val, _, _, Worth),
+    write('===== ===== ===== ===== node/6 ===== ===== ===== ====='), nl,
+    print_val(Val), nl,
+    format('Node Worth: ~D', Worth), nl,
+    print_children(Node), nl, !.
+
+/**
+ * print_tree_deep/1
+ * print_tree_deep(+Tree).
+ *   For debugging purposes only.
+ */
+print_tree_deep(Node) :-
+    Node = node(_, _, Val, _, _, Worth),
+    write('===== ===== ===== ===== node/6 ===== ===== ===== ====='), nl,
+    print_val(Val), nl,
+    format('Node Worth: ~D', Worth), nl,
+    print_children_deep(Node), nl, !.
 
 /**
  * print_children/1
- * print_children(+Children).
+ * print_children(+Node).
  *   For debugging purposes only.
  */
-print_children(Children) :- print_children(Children, 19).
-
-print_children(Children, RowSize) :-
-    length(Children, C),
+print_children(Node) :-
+    Node = node(Board, _, _, _, Children, _), !,
+    matrix_size(Board, RowSize, _),
+    length(Children, C), % can be 0
     format('===== ===== Children: ~d ===== =====', C), nl,
-    (   foreach(Worth-(Move-_), Children),
+    (   foreach(Worth-(Move-Child), Children),
         param(RowSize)
-    do  format('  Worth ~D~n  Move: ~w~n', [Worth, Move])
+    do  format('  Worth ~D~n  Move: ', [Worth]),
+        mainline(Child, Mainline),
+        print_moves([Move|Mainline], RowSize), nl
     ), !.
+
+/**
+ * print_children_deep/1
+ * print_children_deep(+Node).
+ *   For debugging purposes only.
+ */
+print_children_deep(Node) :-
+    Node = node(_, _, _, _, Children, _), !,
+    length(Children, C), % can be 0
+    format('===== ===== Children: ~d ===== =====', C), nl,
+    print_playlines(Node).
+
+/**
+ * print_move/2
+ * print_move(+Move, +RowSize)
+ */
+print_move(Move, RowSize) :-
+    rep_internal(RowSize, [RepRow,RepCol], Move),
+    RepRow > 9, !, format('~w~d  ', [RepCol,RepRow]).
+
+print_move(Move, RowSize) :-
+    rep_internal(RowSize, [RepRow,RepCol], Move),
+    RepRow < 10, !, format('~w~d   ', [RepCol,RepRow]).
 
 /**
  * print_moves/1
@@ -296,13 +356,45 @@ print_moves(Moves) :- print_moves(Moves, 19).
 print_moves(Moves, RowSize) :-
     (   foreach(Move, Moves),
         param(RowSize)
-    do  (   rep_internal(RowSize, [RepRow,RepCol], Move),
-            format('~w~d  ', [RepCol,RepRow])
-        )
+    do  print_move(Move, RowSize)
     ), !.
 
 /**
- * ===== ===== ===== STUDYING SCORES ===== ===== =====
+ * print_playlines/[1,2]
+ * print_playlines(+Node).
+ * print_playlines(+Node, +N).
+ */
+print_playlines(Node) :- print_playlines(Node, 0).
+
+print_playlines(Node, _) :-
+    Node = node(_, P, _, _, [], Worth), !,
+    write('  '),
+    other_player(P, Q),
+    write_board_unit(Q),
+    format(' ~D~n', Worth).
+
+print_playlines(Node, N) :- 
+    Node = node(Board, _, _, _, Children, _), !,
+    length(Children, C),
+    Spaces is 5 * N + 3,
+    fill_n(Spaces, ' ', SpacesList),
+    atom_chars(String, SpacesList),
+    NChild is N + 1,
+    matrix_length(Board, RowSize, _),
+    (N is 0 -> write(String); otherwise),
+    (   foreach(_-(Move-Child), Children),
+        count(I, 1, C),
+        param(String),
+        param(NChild),
+        param(RowSize),
+        param(N)
+    do  (I > 1 -> write(String); otherwise),
+        print_move(Move, RowSize),
+        print_playlines(Child, NChild)
+    ), !.
+
+/**
+ * ===== ===== ===== SCORE ===== ===== =====
  */
 
 /**
@@ -353,7 +445,7 @@ print_pattern_scores(Pattern, [PadLeft,PadRight]) :-
             LeftSpaces is 2 * (PadLeft - Left),
             RightSpaces is 2 * (PadRight - Right),
             pretty_print_pattern(FullPattern, [LeftSpaces, RightSpaces]),
-            format(' -- ~d~n', Value)
+            format(' -- ~D~n', Value)
         )
     ).
 

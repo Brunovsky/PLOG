@@ -346,8 +346,8 @@
  :- findall([Pattern, Score], pattern(Pattern, Score), List),
     (   foreach([WPattern, Score], List)
     do  (   list_reversal(WPattern, BPattern),
-            BScore is -Score,
-            WScore is Score,
+            BScore is integer(-Score),
+            WScore is integer(Score),
             assertz((score(WPattern, WScore))),
             assertz((score(BPattern, BScore)))
         )
@@ -370,7 +370,7 @@
 multiscore(List, Pattern, TotalScore) :-
     score(Pattern, Score),
     countsegment(List, Pattern, N),
-    TotalScore is integer(Score) * N.
+    TotalScore is Score * N.
 
 /**
  * captures_score/4
