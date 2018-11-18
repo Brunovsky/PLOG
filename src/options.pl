@@ -102,7 +102,7 @@ depth_width(WidthList, Depth, Width) :-
     nth0(Depth, WidthList, Width).
 
 next_depth(Options, NewOptions) :-
-    opt_width(Options, WidthList),
+    opt_widthlist(Options, WidthList),
     opt_padding(Options, Padding),
     opt_depth(Options, Depth),
     opt_totaldepth(Options, TotalDepth),

@@ -28,5 +28,5 @@ test :-
     test_board,
     test_score,
     test_tree,
-    test_value,
-    test_strategy.
+    test_value.
+    
