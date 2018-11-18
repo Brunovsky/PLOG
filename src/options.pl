@@ -122,7 +122,7 @@ sanitize_width(Options, DWidth, WidthList) :-
  *   Deduce the flip (board) option.
  */
 sanitize_flip_board(Options, Flip) :-
-    getopt_alt(Options, [flip_board, flip], Flip), !,
+    getopt_alt(Options, [flip_board, flip], false, Flip), !,
     memberchk(Flip, [false,true]);
     write('Invalid FLIP option! (true or false)'), nl, fail.
 
@@ -132,7 +132,7 @@ sanitize_flip_board(Options, Flip) :-
  *   Deduce the tournament_rule option.
  */
 sanitize_tournament_rule(Options, Rule) :-
-    getopt_alt(Options, [tournament_rule, rule, tournament], Rule), !,
+    getopt_alt(Options, [tournament_rule, rule, tournament], true, Rule), !,
     memberchk(Rule, [false,true]);
     write('Invalid TOURNAMENT RULE option! (true or false)'), nl, fail.
 
@@ -193,8 +193,10 @@ next_depth(Options, NewOptions) :-
  * ===== ===== ===== ===== ==== ==== ===== ===== ===== =====
  * ===== ===== ===== ===== ACCESSORS ===== ===== ===== =====
  * ===== ===== ===== ===== ==== ==== ===== ===== ===== =====
- *
- * Shorthands for calls to getopt/3.
+ */
+
+/**
+ * Shorthands for calls to getopt/3 or getopt_alt/3.
  */
 
 opt_turn(Options, Turn) :-

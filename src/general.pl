@@ -89,3 +89,14 @@ untilloop_fail(C, F, X) :- !, \+ call(C, X), call(F, Y), !, untilloop_fail(C, F,
  */
 plus(A, B, C) :- C is A + B.
 mult(A, B, C) :- C is A * B.
+
+/**
+ * repeat_call/2
+ * repeat_call(:P, +N).
+ */
+repeat_call(_, 0).
+repeat_call(P, N) :-
+    N > 0,
+    M is N - 1,
+    call(P),
+    repeat_call(P, M).

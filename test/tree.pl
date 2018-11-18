@@ -76,7 +76,7 @@ test_order_children :-
 
 % build_children/3
 test_build_children :-
-    Options = [padding(2), width([10,5,3,2]), current(0), depth(2)],
+    Options = [turn(4), padding(2), width([10,5,3,2]), current(0), depth(2)],
     Board = [
         [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
         [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
@@ -106,7 +106,7 @@ test_build_children :-
 
 % build_tree/3
 test_build_tree :-
-    Options = [padding(3), width([10,5,3,2]), current(0), depth(2)],
+    Options = [turn(73), padding(3), width([3,5,5,5]), current(0), depth(4)],
     Board = [
         [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
         [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],

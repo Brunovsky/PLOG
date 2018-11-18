@@ -20,3 +20,11 @@ read_position_aux(Row, Col) :-
     integer(Row);
     var(Row), var(Col),
     read_position(Row, Col).
+
+/**
+ * get_move/2
+ * get_move(+Size, -Move).
+ */
+get_move(Size, Move) :-
+    read_position(RepRow, RepCol),
+    rep_internal(Size, [RepRow,RepCol], Move).

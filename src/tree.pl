@@ -33,13 +33,13 @@
  *   For debugging purposes only.
  */
 print_node(Node) :-
-    Node = node(Board, P, Val, [Wc,Bc], Children, Worth),
+    Node = node(Board, P, Val, Cap, Children, Worth),
     write('===== ===== ===== ===== node/6 ===== ===== ===== ====='), nl,
-    display_game(Board, Wc, Bc, P),
+    display_game(Board, P, Cap),
     print_val(Val), nl,
     format('Node Worth: ~D', Worth), nl,
     matrix_length(Board, RowSize, _),
-    print_children(Children, RowSize).
+    print_children(Children, RowSize), !.
 
 /**
  * print_children/1
@@ -71,7 +71,7 @@ print_moves(Moves, RowSize) :-
     do  (   rep_internal(RowSize, [RepRow,RepCol], Move),
             format('~w~d  ', [RepCol,RepRow])
         )
-    ).
+    ), !.
 
 /**
  * mainline/2
@@ -165,11 +165,12 @@ organize_children(P, Width, Unordered, BestOrdered, BestWorth) :-
  *   See tree_parseopt/3 for Options.
  */
 build_children(Node, NewNode, Options) :-
+    opt_turn(Options, Turn),
     opt_padding(Options, Padding),
     opt_width(Options, Width),
     Node = node(Board, P, Val, Cap, _, _),
     NewNode = node(Board, P, Val, Cap, Children, NewWorth),
-    empty_positions_within_boundary(Board, Padding, ListOfMoves), % get subboard
+    valid_moves_within_boundary(Board, Padding, Turn, ListOfMoves),
     (   foreach(Move, ListOfMoves),
         fromto([], Childs, [Worth-(Move-Child)|Childs], Unordered),
         param(Node)
@@ -213,15 +214,12 @@ build_tree(Node, Tree, Options) :-
     recurse_children(NodeWithChildren, Tree, Options).
 
 /**
- * analyze_tree/[4,5]
- * analyze_tree(+Board, +P, +Cap, -Tree).
- * analyze_tree(+Board, +P, +Cap, -Tree, +Options).
+ * analyze_tree/2
+ * analyze_tree(+Game, -Tree).
  */
-analyze_tree(Board, P, Cap, Tree) :-
-    analyze_tree(Board, P, Cap, Tree, []).
-
-analyze_tree(Board, P, Cap, Tree, UserOptions) :-
-    tree_parseopt(UserOptions, Options),
+analyze_tree(Game, Tree) :-
+    Game = game(Board, P, Cap, Turn, UserOptions),
+    tree_parseopt(UserOptions, Turn, Options),
     build_start_node(Board, P, Cap, Node),
     build_tree(Node, Tree, Options).
 
@@ -233,4 +231,3 @@ analyze_tree(Board, P, Cap, Tree, UserOptions) :-
 choose_move(Tree, [R,C]) :-
     node_bestchild(Tree, Child),
     Child = _-([R,C]-_).
-    

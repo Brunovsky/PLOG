@@ -28,6 +28,25 @@ list_reversal(WList, BList) :- map(reversal, WList, BList).
 board_reversal(WBoard, BBoard) :- matrix_map(reversal, WBoard, BBoard).
 
 /**
+ * board_center/2
+ * board_center(+Board, -Center).
+ *   Asserts that Center is the position on the center of Board.
+ */
+board_center(Board, [Center,Center]) :-
+    integer(Center),
+    board_size(Board, S),
+    Center is integer((S+1)/2).
+
+/**
+ * board_center_range(+Board, -Range).
+ *   Asserts that Range is the 5x5 box surrounding the center of Board.
+ */
+board_center_range(Board, [[Min,Max],[Min,Max]]) :-
+    board_size(Board, S),
+    C is integer((S+1)/2),
+    Min is C-2, Max is C+2.
+
+/**
  * five_board/2
  * five_board(+Board, +P).
  *   Verifies if the Board position has a five-in-a-row for player P.
@@ -186,37 +205,64 @@ remove_dead_stones_rightright(P, Board, [R,C], NewBoard, 2) :-
 
 /**
  * remove_dead_stones/5
- * remove_dead_stones(+P, +Board, +[R,C], ?NewBoard, ?Captures).
+ * remove_dead_stones(+P, +Board, +Move, ?NewBoard, ?Captures).
  *   Remove all dead stones (rows, columns and diagonals).
  *   Remember: suicides are not allowed!
  */
-remove_dead_stones(P, Board, [R,C], NewBoard, Captures) :-
-    remove_dead_stones_rowleft(P, Board, [R,C], New1, C1),
-    remove_dead_stones_rowright(P, New1, [R,C], New2, C2),
-    remove_dead_stones_colabove(P, New2, [R,C], New3, C3),
-    remove_dead_stones_colbelow(P, New3, [R,C], New4, C4),
-    remove_dead_stones_leftleft(P, New4, [R,C], New5, C5),
-    remove_dead_stones_leftright(P, New5, [R,C], New6, C6),
-    remove_dead_stones_rightleft(P, New6, [R,C], New7, C7),
-    remove_dead_stones_rightright(P, New7, [R,C], NewBoard, C8),
+remove_dead_stones(P, Board, Move, NewBoard, Captures) :-
+    remove_dead_stones_rowleft(P, Board, Move, New1, C1),
+    remove_dead_stones_rowright(P, New1, Move, New2, C2),
+    remove_dead_stones_colabove(P, New2, Move, New3, C3),
+    remove_dead_stones_colbelow(P, New3, Move, New4, C4),
+    remove_dead_stones_leftleft(P, New4, Move, New5, C5),
+    remove_dead_stones_leftright(P, New5, Move, New6, C6),
+    remove_dead_stones_rightleft(P, New6, Move, New7, C7),
+    remove_dead_stones_rightright(P, New7, Move, NewBoard, C8),
     Captures is C1 + C2 + C3 + C4 + C5 + C6 + C7 + C8.
 
 /**
  * place_stone/5
- * place_stone(+P, +Board, +[R,C], ?NewBoard, ?Captures).
+ * place_stone(+P, +Board, +Move, ?NewBoard, ?Captures).
  *   Places a stone P (w or b) on Board at position (R,C).
  *   Doing so removes captured stones from the board, binding the
  *   number of removed stones to Captures.
  */
-place_stone(w, Board, [R,C], NewBoard, Captures) :-
-	matrix_selectnth1(c, Board, 'W', WBoard, [R,C]),
-    remove_dead_stones(w, WBoard, [R,C], Removed, Captures),
-    matrix_selectnth1('W', Removed, w, NewBoard, [R,C]).
+place_stone(w, Board, Move, NewBoard, Captures) :-
+	matrix_selectnth1(c, Board, 'W', WBoard, Move),
+    remove_dead_stones(w, WBoard, Move, Removed, Captures),
+    matrix_selectnth1('W', Removed, w, NewBoard, Move).
 
-place_stone(b, Board, [R,C], NewBoard, Captures) :-
-    matrix_selectnth1(c, Board, 'B', BBoard, [R,C]),
-    remove_dead_stones(b, BBoard, [R,C], Removed, Captures),
-    matrix_selectnth1('B', Removed, b, NewBoard, [R,C]).
+place_stone(b, Board, Move, NewBoard, Captures) :-
+    matrix_selectnth1(c, Board, 'B', BBoard, Move),
+    remove_dead_stones(b, BBoard, Move, Removed, Captures),
+    matrix_selectnth1('B', Removed, b, NewBoard, Move).
+
+/**
+ * valid_moves/2
+ * valid_moves(+Board, -ListOfMoves).
+ *   List of possible moves for either player in the Board.
+ *   See also valid_moves/[3,4]
+ */
+valid_moves(Board, ListOfMoves) :- empty_positions(Board, ListOfMoves).
+
+/**
+ * move/3
+ * move(+Move, +Game, -NewGame).
+ */
+move(Move, Game, NewGame) :-
+    Game = game(Board, P, Cap, Turn, Options),
+    NewGame = game(NewBoard, Q, NewCap, NextTurn, Options),
+    other_player(P, Q),
+    place_stone(P, Board, Move, NewBoard, Captures),
+    add_captures(P, Captures, Cap, NewCap),
+    NextTurn is Turn + 1.
+
+/**
+ * add_captures/4
+ * add_captures(+P, +Captures, +[Wc,Bc], -[NewWc,NewBc]).
+ */
+add_captures(w, Captures, [Wc,Bc], [NewWc,Bc]) :- NewWc is Wc + Captures.
+add_captures(b, Captures, [Wc,Bc], [Wc,NewBc]) :- NewBc is Bc + Captures.
 
 /**
  * empty_position/2
@@ -228,93 +274,93 @@ empty_position(Board, [R,C]) :- matrixnth1([R,C], Board, c).
 
 /**
  * empty_positions/[2,3]
- * empty_positions(+Board, ?ListOfMoves).
- * empty_positions(+Board, +Range, ?ListOfMoves).
- *   Gets all empty positions on the board, possible only within a range.
+ * empty_positions(+Board, -ListOfMoves).
+ * empty_positions(+Board, +Range, -ListOfMoves).
+ *   Gets all empty positions on the board, possibly only within a range.
  */
 empty_positions(Board, ListOfMoves) :-
-    findall(X, empty_position(Board, X), ListOfMoves).
+    findall(X, empty_position(Board, X), ListOfMoves), !.
 
 empty_positions(Board, Range, FilteredListOfMoves) :-
     empty_positions(Board, ListOfMoves),
-    include(matrix_between(Range), ListOfMoves, FilteredListOfMoves).
+    include(matrix_between(Range), ListOfMoves, FilteredListOfMoves), !.
+
+/**
+ * empty_positions_within_boundary/[2,3]
+ * empty_positions_within_boundary(+Board, -ListOfMoves).
+ * empty_positions_within_boundary(+Board, +Padding, -ListOfMoves).
+ */
+empty_positions_within_boundary(Board, ListOfMoves) :-
+    board_boundary(Board, 0, Range),
+    empty_positions(Board, Range, ListOfMoves), !.
+
+empty_positions_within_boundary(Board, Padding, ListOfMoves) :-
+    board_boundary(Board, Padding, Range), 
+    empty_positions(Board, Range, ListOfMoves), !.
 
 /**
  * valid_move/3
- * valid_move(+Board, +Turn, +[R,C]).
- *    Check if a given move [R,C] is valid in the given Turn
+ * valid_move(+Board, +Turn, +Move).
+ *    Check if a given move Move is valid in the given Turn
  */
-valid_move(Board, 0, [R,C]) :-
-    !, R is C,
-    valid_moves(Board, _, 0, ListOfMoves), !,
-    contains(ListOfMoves, [R,C]).
+valid_move(Board, 0, Center) :- board_center(Board, Center).
 
-valid_move(Board, 2, [R,C]) :-
-    !, valid_moves(Board, _, 2, ListOfMoves), !,
-    contains(ListOfMoves, [R,C]).
+valid_move(Board, 2, Move) :-
+    valid_moves(Board, 2, ListOfMoves), !,
+    contains(ListOfMoves, Move), !.
 
-valid_move(Board, _, Pos) :-
-    valid_moves(Board, _, _, ListOfMoves),
-    contains(ListOfMoves, Pos).
+valid_move(Board, Turn, Move) :-
+    Turn \= 0, Turn \= 2, !,
+    valid_moves(Board, _, ListOfMoves),
+    contains(ListOfMoves, Move).
 
 /**
- * valid_moves/[3,4]
- * valid_moves(+Board, +Player, ?ListOfMoves).
- * valid_moves(+Board, +Player, +Turn, ?ListOfMoves).
+ * valid_moves/3
+ * valid_moves(+Board, +Turn, -ListOfMoves).
  *   Gets a list with all the valid moves (does not depend on the player).
  */
-valid_moves(Board, _, ListOfMoves) :- empty_positions(Board, ListOfMoves).
-valid_moves(Board, _, 0, ListOfMoves) :-
-    board_size(Board, S),
-    C is integer((S+1)/2),
-    ListOfMoves = [[C,C]].
 
-valid_moves(Board, _, 2, ListOfMoves) :- 
-    board_size(Board, S),
-    Center is integer((S+1)/2),
-    Min is Center-2, Max is Center+2,
-    valid_moves_within_boundary(Board, [[Min,Max],[Min,Max]], ListOfMoves).
+valid_moves(Board, 0, [Center]) :- board_center(Board, Center).
 
-valid_moves(Board, _, _, ListOfMoves) :- empty_positions(Board, ListOfMoves).
+valid_moves(Board, 2, ListOfMoves) :- 
+    board_center_range(Board, CenterRange),
+    empty_positions(Board, CenterRange, ExcludedMoves),
+    empty_positions(Board, AllMoves),
+    exclude(contains(ExcludedMoves), AllMoves, ListOfMoves), !.
 
-/**
- * valid_moves_within_boundary/[3-5]
- * valid_moves_within_boundary(+Board, +Range, -ListOfMoves).
- * valid_moves_within_boundary(+Board, +Range, +Turn, -ListOfMoves).
- * valid_moves_within_boundary(+Board, +Range, +Turn, +Padding, -ListOfMoves).
- *   Gets a list with all the valid moves within a boundary.  
- */
-valid_moves_within_boundary(Board, Range, ListOfMoves) :-
-    empty_positions(Board, L),
-    empty_positions(Board, Range, InvalidMoves),
-    exclude(contains(InvalidMoves), L, ListOfMoves).
-
-valid_moves_within_boundary(Board, Range, Turn, ListOfMoves) :-
-    valid_moves(Board, _, Turn, L),
-    empty_positions(Board, Range, InvalidMoves),
-    exclude(contains(InvalidMoves), L, ListOfMoves).
-
-valid_moves_within_boundary(Board, Range, Turn, Padding, ListOfMoves) :-
-    valid_moves(Board, _, Turn, L),
-    empty_positions(Board, Range, InvalidMoves),
-    exclude(contains(InvalidMoves), L, ListOfMoves).
+valid_moves(Board, Turn, ListOfMoves) :-
+    Turn \= 0, Turn \= 2, !,
+    empty_positions(Board, ListOfMoves).
 
 /**
- * move/3
- * move(+[R,C], +game(Board, Wc, Bc, P, Turn), -game(Board, Wc, Bc, P, Turn)).
+ * valid_moves/4
+ * valid_moves(+Board, +Range, +Turn, -ListOfMoves).
+ *   Gets a list with all the valid moves within a given range
+ *   (does not depend on the player).
  */
-move([R,C], game(Board, Wc, Bc, P, Turn), game(NewBoard, Wc1, Bc1, Next, NTurn)) :-
-    place_stone(P, Board, [R,C], NewBoard, Captures),
-    add_captures(P, Captures, [Wc, Bc], [Wc1, Bc1]),
-    other_player(P, Next),
-    NTurn is Turn + 1.
+valid_moves(Board, _, 0, [Center]) :- board_center(Board, Center).
+
+valid_moves(Board, Range, 2, ListOfMoves) :-
+    board_center_range(Board, CenterRange),
+    empty_positions(Board, CenterRange, ExcludedMoves),
+    empty_positions(Board, Range, AllMoves),
+    exclude(contains(ExcludedMoves), AllMoves, ListOfMoves), !.
+
+valid_moves(Board, Range, _, ListOfMoves) :-
+    empty_positions(Board, Range, ListOfMoves).
 
 /**
- * add_captures/4
- * add_captures(+P, +Captures, +[Wc,Bc], -[NewWc,NewBc]).
+ * valid_moves_within_boundary/[3,4]
+ * valid_moves_within_boundary(+Board, +Turn, -ListOfMoves).
+ * valid_moves_within_boundary(+Board, +Padding, +Turn, -ListOfMoves).
  */
-add_captures(w, Captures, [Wc,Bc], [NewWc,Bc]) :- NewWc is Wc + Captures.
-add_captures(b, Captures, [Wc,Bc], [Wc,NewBc]) :- NewBc is Bc + Captures.
+valid_moves_within_boundary(Board, Turn, ListOfMoves) :-
+    board_boundary(Board, 0, Range),
+    valid_moves(Board, Range, Turn, ListOfMoves).
+
+valid_moves_within_boundary(Board, Padding, Turn, ListOfMoves) :-
+    board_boundary(Board, Padding, Range),
+    valid_moves(Board, Range, Turn, ListOfMoves).
 
 /**
  * board_boundary/[2,3]
@@ -327,15 +373,3 @@ board_boundary(Board, Range) :-
 
 board_boundary(Board, Padding, Range) :-
     matrix_boundary(Board, c, Padding, Range).
-
-/**
- * empty_positions_within_boundary/2
- * empty_positions_within_boundary(+Board, -ListOfMoves).
- */
-empty_positions_within_boundary(Board, ListOfMoves) :-
-    board_boundary(Board, 0, Range),
-    empty_positions(Board, Range, ListOfMoves).
-
-empty_positions_within_boundary(Board, Padding, ListOfMoves) :-
-    board_boundary(Board, Padding, Range),
-    empty_positions(Board, Range, ListOfMoves).

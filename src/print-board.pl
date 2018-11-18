@@ -35,6 +35,7 @@
  */
 
 /**
+ * write_board_unit/[1,4]
  * write_board_unit(+P, +[RowSize,ColSize], +Row, +Col).
  *   Writes to the console the piece whose internal representation is P,
  *   on location (Row, Col), assuming the board is SizexSize.
@@ -96,6 +97,23 @@ write_board_unit(_, [RowSize,ColSize], Row, Col) :-
     Row > 1, Row < RowSize, Col > 1, Col < ColSize,
     write('\x253c\\x2500\').
 
+write_board_unit(w) :- write_board_unit(w, _, _, _), !.
+
+write_board_unit(b) :- write_board_unit(b, _, _, _), !.
+
+write_board_unit('W') :- write_board_unit('W', _, _, _), !.
+
+write_board_unit('B') :- write_board_unit('B', _, _, _), !.
+
+write_board_unit(c) :- write_board_unit(c, [3,3], 2, 2), !.
+
+/**
+ * write_npieces(+N, +P).
+ *   Writes N pieces of player P.
+ */
+write_npieces(N, P) :-
+    repeat_call(write_board_unit(P), N), !.
+
 /**
  * write_board_left(+P, +Row, +RowSize).
  *   Print the row's number on the left of the board.
@@ -147,13 +165,27 @@ write_board_top(b, ColSize) :-
     nl.
 
 /**
+ * write_bottom/[2,3]
  * write_bottom(+next, +WhiteCaptures, +BlackCaptures).
  *   Print the players' captures below the board.
  */
-write_bottom(w, Wc, Bc) :-
-    format('      > White: ~d         Black: ~d\n', [Wc, Bc]).
-write_bottom(b, Wc, Bc) :-
-    format('        White: ~d       > Black: ~d\n', [Wc, Bc]).
+write_bottom(w, [Wc,Bc]) :-
+    write('       > White: '), write_npieces(Wc, b), nl,
+    write('         Black: '), write_npieces(Bc, w), nl.
+
+write_bottom(b, [Wc,Bc]) :-
+    write('         White: '), write_npieces(Wc, b), nl,
+    write('       > Black: '), write_npieces(Bc, w), nl.
+
+write_bottom(w, [Wc,Bc], Turn) :-
+    write('       > White: '), write_npieces(Wc, b), nl,
+    write('         Black: '), write_npieces(Bc, w), nl,
+    format(' Turn: ~d', Turn), nl, !.
+
+write_bottom(b, [Wc,Bc], Turn) :-
+    write('         White: '), write_npieces(Wc, b), nl,
+    write('       > Black: '), write_npieces(Bc, w), nl,
+    format(' Turn: ~d', Turn), nl, !.
 
 /**
  * write_board_line(+L, +P, +[RowSize,ColSize], +Row).
@@ -166,26 +198,41 @@ write_board_line(L, P, [RowSize,ColSize], Row) :-
     nl.
 
 /**
+ * print_board/[1,2]
+ * print_board(+Board).
  * print_board(+Board, +P).
- *   Print the whole board.
+ *   Print the whole board. The second version flips the board for Black.
  */
 print_board(Board, w) :-
     matrix_size(Board, RowSize, ColSize),
     write_board_top(w, ColSize),
-    lb_foreach_decreasing(Board, write_board_line, [w, [RowSize,ColSize]], RowSize).
+    lb_foreach_decreasing(Board, write_board_line, [w, [RowSize,ColSize]], RowSize), !.
 
 print_board(Board, b) :-
     matrix_size(Board, RowSize, ColSize),
     matrix_rowcol_reverse(Board, Reversed),
     write_board_top(b, ColSize),
-    lb_foreach_decreasing(Reversed, write_board_line, [b, [RowSize,ColSize]], RowSize).
+    lb_foreach_decreasing(Reversed, write_board_line, [b, [RowSize,ColSize]], RowSize), !.
 
-print_board(Board) :- print_board(Board, w).
+print_board(Board) :- print_board(Board, w), !.
 
 /**
- * display_game(+Board, +White, +Black, +Next).
- *   Print the whole board, plus captures on the bottom.
+ * display_game/[1,3]
+ * display_game(+Game).
+ *   Print all the game's board information, plus captures and turn on the bottom.
  */
-display_game(Board, Wc, Bc, Next) :-
+display_game(Game) :-
+    Game = game(Board, P, Cap, Turn, Options),
+    opt_flip(Options, Flip),
+    Flip, !, print_board(Board, P),
+    write_bottom(P, Cap, Turn), !.
+
+display_game(Game) :-
+    Game = game(Board, P, Cap, Turn, Options),
+    opt_flip(Options, Flip),
+    \+ Flip, !, print_board(Board),
+    write_bottom(P, Cap, Turn), !.
+
+display_game(Board, P, Cap) :-
     print_board(Board),
-    write_bottom(Next, Wc, Bc).
+    write_bottom(P, Cap), !.
