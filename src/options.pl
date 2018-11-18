@@ -11,19 +11,38 @@
  */
 
 /**
- * ===== ===== ===== ===== ====  ==== ===== ===== ===== ===== 
- * ===== ===== ===== ===== DIFFICULTY ===== ===== ===== =====
- * ===== ===== ===== ===== ====  ==== ===== ===== ===== =====
+ * ===== ===== ===== ===== ======= ======= ===== ===== ===== ===== 
+ * ===== ===== ===== ===== DEFAULT OPTIONS ===== ===== ===== =====
+ * ===== ===== ===== ===== ======= ======= ===== ===== ===== =====
  */
+
+/**
+ * default/2
+ * default(+Opt, -DefaultValue).
+ */
+default(board_size, 19).
+default(difficulty, 3).
+default(flip_board, false).
+default(tournament_rule, true).
+
+default(depth, Depth) :-
+    default(difficulty, Diff), difficulty_set(Diff, Depth, _, _).
+
+default(padding, Padding) :-
+    default(difficulty, Diff), difficulty_set(Diff, _, Padding, _).
+
+default(width, WidthList) :-
+    default(difficulty, Diff), difficulty_set(Diff, _, _, WidthList).
+
 /**
  * difficulty_set/4
  * difficulty_set(Level, Depth, Padding, WidthList).
  */
-difficulty_set(1, 1, 3, [2]).
+difficulty_set(1, 1, 3, [3]).
 difficulty_set(2, 2, 3, [5,3]).
-difficulty_set(3, 4, 3, [5,4,3,2]).
-difficulty_set(4, 5, 3, [10,7,5]).
-difficulty_set(5, 6, 3, [10,10,8,6,5,5]).
+difficulty_set(3, 4, 3, [5,3,2]).
+difficulty_set(4, 4, 3, [10,7,5]).
+difficulty_set(5, 6, 2, [10,10,8,6,5]).
 
 /**
  * ===== ===== ===== ===== ====  ==== ===== ===== ===== =====
@@ -59,7 +78,8 @@ sanitize_options(Options, NewOptions) :-
  *   Sanitizes Options' game_board option into Size.
  */
 sanitize_board_size(Options, Size) :-
-    getopt_alt(Options, [board_size, size], 19, Size),
+    default(board_size, DefaultSize),
+    getopt_alt(Options, [board_size, size], DefaultSize, Size),
     integer(Size), 1 is mod(Size, 2), Size >= 7;
     write('Invalid BOARD_SIZE option! (odd > 7)'), nl, fail.
 
@@ -69,7 +89,8 @@ sanitize_board_size(Options, Size) :-
  *   Sanitizes Options' difficulty option into its 3 components (Depth, Padding, Width).
  */
 sanitize_difficulty(Options, DDepth, DPadding, DWidth) :-
-    getopt(Options, difficulty, 3, Difficulty),
+    default(difficulty, DefaultDifficulty),
+    getopt(Options, difficulty, DefaultDifficulty, Difficulty),
     integer(Difficulty),
     difficulty_set(Difficulty, DDepth, DPadding, DWidth),
     format('Difficulty level ~d', Difficulty), nl;
@@ -122,7 +143,8 @@ sanitize_width(Options, DWidth, WidthList) :-
  *   Deduce the flip (board) option.
  */
 sanitize_flip_board(Options, Flip) :-
-    getopt_alt(Options, [flip_board, flip], false, Flip), !,
+    default(flip_board, DefaultFlip),
+    getopt_alt(Options, [flip_board, flip], DefaultFlip, Flip), !,
     memberchk(Flip, [false,true]);
     write('Invalid FLIP option! (true or false)'), nl, fail.
 
@@ -132,7 +154,8 @@ sanitize_flip_board(Options, Flip) :-
  *   Deduce the tournament_rule option.
  */
 sanitize_tournament_rule(Options, Rule) :-
-    getopt_alt(Options, [tournament_rule, rule, tournament], true, Rule), !,
+    default(tournament_rule, DefaultRule),
+    getopt_alt(Options, [tournament_rule, rule, tournament], DefaultRule, Rule), !,
     memberchk(Rule, [false,true]);
     write('Invalid TOURNAMENT RULE option! (true or false)'), nl, fail.
 
@@ -199,17 +222,17 @@ next_depth(Options, NewOptions) :-
  * Shorthands for calls to getopt/3 or getopt_alt/3.
  */
 
-opt_turn(Options, Turn) :-
-    getopt(Options, turn, Turn).
-
-opt_depth(Options, Depth) :-
-    getopt(Options, current, Depth).
-
 opt_board_size(Options, Size) :-
     getopt_alt(Options, [board_size, size], Size).
 
 opt_size(Options, Size) :-
     getopt_alt(Options, [board_size, size], Size).
+
+opt_turn(Options, Turn) :-
+    getopt(Options, turn, Turn).
+
+opt_depth(Options, Depth) :-
+    getopt(Options, current, Depth).
 
 opt_totaldepth(Options, TotalDepth) :-
     getopt(Options, depth, TotalDepth).
