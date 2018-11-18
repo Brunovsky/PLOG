@@ -95,8 +95,6 @@ pretty_print_pattern(Pattern, Length) :-
     write_board_line_crude(Pattern),
     write(SpaceString).
 
-p(Pattern, Pad) :- print_pattern_scores(Pattern, Pad).
-
 /**
  * pattern/2
  * pattern(+Pattern, -Score).
@@ -105,282 +103,303 @@ p(Pattern, Pad) :- print_pattern_scores(Pattern, Pad).
 
 /**
  * Pure Pattern with 1 stone.
- * Multiplier 2 ** 0
- * 9
+ * Capped at 2 ** 7 === 128
  */
 
-% - - w - - CHECK
-pattern([c,c,w,c,c], 12).
-pattern([c,c,w,c], 4).
-pattern([c,c,w], 3).
+% - - w - - CHECK 128
+    pattern([c,c,w,c,c], 38).
+    pattern([c,c,w,c], 16).
+    pattern([c,c,w], 10).
 
-pattern([c,w,c,c], 4).
-pattern([c,w,c], 8).
-pattern([c,w], 2).
+    pattern([c,w,c,c], 16).
+    pattern([c,w,c], 24).
+    pattern([c,w], 6).
 
-pattern([w,c,c], 3).
-pattern([w,c], 2).
-pattern([w], 2).
+    pattern([w,c,c], 10).
+    pattern([w,c], 6).
+    pattern([w], 2).
 
 /**
  * Pure Pattern with 2 stones.
- * Multiplier 2 ** 5
- * 31
+ * Capped at 2 ** 20 === 1M
  */
 
-% - - w w - - CHECK
-pattern([c,c,w,w,c,c], 16 * 2 ** 5).
-pattern([c,c,w,w,c], 11 * 2 ** 5).
-pattern([c,c,w,w], 16 * 2 ** 5).
+% - - w w - - CHECK 388 - 4,772
+    pattern([c,c,w,w,c,c], 12 * 2 ** 7).
+    pattern([c,c,w,w,c], 5 * 2 ** 7).
+    pattern([c,c,w,w], 4 * 2 ** 7).
 
-pattern([c,w,w,c,c], 11 * 2 ** 5).
-pattern([c,w,w,c], 64 * 2 ** 5).
-pattern([c,w,w], -24 * 2 ** 5).
+    pattern([c,w,w,c,c], 5 * 2 ** 7).
+    pattern([c,w,w,c], 40 * 2 ** 7).
+    pattern([c,w,w], -18 * 2 ** 7).
 
-pattern([w,w,c,c], 16 * 2 ** 5).
-pattern([w,w,c], -24 * 2 ** 5).
-pattern([w,w], 12 * 2 ** 5).
+    pattern([w,w,c,c], 4 * 2 ** 7).
+    pattern([w,w,c], -18 * 2 ** 7).
+    pattern([w,w], 3 * 2 ** 7).
 
-% - - w - w - - CHECK
-pattern([c,c,w,c,w,c,c], 50 * 2 ** 10).
-pattern([c,c,w,c,w,c], 70 * 2 ** 10).
-pattern([c,c,w,c,w], 80 * 2 ** 10).
+% - - w - w - - CHECK 196K - 1M
+    pattern([c,c,w,c,w,c,c], 2 ** 16).
+    pattern([c,c,w,c,w,c], 3 * 2 ** 15).
+    pattern([c,c,w,c,w], 5 * 2 ** 14).
 
-pattern([c,w,c,w,c,c], 70 * 2 ** 10).
-pattern([c,w,c,w,c], 130 * 2 ** 10).
-pattern([c,w,c,w], 100 * 2 ** 10).
+    pattern([c,w,c,w,c,c], 3 * 2 ** 15).
+    pattern([c,w,c,w,c], 2 ** 17).
+    pattern([c,w,c,w], 2 ** 17).
 
-pattern([w,c,w,c,c], 80 * 2 ** 10).
-pattern([w,c,w,c], 100 * 2 ** 10).
-pattern([w,c,w], 250 * 2 ** 10).
+    pattern([w,c,w,c,c], 5 * 2 ** 14).
+    pattern([w,c,w,c], 2 ** 17).
+    pattern([w,c,w], 3 * 2 ** 16).
 
-% - - w - - w - - CHECK
-pattern([c,c,w,c,c,w,c,c], 10 * 2 ** 8).
-pattern([c,c,w,c,c,w,c], 10 * 2 ** 8).
-pattern([c,c,w,c,c,w], 20 * 2 ** 8).
+% - - w - - w - - CHECK 41K - 160K
+    pattern([c,c,w,c,c,w,c,c], 2 ** 11).
+    pattern([c,c,w,c,c,w,c], 2 ** 12).
+    pattern([c,c,w,c,c,w], 2.5 * 2 ** 11).
 
-pattern([c,w,c,c,w,c,c], 10 * 2 ** 8).
-pattern([c,w,c,c,w,c], 90 * 2 ** 8).
-pattern([c,w,c,c,w], 90 * 2 ** 8).
+    pattern([c,w,c,c,w,c,c], 2 ** 12).
+    pattern([c,w,c,c,w,c], 2 ** 15).
+    pattern([c,w,c,c,w], 2 ** 15).
 
-pattern([w,c,c,w,c,c], 20 * 2 ** 8).
-pattern([w,c,c,w,c], 90 * 2 ** 8).
-pattern([w,c,c,w], 150 * 2 ** 8).
+    pattern([w,c,c,w,c,c], 2.5 * 2 ** 11).
+    pattern([w,c,c,w,c], 2 ** 15).
+    pattern([w,c,c,w], 2.5 * 2 ** 14).
 
-% - w - - - w - CHECK
-pattern([c,w,c,c,c,w,c], 4 * 2 ** 5).
-pattern([c,w,c,c,c,w], 3 * 2 ** 5).
+% - w - - - w - CHECK 292 - 1,408
+    pattern([c,w,c,c,c,w,c], 2 ** 9).
+    pattern([c,w,c,c,c,w], 2 ** 8).
 
-pattern([w,c,c,c,w,c], 3 * 2 ** 5).
-pattern([w,c,c,c,w], 5 * 2 ** 5).
+    pattern([w,c,c,c,w,c], 2 ** 8).
+    pattern([w,c,c,c,w], 2 ** 8).
 
 /**
  * Pure Pattern with 3 stones.
- * Multiplier 2 ** 10
- * 40
+ * No Sente -> 2 ** 16 --- 2 ** 28
+ * Sente 1 --- 2 ** 32 --- 2 ** 36
+ * Sente 2 --- 2 ** 39 --- 2 ** 43
  */
 
-% - - w w w - - CHECK
-pattern([c,c,w,w,w,c,c], 800 * 2 ** 28). % SENTE 2
-pattern([c,c,w,w,w,c], 250 * 2 ** 26). % SENTE
-pattern([c,c,w,w,w], 20 * 2 ** 24).
+% - - w w w - - CHECK 2,1M - 324B
+    pattern([c,c,w,w,w,c,c], 2 ** 41). % SENTE 2
+    pattern([c,c,w,w,w,c], 2 ** 35.5). % SENTE
+    pattern([c,c,w,w,w], 2 ** 28).
 
-pattern([c,w,w,w,c,c], 250 * 2 ** 26). % SENTE
-pattern([c,w,w,w,c], 15 * 2 ** 24).
-pattern([c,w,w,w], 2 * 2 ** 24).
+    pattern([c,w,w,w,c,c], 2 ** 35.5). % SENTE
+    pattern([c,w,w,w,c], 2 ** 28.5).
+    pattern([c,w,w,w], 2 ** 23).
 
-pattern([w,w,w,c,c], 20 * 2 ** 24).
-pattern([w,w,w,c], 2 * 2 ** 24).
-pattern([w,w,w], 8 * 2 ** 24).
+    pattern([w,w,w,c,c], 2 ** 28).
+    pattern([w,w,w,c], 2 ** 23).
+    pattern([w,w,w], 2 ** 21).
 
-% - w w - w -   @   - w - w w - CHECK
-pattern([c,w,w,c,w,c], 34 * 2 ** 22). % SENTE
-pattern([c,w,w,c,w], 48 * 2 ** 22).
+% - w w - w -   @   - w - w w - CHECK -1,9M - 12B
+    pattern([c,w,w,c,w,c], 2 ** 33.5). % SENTE
+    pattern([c,w,w,c,w], 2 ** 26).
 
-pattern([w,w,c,w,c], 1 * 2 ** 22).
-pattern([w,w,c,w], -4 * 2 ** 22).
+    pattern([w,w,c,w,c], 2 ** 21).
+    pattern([w,w,c,w], -1 * 2 ** 21).
 
-pattern([c,w,c,w,w,c], 32 * 2 ** 22). % SENTE
-pattern([c,w,c,w,w], 1 * 2 ** 22).
+    pattern([c,w,c,w,w,c], 2 ** 33.5). % SENTE
+    pattern([c,w,c,w,w], 2 ** 21).
 
-pattern([w,c,w,w,c], 48 * 2 ** 22).
-pattern([w,c,w,w], -4 * 2 ** 22).
+    pattern([w,c,w,w,c], 2 ** 26).
+    pattern([w,c,w,w], -1 * 2 ** 21).
 
-% - - w - w - w - - CHECK
-pattern([c,c,w,c,w,c,w,c,c], 5 * 2 ** 16).
-pattern([c,c,w,c,w,c,w,c], 7 * 2 ** 16).
-pattern([c,c,w,c,w,c,w], 4 * 2 ** 16).
+% - - w - w - w - - CHECK 67M - 739M
+    pattern([c,c,w,c,w,c,w,c,c], 2 ** 27).
+    pattern([c,c,w,c,w,c,w,c], 2 ** 25).
+    pattern([c,c,w,c,w,c,w], 2 ** 25).
 
-pattern([c,w,c,w,c,w,c,c], 7 * 2 ** 16).
-pattern([c,w,c,w,c,w,c], 18 * 2 ** 16).
-pattern([c,w,c,w,c,w], 8 * 2 ** 16).
+    pattern([c,w,c,w,c,w,c,c], 2 ** 25).
+    pattern([c,w,c,w,c,w,c], 2 ** 27).
+    pattern([c,w,c,w,c,w], 2 ** 27).
 
-pattern([w,c,w,c,w,c,c], 4 * 2 ** 16).
-pattern([w,c,w,c,w,c], 8 * 2 ** 16).
-pattern([w,c,w,c,w], 4 * 2 ** 16).
+    pattern([w,c,w,c,w,c,c], 2 ** 25).
+    pattern([w,c,w,c,w,c], 2 ** 27).
+    pattern([w,c,w,c,w], 2 ** 26).
 
-% - w - - w - w - -   @   - - w - w - - w - CHECK
-pattern([c,w,c,c,w,c,w,c,c], 1 * 2 ** 11).
-pattern([c,w,c,c,w,c,w,c], 1.5 * 2 ** 11).
-pattern([c,w,c,c,w,c,w], 3 * 2 ** 11).
+% - w - - w - w - -   @   - - w - w - - w - CHECK 549K - 1,3M
+    pattern([c,w,c,c,w,c,w,c,c], 2 ** 12).
+    pattern([c,w,c,c,w,c,w,c], 2 ** 13).
+    pattern([c,w,c,c,w,c,w], 2 ** 14).
 
-pattern([w,c,c,w,c,w,c,c], 1 * 2 ** 11).
-pattern([w,c,c,w,c,w,c], 5 * 2 ** 11).
-pattern([w,c,c,w,c,w], 12 * 2 ** 11).
+    pattern([w,c,c,w,c,w,c,c], 2 ** 12).
+    pattern([w,c,c,w,c,w,c], 2 ** 14).
+    pattern([w,c,c,w,c,w], 2 ** 16).
 
-pattern([c,c,w,c,w,c,c,w,c], 1 * 2 ** 11).
-pattern([c,c,w,c,w,c,c,w], 1 * 2 ** 11).
+    pattern([c,c,w,c,w,c,c,w,c], 2 ** 12).
+    pattern([c,c,w,c,w,c,c,w], 2 ** 12).
 
-pattern([c,w,c,w,c,c,w,c], 1.5 * 2 ** 11).
-pattern([c,w,c,w,c,c,w], 5 * 2 ** 11).
+    pattern([c,w,c,w,c,c,w,c], 2 ** 13).
+    pattern([c,w,c,w,c,c,w], 2 ** 14).
 
-pattern([w,c,w,c,c,w,c], 3 * 2 ** 11).
-pattern([w,c,w,c,c,w], 12 * 2 ** 11).
+    pattern([w,c,w,c,c,w,c], 2 ** 14).
+    pattern([w,c,w,c,c,w], 2 ** 16).
 
 /**
  * Pure Pattern with 4 stones.
- * 2 ** 30
+ * No Sente -> 2 ** 21 --- 2 ** 29
+ * Sente 1 --> 2 ** 34 --- 2 ** 39
+ * Sente 2 --> 2 ** 42 --- 2 ** 47
+ * Sente 3 --> 2 ** 49 --- 2 ** 54
+ * Win in 1 -> 2 ** 64 --- 2 ** 66
  * 27
  */
 
-% - w w w w - CHECK
-pattern([c,w,w,w,w,c], 2 ** 65). % WIN IN 1.
-pattern([c,w,w,w,w], 2 ** 38). % SENTE
+% - w w w w - CHECK 71M - 362B
+    pattern([c,w,w,w,w,c], 2 ** 65). % WIN IN 1.
+    pattern([c,w,w,w,w], 2 ** 38.4). % STRONG SENTE
 
-pattern([w,w,w,w,c], 2 ** 38). % SENTE
-pattern([w,w,w,w], 3 * 2 ** 25).
+    pattern([w,w,w,w,c], 2 ** 38.4). % STRONG SENTE
+    pattern([w,w,w,w], 2 ** 26).
 
-% - - w w w - w   @   w - w w w - - CHECK
-pattern([c,c,w,w,w,c,w], 2 ** 39). % SENTE 2
-pattern([c,w,w,w,c,w], 2 ** 30). % SENTE
-pattern([w,w,w,c,w], 2 ** 38). % SENTE
+% - - w w w - w   @   w - w w w - - CHECK 68B - 4,56T
+    pattern([c,c,w,w,w,c,w], 2 ** 43). % STRONG SENTE 2
+    pattern([c,w,w,w,c,w], 2 ** 36). % STRONG SENTE
+    pattern([w,w,w,c,w], 2 ** 36). % STRONG SENTE
 
-pattern([w,c,w,w,w,c,c], 2 ** 42). % SENTE 2
-pattern([w,c,w,w,w,c], 2 ** 37). % SENTE
-pattern([w,c,w,w,w], 2 ** 40). % SENTE
+    pattern([w,c,w,w,w,c,c], 2 ** 43). % STRONG SENTE 2
+    pattern([w,c,w,w,w,c], 2 ** 36). % STRONG SENTE
+    pattern([w,c,w,w,w], 2 ** 36). % STRONG SENTE
 
-% - w - w w - w - CHECK
-pattern([c,w,c,w,w,c,w,c], 2 ** 43). % SENTE 2
-pattern([c,w,c,w,w,c,w], 2 ** 39). % SENTE
+% - w - w w - w - CHECK 131M - 3,89T
+    pattern([c,w,c,w,w,c,w,c], 2 ** 41.8). % SENTE 2
+    pattern([c,w,c,w,w,c,w], 2 ** 34). % BAD SENTE
 
-pattern([w,c,w,w,c,w,c], 2 ** 39). % SENTE
-pattern([w,c,w,w,c,w], 2 ** 18).
+    pattern([w,c,w,w,c,w,c], 2 ** 34). % BAD SENTE
+    pattern([w,c,w,w,c,w], 2 ** 20).
 
-% - - w - w - w - w - - CHECK
-pattern([c,c,w,c,w,c,w,c,w,c,c], 2 ** 28). % SENTE
-pattern([c,c,w,c,w,c,w,c,w,c], 2 ** 28). % SENTE
-pattern([c,c,w,c,w,c,w,c,w], 2 ** 32). % SENTE
+% - - w - w - w - w - - CHECK 138B - 585B
+    pattern([c,c,w,c,w,c,w,c,w,c,c], 2 ** 37). % SENTE
+    pattern([c,c,w,c,w,c,w,c,w,c], 2 ** 35). % SENTE
+    pattern([c,c,w,c,w,c,w,c,w], 2 ** 35). % SENTE
 
-pattern([c,w,c,w,c,w,c,w,c,c], 2 ** 28). % SENTE
-pattern([c,w,c,w,c,w,c,w,c], 2 ** 31). % SENTE
-pattern([c,w,c,w,c,w,c,w], 2 ** 27). % SENTE
+    pattern([c,w,c,w,c,w,c,w,c,c], 2 ** 35). % SENTE
+    pattern([c,w,c,w,c,w,c,w,c], 2 ** 35). % SENTE
+    pattern([c,w,c,w,c,w,c,w], 2 ** 36). % SENTE
 
-pattern([w,c,w,c,w,c,w,c,c], 2 ** 32). % SENTE
-pattern([w,c,w,c,w,c,w,c], 2 ** 27). % SENTE
-pattern([w,c,w,c,w,c,w], 3 * 2 ** 38). % SENTE
+    pattern([w,c,w,c,w,c,w,c,c], 2 ** 35). % SENTE
+    pattern([w,c,w,c,w,c,w,c], 2 ** 36). % SENTE
+    pattern([w,c,w,c,w,c,w], 2 ** 37). % SENTE
 
-% - w w - w w - CHECK
-pattern([c,w,w,c,w,w,c], 2 ** 22).
-pattern([c,w,w,c,w,w], 2 ** 21).
+% - w w - w w - CHECK 12,7M - 1,2B
+    pattern([c,w,w,c,w,w,c], 2 ** 30). % STRONG SENTE
+    pattern([c,w,w,c,w,w], 2 ** 21). % STRONG SENTE
 
-pattern([w,w,c,w,w,c], 2 ** 21).
-pattern([w,w,c,w,w], -2 ** 24).
+    pattern([w,w,c,w,w,c], 2 ** 21). % STRONG SENTE
+    pattern([w,w,c,w,w], -1 * 2 ** 27). % STRONG SENTE
 
 /**
  * Pure Pattern with 5 stones.
- * 2 ** 35
- * ! TODO
- * 29
+ * No Sente -> 2 ** 20 --- 2 ** 32
+ * Sente 1 --> 2 ** 34 --- 2 ** 38
+ * Sente 2 --> 2 ** 40 --- 2 ** 47
+ * Sente 3 --> 2 ** 46 --- 2 ** 56
+ * Win in 1 -> 2 ** 65 --- 2 ** 67
  */
 
-% w w w w w
-pattern([w,w,w,w,w], 2 ** 100). % WIN.
+% w w w w w - CHECK 1,267,650TT
+    pattern([w,w,w,w,w], 2 ** 100). % WIN.
 
-% w - w w w - w
-pattern([w,c,w,w,w,c,w], 2 ** 67). % WIN IN 1.
+% w - w w w - w CHECK
+    pattern([w,c,w,w,w,c,w], 2 ** 67). % WIN IN 1.
 
-% - w w - w - w w -
-pattern([c,w,w,c,w,c,w,w,c], 3 * 2 ** 40). % SENTE 2
-pattern([c,w,w,c,w,c,w,w], 2 ** 38). % SENTE
+% - w w - w - w w - CHECK 4,3M - 4.4T
+    pattern([c,w,w,c,w,c,w,w,c], 2 ** 42). % SENTE 2
+    pattern([c,w,w,c,w,c,w,w], 2 ** 35). % SENTE
 
-pattern([w,w,c,w,c,w,w,c], 2 ** 38). % SENTE
-pattern([w,w,c,w,c,w,w], 2 ** 30).
+    pattern([w,w,c,w,c,w,w,c], 2 ** 35). % SENTE
+    pattern([w,w,c,w,c,w,w], -1 * 2 ** 33).
 
-% - - w w w - w w   @   w w - w w w - -
-pattern([c,c,w,w,w,c,w,w], 2 ** 39). % SENTE 2
-pattern([c,w,w,w,c,w,w], 2 ** 34). % SENTE
-pattern([w,w,w,c,w,w], 2 ** 34). % SENTE
+% - - w w w - w w -   @   - w w - w w w - -
+    pattern([c,c,w,w,w,c,w,w,c], 2 ** 41.5). % SENTE 2
+    pattern([c,w,w,w,c,w,w,c], 2 ** 34). % SENTE
+    pattern([w,w,w,c,w,w,c], 2 ** 34). % SENTE
 
-pattern([w,w,c,w,w,w,c,c], 2 ** 39). % SENTE 2
-pattern([w,w,c,w,w,w,c], 2 ** 34). % SENTE
-pattern([w,w,c,w,w,w], 2 ** 34). % SENTE
+    pattern([c,c,w,w,w,c,w,w], 2 ** 39). % BAD SENTE 2
+    %pattern([c,w,w,w,c,w,w], 0). % BAD SENTE
+    pattern([w,w,w,c,w,w], -1 * 2 ** 33). % BAD SENTE
 
-% - w - w w - w w   @   w w - w w - w -
-pattern([c,w,c,w,w,c,w,w], 3 * 2 ** 40). % SENTE 2
-pattern([w,c,w,w,c,w,w], 2 ** 36). % SENTE
+    pattern([c,w,w,c,w,w,w,c,c], 2 ** 41.5). % SENTE 2
+    pattern([c,w,w,c,w,w,w,c], 2 ** 34). % SENTE
+    pattern([c,w,w,c,w,w,w], 2 ** 34). % SENTE
 
-pattern([w,w,c,w,w,c,w,c], 3 * 2 ** 40). % SENTE 2
-pattern([w,w,c,w,w,c,w], 2 ** 36). % SENTE
+    pattern([w,w,c,w,w,w,c,c], 2 ** 39). % BAD SENTE 2
+    %pattern([w,w,c,w,w,w,c], 0). % BAD SENTE
+    pattern([w,w,c,w,w,w], -1 * 2 ** 33). % BAD SENTE
 
-% - - w - w - w - w - w - -
-pattern([c,c,w,c,w,c,w,c,w,c,w,c,c], 2 ** 45). % SENTE 3
-pattern([c,c,w,c,w,c,w,c,w,c,w,c], 2 ** 39). % SENTE 2
-pattern([c,c,w,c,w,c,w,c,w,c,w], 2 ** 39). % SENTE 2
+% - w - w w - w w -   @   - w w - w w - w -
+    pattern([c,w,c,w,w,c,w,w,c], 2 ** 41.5). % SENTE 2
+    pattern([w,c,w,w,c,w,w,c], 2 ** 36). % SENTE
 
-pattern([c,w,c,w,c,w,c,w,c,w,c,c], 2 ** 39). % SENTE 2
-pattern([c,w,c,w,c,w,c,w,c,w,c], 3 * 2 ** 36). % SENTE 2
-pattern([c,w,c,w,c,w,c,w,c,w], 3 * 2 ** 36). % SENTE 2
+    pattern([c,w,c,w,w,c,w,w], 2 ** 38.5). % BAD SENTE 2
+    pattern([w,c,w,w,c,w,w], -1 * 2 ** 34). % BAD SENTE
 
-pattern([w,c,w,c,w,c,w,c,w,c,c], 2 ** 39). % SENTE 2
-pattern([w,c,w,c,w,c,w,c,w,c], 3 * 2 ** 36). % SENTE 2
-pattern([w,c,w,c,w,c,w,c,w], 3 * 2 ** 36). % SENTE 2
+    pattern([c,w,w,c,w,w,c,w,c], 2 ** 41.5). % SENTE 2
+    pattern([c,w,w,c,w,w,c,w], 2 ** 36). % SENTE
+
+    pattern([w,w,c,w,w,c,w,c], 2 ** 38.5). % BAD SENTE 2
+    pattern([w,w,c,w,w,c,w], -1 * 2 ** 34). % BAD SENTE
+
+% - - w - w - w - w - w - - CHECK 9,2T - 2,265T
+    pattern([c,c,w,c,w,c,w,c,w,c,w,c,c], 2 ** 51). % SENTE 3
+    pattern([c,c,w,c,w,c,w,c,w,c,w,c], 2 ** 38.5). % SENTE 2
+    pattern([c,c,w,c,w,c,w,c,w,c,w], 2 ** 38.5). % SENTE 2
+
+    pattern([c,w,c,w,c,w,c,w,c,w,c,c], 2 ** 38.5). % SENTE 2
+    pattern([c,w,c,w,c,w,c,w,c,w,c], 2 ** 39). % SENTE 2
+    pattern([c,w,c,w,c,w,c,w,c,w], 2 ** 39.5). % SENTE 2
+
+    pattern([w,c,w,c,w,c,w,c,w,c,c], 2 ** 38.5). % SENTE 2
+    pattern([w,c,w,c,w,c,w,c,w,c], 2 ** 39.5). % SENTE 2
+    pattern([w,c,w,c,w,c,w,c,w], 2 ** 43). % SENTE 2
 
 % - w - w w - w - w   @   w - w - w w - w -
-pattern([c,w,c,w,w,c,w,c,w], 2 ** 41). % SENTE 2
-pattern([w,c,w,w,c,w,c,w], 2 ** 37). % SENTE
+    pattern([c,w,c,w,w,c,w,c,w], 2 ** 43.5). % SENTE 2
+    pattern([w,c,w,w,c,w,c,w], 2 ** 38). % SENTE
 
-pattern([w,c,w,c,w,w,c,w,c], 2 ** 41). % SENTE 2
-pattern([w,c,w,c,w,w,c,w], 2 ** 37). % SENTE
+    pattern([w,c,w,c,w,w,c,w,c], 2 ** 43.5). % SENTE 2
+    pattern([w,c,w,c,w,w,c,w], 2 ** 38). % SENTE
 
 /**
  * Pure Pattern with 6 stones.
- * ! TODO
- * 14
+ * Sente 1 --> 2 ** 36 --- 2 ** 40
+ * Sente 2 --> 2 ** 41 --- 2 ** 48
+ * Sente 3 --> 2 ** 47 --- 2 ** 57
+ * Win in 1 -> 2 ** 64 --- 2 ** 65
  */
 
 % - - w w w - w w w - -
-pattern([c,c,w,w,w,c,w,w,w,c,c], 2 ** 47). % SENTE 3
-pattern([c,c,w,w,w,c,w,w,w,c], 2 ** 41). % SENTE 2
-pattern([c,c,w,w,w,c,w,w,w], 2 ** 41). % SENTE 2
+    pattern([c,c,w,w,w,c,w,w,w,c,c], 2 ** 52.5). % SENTE 3
+    pattern([c,c,w,w,w,c,w,w,w,c], 2 ** 43). % SENTE 2
+    pattern([c,c,w,w,w,c,w,w,w], 2 ** 43). % SENTE 2
 
-pattern([c,w,w,w,c,w,w,w,c,c], 2 ** 41). % SENTE 2
-pattern([c,w,w,w,c,w,w,w,c], 2 ** 33). % SENTE
-pattern([c,w,w,w,c,w,w,w], 2 ** 33). % SENTE
+    pattern([c,w,w,w,c,w,w,w,c,c], 2 ** 43). % SENTE 2
+    pattern([c,w,w,w,c,w,w,w,c], 2 ** 38). % SENTE
+    pattern([c,w,w,w,c,w,w,w], 2 ** 38). % SENTE
 
-pattern([w,w,w,c,w,w,w,c,c], 2 ** 41). % SENTE 2
-pattern([w,w,w,c,w,w,w,c], 2 ** 33). % SENTE
-pattern([w,w,w,c,w,w,w], 2 ** 33). % SENTE
+    pattern([w,w,w,c,w,w,w,c,c], 2 ** 43). % SENTE 2
+    pattern([w,w,w,c,w,w,w,c], 2 ** 38). % SENTE
+    pattern([w,w,w,c,w,w,w], 2 ** 40). % SENTE
 
 % w w - w w - w w
-pattern([w,w,c,w,w,c,w,w], 2 ** 66). % WIN IN 1.
+    pattern([w,w,c,w,w,c,w,w], 2 ** 64). % WIN IN 1.
 
 % - w - w w - w w w - -
-pattern([c,w,c,w,w,c,w,w,w,c,c], 3 * 2 ** 45). % SENTE 3
-pattern([c,w,c,w,w,c,w,w,w,c], 2 ** 38). % SENTE 2
-pattern([c,w,c,w,w,c,w,w,w], 2 ** 40). % SENTE 2
+    pattern([c,w,c,w,w,c,w,w,w,c,c], 2 ** 52.5). % SENTE 3
+    pattern([c,w,c,w,w,c,w,w,w,c], 2 ** 41). % SENTE 2
+    pattern([c,w,c,w,w,c,w,w,w], 2 ** 43). % SENTE 2
 
-pattern([w,c,w,w,c,w,w,w,c,c], 2 ** 36). % SENTE 2
-pattern([w,c,w,w,c,w,w,w,c], 2 ** 32). % SENTE
-pattern([w,c,w,w,c,w,w,w], 2 ** 32). % SENTE
+    pattern([w,c,w,w,c,w,w,w,c,c], 2 ** 39.5). % SENTE 2
+    pattern([w,c,w,w,c,w,w,w,c], 2 ** 34). % SENTE
+    pattern([w,c,w,w,c,w,w,w], 2 ** 33). % SENTE
 
-pattern([c,c,w,w,w,c,w,w,c,w,c], 3 * 2 ** 45). % SENTE 3
-pattern([c,c,w,w,w,c,w,w,c,w], 2 ** 36). % SENTE 2
+    pattern([c,c,w,w,w,c,w,w,c,w,c], 2 ** 52.5). % SENTE 3
+    pattern([c,c,w,w,w,c,w,w,c,w], 2 ** 39.5). % SENTE 2
 
-pattern([c,w,w,w,c,w,w,c,w,c], 2 ** 38). % SENTE 2
-pattern([c,w,w,w,c,w,w,c,w], 2 ** 32). % SENTE
+    pattern([c,w,w,w,c,w,w,c,w,c], 2 ** 41). % SENTE 2
+    pattern([c,w,w,w,c,w,w,c,w], 2 ** 34). % SENTE
 
-pattern([w,w,w,c,w,w,c,w,c], 2 ** 40). % SENTE 2
-pattern([w,w,w,c,w,w,c,w], 2 ** 32). % SENTE
+    pattern([w,w,w,c,w,w,c,w,c], 2 ** 43). % SENTE 2
+    pattern([w,w,w,c,w,w,c,w], 2 ** 33). % SENTE
 
 /**
  * dynamic score/2
@@ -494,5 +513,6 @@ check_evaluate_all(List) :-
     evaluate(List, Value),
     format('Total Value: ~D~n', Value).
 
+p(Pattern, Pad) :- print_pattern_scores(Pattern, Pad).
 e(List) :- check_evaluate(List).
 a(List) :- check_evaluate_all(List).
