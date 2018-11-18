@@ -1,5 +1,34 @@
 /**
  * Game options
+ *
+ *   board_size / size      --- Define board size, odd integer, default 19.
+ *   difficulty             --- Bot difficulty, 1 to 5, default 3.
+ *   depth                  --- Analysis tree depth, 0 or higher.
+ *   padding                --- Board padding, 1 or higher.
+ *   width                  --- Analysys tree width, a list with widths for each depth.
+ *   flip_board / flip      --- Flip the board for player Black, default false.
+ *   tournament_rule / rule --- Use the tournament rule, default true.
+ */
+
+/**
+ * ===== ===== ===== ===== ====  ==== ===== ===== ===== ===== 
+ * ===== ===== ===== ===== DIFFICULTY ===== ===== ===== =====
+ * ===== ===== ===== ===== ====  ==== ===== ===== ===== =====
+ */
+/**
+ * difficulty_set/4
+ * difficulty_set(Level, Depth, Padding, WidthList).
+ */
+difficulty_set(1, 1, 3, [2]).
+difficulty_set(2, 2, 3, [5,3]).
+difficulty_set(3, 4, 3, [5,4,3,2]).
+difficulty_set(4, 5, 3, [10,7,5]).
+difficulty_set(5, 6, 3, [10,10,8,6,5,5]).
+
+/**
+ * ===== ===== ===== ===== ====  ==== ===== ===== ===== =====
+ * ===== ===== ===== ===== SANITIZERS ===== ===== ===== =====
+ * ===== ===== ===== ===== ====  ==== ===== ===== ===== =====
  */
 
 /**
@@ -8,23 +37,31 @@
  *   Sanitizes a given Options list into NewOptions.
  */
 sanitize_options(Options, NewOptions) :- 
-    sanitize_board_size(Options, BoardSize), !,
+    sanitize_board_size(Options, Size), !,
     sanitize_difficulty(Options, DDepth, DPadding, DWidth), !,
     sanitize_depth(Options, DDepth, Depth), !,
     sanitize_padding(Options, DPadding, Padding), !,
     sanitize_width(Options, DWidth, Width), !,
-    NewOptions = [board_size(BoardSize), depth(Depth), padding(Padding), width(Width)].
+    sanitize_flip_board(Options, Flip), !,
+    sanitize_tournament_rule(Options, Rule),
+    NewOptions = [
+        board_size(Size),
+        depth(Depth),
+        padding(Padding),
+        width(Width),
+        flip_board(Flip),
+        tournament_rule(Rule)
+    ].
 
 /**
  * sanitize_board_size/2
- * sanitize_board_size(+Options, -BoardSize).
- *   Sanitizes Options' game_board option into BoardSize.
+ * sanitize_board_size(+Options, -Size).
+ *   Sanitizes Options' game_board option into Size.
  */
-sanitize_board_size(Options, BoardSize) :-
-    getopt(Options, board_size, 19, BoardSize),
-    integer(BoardSize),
-    1 is mod(BoardSize, 2);
-    write('Invalid BOARD_SIZE option!'), nl, fail.
+sanitize_board_size(Options, Size) :-
+    getopt_alt(Options, [board_size, size], 19, Size),
+    integer(Size), 1 is mod(Size, 2), Size >= 7;
+    write('Invalid BOARD_SIZE option! (odd > 7)'), nl, fail.
 
 /**
  * sanitize_difficulty/4
@@ -34,96 +71,167 @@ sanitize_board_size(Options, BoardSize) :-
 sanitize_difficulty(Options, DDepth, DPadding, DWidth) :-
     getopt(Options, difficulty, 3, Difficulty),
     integer(Difficulty),
-    Difficulty > 0,
-    5 >= Difficulty,
-    sanitize_difficulty_aux(Difficulty, DDepth, DPadding, DWidth);
-    write('Invalid DIFFICULTY option!'), nl, fail.
-
-sanitize_difficulty_aux(1, 1, 7, [2]).
-sanitize_difficulty_aux(2, 2, 5, [5,3]).
-sanitize_difficulty_aux(3, 4, 3, [10,5,3,2]).
-sanitize_difficulty_aux(4, 5, 3, [10,7,5]).
-sanitize_difficulty_aux(5, 6, 3, [10, 10, 8]).
+    difficulty_set(Difficulty, DDepth, DPadding, DWidth),
+    format('Difficulty level ~d', Difficulty), nl;
+    write('Invalid DIFFICULTY option! (1-5)'), nl, fail.
 
 /**
  * sanitize_depth/3
  * sanitize_depth(+Options, +DDepth, -Depth).
- *   Sanitizes Options' depth option into Depth using DDepth as default.
+ *   Deduce depth option into Depth using DDepth as default.
  */
 sanitize_depth(Options, DDepth, Depth) :-
-    getopt(Options, depth, DDepth, Depth),
-    integer(Depth),
-    Depth > 0;
-    write('Invalid DEPTH option!'), nl, fail.
+    getopt(Options, depth, DDepth, Depth), !,
+    integer(Depth), Depth >= 0;
+    write('Invalid DEPTH option! (>= 0)'), nl, fail.
 
 /**
  * sanitize_padding/3
  * sanitize_padding(+Options, +DPadding, -Padding).
- *   Sanitizes Options' padding option into Padding using DPadding as default.
+ *   Deduce padding option into Padding using DPadding as default.
  */
 sanitize_padding(Options, DPadding, Padding) :-
-    getopt(Options, padding, DPadding, Padding),
-    integer(Padding),
-    Padding >= 0;
-    write('Invalid PADDING option!'), nl, fail.
+    getopt(Options, padding, DPadding, Padding), !,
+    integer(Padding), Padding > 0;
+    write('Invalid PADDING option! (> 0)'), nl, fail.
+
+/**
+ * validate_widthlist/1
+ * validate_widthlist(+Arg, -WidthList).
+ */
+validate_widthlist(WidthList, WidthList) :-
+    proper_length(WidthList, Length), !, Length > 0,
+    a_all_of(>, 0, WidthList).
+
+validate_widthlist(Width, [Width]) :-
+    integer(Width), !, Width > 0.
 
 /**
  * sanitize_width/3
- * sanitize_width(+Options, +DWidth, -Width).
- *   Sanitizes Options' width option into Width using DWidth as default.
+ * sanitize_width(+Options, +DWidth, -WidthList).
+ *   Deduce width option into WidthList using DWidth as default.
  */
-sanitize_width(Options, DWidth, Width) :-
-    getopt(Options, width, DWidth, Temp),
-    (is_list(Temp), length(Temp, L), L > 0, Width = Temp;
-    integer(Temp), Width = [Temp]);
-    write('Invalid WIDTH option!'), nl, fail.
-
+sanitize_width(Options, DWidth, WidthList) :-
+    getopt(Options, width, DWidth, Opt), !,
+    validate_widthlist(Opt, WidthList);
+    write('Invalid WIDTH option! (list with widths > 0)'), nl, fail.
 
 /**
- * tree_parseopt/2, next_depth/2
- * tree_parseopt(+Options, -NewOptions).
- * next_depth(+[Depth,...], -[Depth-1,...]).
+ * sanitize_flip_board/3
+ * sanitize_flip_board(+Options, -Flip),
+ *   Deduce the flip (board) option.
  */
-tree_parseopt(Options, NewOptions) :-
-    getopt(Options, depth, 4, TotalDepth),
-    getopt(Options, padding, 3, Padding),
-    getopt(Options, width, [10,5,3,2], WidthList),
-    NewOptions = [current(0), depth(TotalDepth), padding(Padding), width(WidthList)].
+sanitize_flip_board(Options, Flip) :-
+    getopt_alt(Options, [flip_board, flip], Flip), !,
+    memberchk(Flip, [false,true]);
+    write('Invalid FLIP option! (true or false)'), nl, fail.
 
 /**
- * depth_width/3, next_depth/2
+ * sanitize_tournament_rule/2
+ * sanitize_tournament_rule(+Options, -Rule).
+ *   Deduce the tournament_rule option.
+ */
+sanitize_tournament_rule(Options, Rule) :-
+    getopt_alt(Options, [tournament_rule, rule, tournament], Rule), !,
+    memberchk(Rule, [false,true]);
+    write('Invalid TOURNAMENT RULE option! (true or false)'), nl, fail.
+
+/**
+ * ===== ===== ===== ===== ======  ====== ===== ===== ===== =====
+ * ===== ===== ===== ===== TREE UTILITIES ===== ===== ===== =====
+ * ===== ===== ===== ===== ======  ====== ===== ===== ===== =====
+ */
+
+/**
+ * tree_parseopt/3
+ * tree_parseopt(+Options, +Turn, -NewOptions).
+ *   Constructs an options list appropriate for the tree analysis module.
+ */
+tree_parseopt(Options, Turn, NewOptions) :-
+    opt_totaldepth(Options, TotalDepth),
+    opt_padding(Options, Padding),
+    opt_widthlist(Options, WidthList),
+    NewOptions = [
+        turn(Turn),
+        current(0),
+        depth(TotalDepth),
+        padding(Padding),
+        width(WidthList)
+    ], !.
+
+/**
+ * depth_width/3
  * depth_width(+WidthList, +Depth, -Width).
- * next_depth(+Options, -NewOptions).
+ *   Gets width at a given depth from a width list.
  */
 depth_width(WidthList, Depth, Width) :-
     length(WidthList, Length),
-    Depth >= Length,
+    Depth >= Length, !,
     last(WidthList, Width);
-    nth0(Depth, WidthList, Width).
-
-next_depth(Options, NewOptions) :-
-    opt_widthlist(Options, WidthList),
-    opt_padding(Options, Padding),
-    opt_depth(Options, Depth),
-    opt_totaldepth(Options, TotalDepth),
-    D is Depth + 1,
-    NewOptions = [current(D), depth(TotalDepth), padding(Padding), width(WidthList)].
+    nth0(Depth, WidthList, Width), !.
 
 /**
- * opt_padding/2, opt_depth/2, opt_totaldepth/2, opt_widthlist/2, opt_width/3
- *   Calls to getopt/3
+ * next_depth/2
+ * next_depth(+Options, -NewOptions).
  */
-opt_padding(Options, Padding) :-
-    getopt(Options, padding, Padding).
+next_depth(Options, NewOptions) :-
+    opt_turn(Options, Turn),
+    opt_depth(Options, Depth),
+    opt_totaldepth(Options, TotalDepth),
+    opt_padding(Options, Padding),
+    opt_widthlist(Options, WidthList),
+    D is Depth + 1,
+    NewOptions = [
+        turn(Turn),
+        current(D),
+        depth(TotalDepth),
+        padding(Padding),
+        width(WidthList)
+    ], !.
+
+/**
+ * ===== ===== ===== ===== ==== ==== ===== ===== ===== =====
+ * ===== ===== ===== ===== ACCESSORS ===== ===== ===== =====
+ * ===== ===== ===== ===== ==== ==== ===== ===== ===== =====
+ *
+ * Shorthands for calls to getopt/3.
+ */
+
+opt_turn(Options, Turn) :-
+    getopt(Options, turn, Turn).
 
 opt_depth(Options, Depth) :-
     getopt(Options, current, Depth).
 
+opt_board_size(Options, Size) :-
+    getopt_alt(Options, [board_size, size], Size).
+
+opt_size(Options, Size) :-
+    getopt_alt(Options, [board_size, size], Size).
+
 opt_totaldepth(Options, TotalDepth) :-
     getopt(Options, depth, TotalDepth).
 
+opt_padding(Options, Padding) :-
+    getopt(Options, padding, Padding).
+
 opt_widthlist(Options, WidthList) :-
     getopt(Options, width, WidthList).
+
+opt_flip_board(Options, Flip) :-
+    getopt_alt(Options, [flip_board, flip], Flip).
+
+opt_flip(Options, Flip) :-
+    getopt_alt(Options, [flip_board, flip], Flip).
+
+opt_tournament_rule(Options, Rule) :-
+    getopt_alt(Options, [tournament_rule, rule, tournament], Rule).
+
+opt_rule(Options, Rule) :-
+    getopt_alt(Options, [tournament_rule, rule, tournament], Rule).
+
+opt_tournament(Options, Rule) :-
+    getopt_alt(Options, [tournament_rule, rule, tournament], Rule).
 
 opt_width(Options, Width) :-
     opt_depth(Options, Depth),

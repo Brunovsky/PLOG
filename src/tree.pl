@@ -190,7 +190,6 @@ recurse_children(Node, NewNode, Options) :-
     next_depth(Options, OptionsChildren),
     Node = node(Board, P, Val, Cap, OldChildren, _),
     NewNode = node(Board, P, Val, Cap, NewChildren, BestWorth),
-    % Recurse
     (   foreach(_-(Move-Child), OldChildren),
         fromto([], NewChilds, [NewWorth-(Move-NewChild)|NewChilds], Unordered),
         param(OptionsChildren)
