@@ -8,6 +8,8 @@
 :- use_module(library(random)).
 % Sleep
 :- use_module(library(system)).
+% Sorting
+:- use_module(library(samsort)).
 
 % ***** User
 

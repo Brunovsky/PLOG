@@ -1,6 +1,6 @@
 % score/2
 test_scorepattern :-
-    findall(Pattern, score(Pattern, _), ListPatterns),
+    findall(X, score(X, _), ListPatterns),
     score_list(ListPatterns),
     (   foreach(Pattern, ListPatterns)
     do  reverse(Pattern, Reversed),

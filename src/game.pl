@@ -65,8 +65,7 @@ start_game(bot, bot, Options) :-
 	make_board(Size, Board),
 	gloop_bot_bot(game(Board, w, [0,0], 0, Options)).
 
-cls :- repeat_call(nl, 5).
-%cls :- write('\e[2J').
+cls :- repeat_call(nl, 50).
 
 /**
  * gloop_player_player/1, gloop_player_bot/1, gloop_bot_player/1, gloop_bot_bot/1
@@ -75,7 +74,7 @@ cls :- repeat_call(nl, 5).
  */
 % PLAYER vs PLAYER
 gloop_player_player(Game) :-
-	Game = game(Board, _, _, Turn, Options), cls, !,
+	Game = game(Board, _, _, Turn, Options), repeat_call(nl, 50), !,
     board_size(Board, Size), !,
     opt_tournament(Options, Tournament), !,
     display_game(Game), !,
@@ -86,7 +85,7 @@ gloop_player_player(Game) :-
 
 % PLAYER vs BOT,  PLAYER's turn
 gloop_player_bot(Game) :-
-    Game = game(Board, w, _, Turn, Options), cls, !,
+    Game = game(Board, w, _, Turn, Options), repeat_call(nl, 30), !,
     board_size(Board, Size), !,
     opt_tournament(Options, Tournament), !,
     display_game(Game), !,
@@ -97,7 +96,7 @@ gloop_player_bot(Game) :-
 
 % PLAYER vs BOT,  BOT's turn
 gloop_player_bot(Game) :-
-    Game = game(_, b, _, _, Options), cls, !,
+    Game = game(_, b, _, _, Options), repeat_call(nl, 30), !,
     display_game(Game), !,
 	analyze_tree(Game, Tree),
 	choose_move(Tree, Move, Options),
@@ -106,7 +105,7 @@ gloop_player_bot(Game) :-
 
 % BOT vs PLAYER,  BOT's turn
 gloop_bot_player(Game) :-
-    Game = game(_, w, _, _, Options), cls, !,
+    Game = game(_, w, _, _, Options), repeat_call(nl, 30), !,
     display_game(Game), !,
     analyze_tree(Game, Tree),
     choose_move(Tree, Move, Options),
@@ -115,7 +114,7 @@ gloop_bot_player(Game) :-
 
 % BOT vs PLAYER,  PLAYER's turn
 gloop_bot_player(Game) :-
-    Game = game(Board, b, _, Turn, Options), cls, !,
+    Game = game(Board, b, _, Turn, Options), repeat_call(nl, 30), !,
     board_size(Board, Size), !,
     opt_tournament(Options, Tournament), !,
     display_game(Game), !,
@@ -126,7 +125,7 @@ gloop_bot_player(Game) :-
 
 % BOT vs BOT
 gloop_bot_bot(Game) :-
-    Game = game(_, _, _, _, Options), cls, !,
+    Game = game(_, _, _, _, Options), repeat_call(nl, 6), !,
     display_game(Game), !,
     analyze_tree(Game, Tree),
     choose_move(Tree, Move, Options),

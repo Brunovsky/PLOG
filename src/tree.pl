@@ -98,7 +98,6 @@ build_child_node(Move, ParentNode, ChildNode) :-
     place_stone(P, Board, Move, ChildBoard, Captures), !,
     add_captures(P, Captures, Cap, ChildCap),
     reevaluate_board(Board, ChildBoard, Val, ChildVal), !,
-    %evaluate_board(ChildBoard, ChildVal), !,
     totalval(ChildVal, ChildCap, Worth), !.
 
 /**
@@ -118,6 +117,15 @@ order_children(b, Children, OrderedChildren) :-
     keysort(Children, OrderedChildren).
 
 /**
+ * reorder_clumps/2
+ * reorder_clumps(+Ordered, -Reordered).
+ */
+reorder_clumps(Ordered, Reordered) :-
+    keyclumps(Ordered, Clumps),
+    map(random_permutation, Clumps, Permuted),
+    append(Permuted, Reordered).
+
+/**
  * organize_children/[4,5]
  * organize_children(+P, +Unordered, -Ordered, -BestWorth).
  * organize_children(+P, +Width, +Unordered, -Ordered, -BestWorth).
@@ -131,7 +139,8 @@ organize_children(P, Unordered, Ordered, BestWorth) :-
 
 organize_children(P, Width, Unordered, BestOrdered, BestWorth) :-
     order_children(P, Unordered, Ordered), !,
-    extra_prefix_length(Ordered, BestOrdered, Width),
+    reorder_clumps(Ordered, Reordered),
+    extra_prefix_length(Reordered, BestOrdered, Width),
     head(BestOrdered, BestChild),
     child_worth(BestChild, BestWorth), !.
 
@@ -174,7 +183,7 @@ choose_best_entry(P, Child1, Child2, Child2) :-
 
 /**
  * build_children_loop/3
- * build_children_loop(Node, +MovesList, -Children).
+ * build_children_loop(Node, +MovesList, -Children, +Options).
  *   build_children/3 Loop. Iterates over a MovesList constructing Children for Node.
  *   If a winning child is found, i.e. one making 10 captures or five-in-a-row for
  *   Node's player, the iteration stops and Children becomes a one element list
@@ -205,8 +214,7 @@ build_children_loop(Node, [Move|OtherMoves], ResultChildren) :-
  */
 % winners and losers are natural leafs, do not recurse them.
 build_children(Node, Node, _) :-
-    Node = node(_, _, _, _, _, Worth),
-    end_value(Worth), !.
+    Node = node(_, _, _, _, _, Worth), end_value(Worth), !.
 
 % not a natural leaf.
 build_children(Node, NewNode, Options) :-
@@ -218,7 +226,8 @@ build_children(Node, NewNode, Options) :-
     NewNode = node(Board, P, Val, Cap, Children, NewWorth), !,
     valid_moves_within_boundary(Board, Padding, Turn, Tournament, MovesList), !,
     build_children_loop(Node, MovesList, Unordered), !,
-    organize_children(P, Width, Unordered, Children, NewWorth), !.
+    organize_children(P, Width, Unordered, Children, NewWorth),
+    garbage_collect, !.
 
 /**
  * recurse_children_loop/5
@@ -271,8 +280,7 @@ recurse_children_loop(Node, [ChildEntry|OldChildren], ResultChildren, Options, B
  */
 % winners and losers are natural leafs, do not recurse them.
 recurse_children(Node, Node, _) :-
-    Node = node(_, _, _, _, _, Worth),
-    end_value(Worth), !.
+    Node = node(_, _, _, _, _, Worth), end_value(Worth), !.
 
 % all other nodes should have children and be recursed.
 recurse_children(Node, NewNode, Options) :-
@@ -285,7 +293,7 @@ recurse_children(Node, NewNode, Options) :-
         NewChildren = [Best],
         Best = BestWorth-(_-_);
         organize_children(P, Unordered, NewChildren, BestWorth)
-    ), !.
+    ), garbage_collect, !.
 
 /**
  * build_tree/3
@@ -300,7 +308,11 @@ build_tree(Node, Node, Options) :-
 % ... or maybe not
 build_tree(Node, Tree, Options) :-
     build_children(Node, NodeWithChildren, Options),
-    recurse_children(NodeWithChildren, Tree, Options).
+    node_children(NodeWithChildren, Children),
+    (   length(Children, C), C > 1 ->
+        recurse_children(NodeWithChildren, Tree, Options);
+        Tree = NodeWithChildren
+    ), !.
 
 /**
  * analyze_tree/2
@@ -310,10 +322,18 @@ build_tree(Node, Tree, Options) :-
  */
 analyze_tree(Game, Tree) :-
     Game = game(Board, P, Cap, Turn, UserOptions),
+    opt_traverse(UserOptions, true),
     tree_parseopt(UserOptions, Turn, Options),
     build_start_node(Board, P, Cap, Node),
     build_tree(Node, Tree, Options),
     print_tree_deep(Tree).
+
+analyze_tree(Game, Tree) :-
+    Game = game(Board, P, Cap, Turn, UserOptions),
+    opt_traverse(UserOptions, false),
+    tree_parseopt(UserOptions, Turn, Options),
+    build_start_node(Board, P, Cap, Node),
+    build_tree(Node, Tree, Options).
 
 /**
  * ===== ===== ===== CHOOSING MOVE ===== ===== =====

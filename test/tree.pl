@@ -99,18 +99,15 @@ test_build_children :-
         [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c]
     ],
     build_start_node(Board, b, [0,0], BNode),
-    print_node(BNode),
     build_start_node(Board, w, [0,0], WNode),
-    print_node(WNode),
-    build_children(BNode, NewBNode, Options),
-    print_node(NewBNode),
-    build_children(WNode, NewWNode, Options),
-    print_node(NewWNode),
-    true.
+    build_children(BNode, _, Options),
+    build_children(WNode, _, Options),
+    print_tree_deep(BNode),
+    print_tree_deep(WNode).
 
 % build_tree/3
 test_build_tree :-
-    Options = [turn(73), padding(1), width([10,5,3,2]), current(0), depth(4), rule(true)],
+    Options = [turn(73), padding(1), width([10,5,3,2]), current(0), depth(4), rule(true), traverse(false)],
     Board = [
         [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
         [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
@@ -134,22 +131,7 @@ test_build_tree :-
     ],
     Game = game(Board, b, [0,0], 74, Options),
     analyze_tree(Game, Tree),
-    print_node(Tree), nl,
-    true.
-
-test_simple :-
-    Options = [padding(1), width([2]), depth(1), rule(true), flip(false), size(7)],
-    Board = [
-        [c,c,c,b,c],
-        [w,w,w,c,w],
-        [c,c,c,c,c],
-        [c,c,c,b,c],
-        [c,c,c,c,b]
-    ],
-    Game = game(Board, b, [0,0], 8, Options),
-    analyze_tree(Game, Tree),
-    print_node(Tree), nl.
-
+    print_tree_deep(Tree), nl.
 
 test_tree :- test_all(tree, [
     test_build_start_node,

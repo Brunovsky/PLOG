@@ -120,3 +120,12 @@ reevaluate_board(OldBoard, NewBoard, OldVal, NewVal) :-
         param(NewBoard)
     do  reevaluate_cell(Position, NewBoard, InVal, OutVal)
     ), !.
+
+/**
+ * value/2
+ * value(+Game, -Value).
+ */
+value(Game, Value) :-
+    Game = game(Board, _, Cap, _, _),
+    evaluate_board(Board, Val),
+    totalval(Val, Cap, Value).

@@ -136,7 +136,24 @@ test_valid_move :-
     valid_move(M1, 19, true, [12,8]),
     valid_move(M1, 1, true,[13,13]),
     valid_move(M1, 9, true, [5,16]).
-    
+
+test_valid_moves_within :-
+    Board = [
+        [c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,w,c,c,c,c,c],
+        [c,c,c,c,c,w,b,b,b,b,w,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,b,w,w,w,w,b,c,c,c],
+        [c,c,c,b,c,w,b,c,c,w,c,c,c],
+        [c,b,w,w,w,w,b,c,c,c,c,c,c],
+        [c,c,c,b,c,w,b,c,c,c,c,c,c],
+        [c,c,c,w,c,b,w,b,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,b,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c],
+        [c,c,c,c,c,c,c,c,c,c,c,c,c]
+    ],
+    valid_moves_within_boundary(Board, 0, [[10,10]]).
 
 test_board :- test_all(board, [
     test_make_board,

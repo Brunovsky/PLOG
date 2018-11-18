@@ -39,11 +39,13 @@
  */
 
 /**
- * write_board_unit/1
- * write_board_unit(+A).
+ * write_board_unit/1, write_piece/1
+ * write_board_unit(+A), write_piece(+A).
  *   Writes atom A to standard output, under its mapped representation.
  */
 write_board_unit(A) :- write_board_unit(A, [3,3], 2, 2), !.
+
+write_piece(A) :- write_board_unit(A, [3,3], 2, 2), !.
 
 /**
  * write_board_unit/4
@@ -113,7 +115,7 @@ write_board_unit(_, [RowSize,ColSize], Row, Col) :-
  * write_npieces(+N, +P).
  *   Writes N pieces P.
  */
-write_npieces(N, P) :- repeat_call(write_board_unit(P), N), !.
+write_npieces(N, P) :- repeat_call(write_piece(P), N), !.
 
 /**
  * write_board_left(+P, +Row, +RowSize).
@@ -284,6 +286,18 @@ print_node(Node) :-
     print_children(Node), nl, !.
 
 /**
+ * print_node_deep/1
+ * print_node_deep(+Node).
+ *   For debugging purposes only.
+ */
+print_node_deep(Node) :-
+    Node = node(Board, P, _, Cap, _, Worth),
+    write('===== ===== ===== ===== node/6 ===== ===== ===== ====='), nl,
+    display_game(Board, P, Cap),
+    format('Node Worth: ~D', Worth), nl,
+    print_children_deep(Node), nl, !.
+
+/**
  * print_tree/1
  * print_tree(+Tree).
  *   For debugging purposes only.
@@ -301,9 +315,8 @@ print_tree(Node) :-
  *   For debugging purposes only.
  */
 print_tree_deep(Node) :-
-    Node = node(_, _, Val, _, _, Worth),
+    Node = node(_, _, _, _, _, Worth),
     write('===== ===== ===== ===== node/6 ===== ===== ===== ====='), nl,
-    print_val(Val), nl,
     format('Node Worth: ~D', Worth), nl,
     print_children_deep(Node), nl, !.
 
@@ -319,7 +332,7 @@ print_children(Node) :-
     format('===== ===== Children: ~d ===== =====', C), nl,
     (   foreach(Worth-(Move-Child), Children),
         param(RowSize)
-    do  format('  Worth ~D~n  Move: ', [Worth]),
+    do  format('  Worth ~D~n  Move: ', Worth),
         mainline(Child, Mainline),
         print_moves([Move|Mainline], RowSize), nl
     ), !.
@@ -336,8 +349,9 @@ print_children_deep(Node) :-
     print_playlines(Node).
 
 /**
- * print_move/2
+ * print_move/3
  * print_move(+Move, +RowSize)
+ * print_move(+P, +Move, +RowSize)
  */
 print_move(Move, RowSize) :-
     rep_internal(RowSize, [RepRow,RepCol], Move),
@@ -346,6 +360,18 @@ print_move(Move, RowSize) :-
 print_move(Move, RowSize) :-
     rep_internal(RowSize, [RepRow,RepCol], Move),
     RepRow < 10, !, format('~w~d   ', [RepCol,RepRow]).
+
+print_move(P, Move, RowSize) :-
+    rep_internal(RowSize, [RepRow,RepCol], Move),
+    RepRow > 9, !,
+    write_piece(P),
+    format('~w~d  ', [RepCol,RepRow]).
+
+print_move(P, Move, RowSize) :-
+    rep_internal(RowSize, [RepRow,RepCol], Move),
+    RepRow < 10, !,
+    write_piece(P),
+    format('~w~d   ', [RepCol,RepRow]).
 
 /**
  * print_moves/1
@@ -367,16 +393,13 @@ print_moves(Moves, RowSize) :-
 print_playlines(Node) :- print_playlines(Node, 0).
 
 print_playlines(Node, _) :-
-    Node = node(_, P, _, _, [], Worth), !,
-    write('  '),
-    other_player(P, Q),
-    write_board_unit(Q),
-    format(' ~D~n', Worth).
+    Node = node(_, _, _, _, [], Worth), !,
+    format('   ~D', Worth), nl.
 
 print_playlines(Node, N) :- 
-    Node = node(Board, _, _, _, Children, _), !,
+    Node = node(Board, P, _, _, Children, _), !,
     length(Children, C),
-    Spaces is 5 * N + 3,
+    Spaces is 7 * N + 3,
     fill_n(Spaces, ' ', SpacesList),
     atom_chars(String, SpacesList),
     NChild is N + 1,
@@ -387,9 +410,9 @@ print_playlines(Node, N) :-
         param(String),
         param(NChild),
         param(RowSize),
-        param(N)
+        param(N), param(P)
     do  (I > 1 -> write(String); otherwise),
-        print_move(Move, RowSize),
+        print_move(P, Move, RowSize),
         print_playlines(Child, NChild)
     ), !.
 
