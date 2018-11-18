@@ -924,6 +924,23 @@ getopt(OptionsList, OptName, Default, OptValue) :-
     OptValue = Default, !.
 
 /**
+ * getopt_alt/[3,4]
+ * getopt_alt(+OptionsList, +OptNameList, -OptValue).
+ * getopt_alt(+OptionsList, +OptNameList, +Default, -OptValue).
+ *   Like getopt/[3,4] but the option name has multiple alternatives,
+ *   ordered by priority.
+ */
+getopt_alt(OptionsList, [OptName|OptNameTail], OptValue) :-
+    getopt(OptionsList, OptName, OptValue), !;
+    getopt_alt(OptionsList, OptNameTail, OptValue), !.
+
+getopt_alt(_, [], Default, Default).
+
+getopt_alt(OptionsList, [OptName|OptNameTail], Default, OptValue) :-
+    getopt(OptionsList, OptName, OptValue), !;
+    getopt_alt(OptionsList, OptNameTail, Default, OptValue), !.
+
+/**
  * extra_prefix_length/3, extra_suffix_length/3
  * extra_prefix_length(?List, ?Prefix, ?N).
  * extra_suffix_length(?List, ?Suffix, ?N).
