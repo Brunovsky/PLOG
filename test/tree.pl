@@ -76,7 +76,7 @@ test_order_children :-
 
 % build_children/3
 test_build_children :-
-    Options = [turn(4), padding(2), width([10,5,3,2]), current(0), depth(2)],
+    Options = [turn(4), padding(2), width([10,5,3,2]), current(0), depth(2), rule(true)],
     Board = [
         [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
         [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
@@ -99,14 +99,14 @@ test_build_children :-
         [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c]
     ],
     build_start_node(Board, b, [0,0], Node),
-    %print_node(Node), nl,
+    print_node(Node), nl,
     build_children(Node, NewNode, Options),
     print_node(NewNode), nl,
     true.
 
 % build_tree/3
 test_build_tree :-
-    Options = [turn(73), padding(3), width([3,5,5,5]), current(0), depth(4)],
+    Options = [turn(73), padding(3), width([3,5,5,5]), current(0), depth(4), rule(true)],
     Board = [
         [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
         [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c],
@@ -129,9 +129,10 @@ test_build_tree :-
         [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c]
     ],
     build_start_node(Board, b, [0,0], Node),
-    print_node(Node), nl, !,
+    %print_node(Node), nl, !,
     build_tree(Node, Tree, Options), !,
-    print_node(Tree), nl,
+    %print_node(Tree), nl,
+    Tree = Tree,
     true.
 
 test_tree :- test_all(tree, [
