@@ -181,11 +181,11 @@ pattern([w,c,c,c,w], 5 * 2 ** 5).
  */
 
 % - - w w w - - CHECK
-pattern([c,c,w,w,w,c,c], 70 * 2 ** 24). % SENTE 2
-pattern([c,c,w,w,w,c], 30 * 2 ** 24). % SENTE
+pattern([c,c,w,w,w,c,c], 800 * 2 ** 28). % SENTE 2
+pattern([c,c,w,w,w,c], 250 * 2 ** 26). % SENTE
 pattern([c,c,w,w,w], 20 * 2 ** 24).
 
-pattern([c,w,w,w,c,c], 30 * 2 ** 24). % SENTE
+pattern([c,w,w,w,c,c], 250 * 2 ** 26). % SENTE
 pattern([c,w,w,w,c], 15 * 2 ** 24).
 pattern([c,w,w,w], 2 * 2 ** 24).
 
@@ -194,7 +194,7 @@ pattern([w,w,w,c], 2 * 2 ** 24).
 pattern([w,w,w], 8 * 2 ** 24).
 
 % - w w - w -   @   - w - w w - CHECK
-pattern([c,w,w,c,w,c], 32 * 2 ** 22). % SENTE
+pattern([c,w,w,c,w,c], 34 * 2 ** 22). % SENTE
 pattern([c,w,w,c,w], 48 * 2 ** 22).
 
 pattern([w,w,c,w,c], 1 * 2 ** 22).
@@ -240,44 +240,44 @@ pattern([w,c,w,c,c,w], 12 * 2 ** 11).
 /**
  * Pure Pattern with 4 stones.
  * 2 ** 30
- * 23
+ * 27
  */
 
 % - w w w w - CHECK
-pattern([c,w,w,w,w,c], 2 ** 60). % WIN IN 1.
-pattern([c,w,w,w,w], 90 * 2 ** 32). % SENTE
+pattern([c,w,w,w,w,c], 2 ** 65). % WIN IN 1.
+pattern([c,w,w,w,w], 2 ** 38). % SENTE
 
-pattern([w,w,w,w,c], 90 * 2 ** 32). % SENTE
+pattern([w,w,w,w,c], 2 ** 38). % SENTE
 pattern([w,w,w,w], 3 * 2 ** 25).
 
 % - - w w w - w   @   w - w w w - - CHECK
-pattern([c,c,w,w,w,c,w], 150 * 2 ** 34). % SENTE 2
-pattern([c,w,w,w,c,w], 10 * 2 ** 34). % SENTE
-pattern([w,w,w,c,w], 60 * 2 ** 34). % SENTE
+pattern([c,c,w,w,w,c,w], 2 ** 39). % SENTE 2
+pattern([c,w,w,w,c,w], 2 ** 30). % SENTE
+pattern([w,w,w,c,w], 2 ** 38). % SENTE
 
-pattern([w,c,w,w,w,c,c], 150 * 2 ** 34). % SENTE 2
-pattern([w,c,w,w,w,c], 10 * 2 ** 34). % SENTE
-pattern([w,c,w,w,w], 60 * 2 ** 34). % SENTE
+pattern([w,c,w,w,w,c,c], 2 ** 42). % SENTE 2
+pattern([w,c,w,w,w,c], 2 ** 37). % SENTE
+pattern([w,c,w,w,w], 2 ** 40). % SENTE
 
 % - w - w w - w - CHECK
-pattern([c,w,c,w,w,c,w,c], 40 * 2 ** 36). % SENTE 2
-pattern([c,w,c,w,w,c,w], 8 * 2 ** 36). % SENTE
+pattern([c,w,c,w,w,c,w,c], 2 ** 43). % SENTE 2
+pattern([c,w,c,w,w,c,w], 2 ** 39). % SENTE
 
-pattern([w,c,w,w,c,w,c], 8 * 2 ** 36). % SENTE
-pattern([w,c,w,w,c,w], 3 * 2 ** 16).
+pattern([w,c,w,w,c,w,c], 2 ** 39). % SENTE
+pattern([w,c,w,w,c,w], 2 ** 18).
 
 % - - w - w - w - w - - CHECK
-pattern([c,c,w,c,w,c,w,c,w,c,c], 3 ** 28). % SENTE
-pattern([c,c,w,c,w,c,w,c,w,c], 3 ** 28). % SENTE
-pattern([c,c,w,c,w,c,w,c,w], 3 ** 32). % SENTE
+pattern([c,c,w,c,w,c,w,c,w,c,c], 2 ** 28). % SENTE
+pattern([c,c,w,c,w,c,w,c,w,c], 2 ** 28). % SENTE
+pattern([c,c,w,c,w,c,w,c,w], 2 ** 32). % SENTE
 
-pattern([c,w,c,w,c,w,c,w,c,c], 3 ** 28). % SENTE
-pattern([c,w,c,w,c,w,c,w,c], 3 ** 31). % SENTE
-pattern([c,w,c,w,c,w,c,w], 3 ** 27). % SENTE
+pattern([c,w,c,w,c,w,c,w,c,c], 2 ** 28). % SENTE
+pattern([c,w,c,w,c,w,c,w,c], 2 ** 31). % SENTE
+pattern([c,w,c,w,c,w,c,w], 2 ** 27). % SENTE
 
-pattern([w,c,w,c,w,c,w,c,c], 3 ** 32). % SENTE
-pattern([w,c,w,c,w,c,w,c], 3 ** 27). % SENTE
-pattern([w,c,w,c,w,c,w], 12 * 2 ** 39). % SENTE
+pattern([w,c,w,c,w,c,w,c,c], 2 ** 32). % SENTE
+pattern([w,c,w,c,w,c,w,c], 2 ** 27). % SENTE
+pattern([w,c,w,c,w,c,w], 3 * 2 ** 38). % SENTE
 
 % - w w - w w - CHECK
 pattern([c,w,w,c,w,w,c], 2 ** 22).
@@ -288,58 +288,59 @@ pattern([w,w,c,w,w], -2 ** 24).
 
 /**
  * Pure Pattern with 5 stones.
+ * 2 ** 35
  * ! TODO
  * 29
  */
 
 % w w w w w
-pattern([w,w,w,w,w], 2 ** 90). % WIN.
+pattern([w,w,w,w,w], 2 ** 100). % WIN.
 
 % w - w w w - w
-pattern([w,c,w,w,w,c,w], 2 ** 60). % WIN IN 1.
+pattern([w,c,w,w,w,c,w], 2 ** 67). % WIN IN 1.
 
 % - w w - w - w w -
-pattern([c,w,w,c,w,c,w,w,c], 1). % SENTE 2
-pattern([c,w,w,c,w,c,w,w], 1). % SENTE
+pattern([c,w,w,c,w,c,w,w,c], 3 * 2 ** 40). % SENTE 2
+pattern([c,w,w,c,w,c,w,w], 2 ** 38). % SENTE
 
-pattern([w,w,c,w,c,w,w,c], 1). % SENTE
-pattern([w,w,c,w,c,w,w], 1).
+pattern([w,w,c,w,c,w,w,c], 2 ** 38). % SENTE
+pattern([w,w,c,w,c,w,w], 2 ** 30).
 
 % - - w w w - w w   @   w w - w w w - -
-pattern([c,c,w,w,w,c,w,w], 1). % SENTE 2
-pattern([c,w,w,w,c,w,w], 1). % SENTE
-pattern([w,w,w,c,w,w], 1). % SENTE
+pattern([c,c,w,w,w,c,w,w], 2 ** 39). % SENTE 2
+pattern([c,w,w,w,c,w,w], 2 ** 34). % SENTE
+pattern([w,w,w,c,w,w], 2 ** 34). % SENTE
 
-pattern([w,w,c,w,w,w,c,c], 1). % SENTE 2
-pattern([w,w,c,w,w,w,c], 1). % SENTE
-pattern([w,w,c,w,w,w], 1). % SENTE
+pattern([w,w,c,w,w,w,c,c], 2 ** 39). % SENTE 2
+pattern([w,w,c,w,w,w,c], 2 ** 34). % SENTE
+pattern([w,w,c,w,w,w], 2 ** 34). % SENTE
 
 % - w - w w - w w   @   w w - w w - w -
-pattern([c,w,c,w,w,c,w,w], 1). % SENTE 2
-pattern([w,c,w,w,c,w,w], 1). % SENTE
+pattern([c,w,c,w,w,c,w,w], 3 * 2 ** 40). % SENTE 2
+pattern([w,c,w,w,c,w,w], 2 ** 36). % SENTE
 
-pattern([w,w,c,w,w,c,w,c], 1). % SENTE 2
-pattern([w,w,c,w,w,c,w], 1). % SENTE
+pattern([w,w,c,w,w,c,w,c], 3 * 2 ** 40). % SENTE 2
+pattern([w,w,c,w,w,c,w], 2 ** 36). % SENTE
 
 % - - w - w - w - w - w - -
-pattern([c,c,w,c,w,c,w,c,w,c,w,c,c], 1). % SENTE 3
-pattern([c,c,w,c,w,c,w,c,w,c,w,c], 1). % SENTE 2
-pattern([c,c,w,c,w,c,w,c,w,c,w], 1). % SENTE 2
+pattern([c,c,w,c,w,c,w,c,w,c,w,c,c], 2 ** 45). % SENTE 3
+pattern([c,c,w,c,w,c,w,c,w,c,w,c], 2 ** 39). % SENTE 2
+pattern([c,c,w,c,w,c,w,c,w,c,w], 2 ** 39). % SENTE 2
 
-pattern([c,w,c,w,c,w,c,w,c,w,c,c], 1). % SENTE 2
-pattern([c,w,c,w,c,w,c,w,c,w,c], 1). % SENTE 2
-pattern([c,w,c,w,c,w,c,w,c,w], 1). % SENTE 2
+pattern([c,w,c,w,c,w,c,w,c,w,c,c], 2 ** 39). % SENTE 2
+pattern([c,w,c,w,c,w,c,w,c,w,c], 3 * 2 ** 36). % SENTE 2
+pattern([c,w,c,w,c,w,c,w,c,w], 3 * 2 ** 36). % SENTE 2
 
-pattern([w,c,w,c,w,c,w,c,w,c,c], 1). % SENTE 2
-pattern([w,c,w,c,w,c,w,c,w,c], 1). % SENTE 2
-pattern([w,c,w,c,w,c,w,c,w], 1). % SENTE 2
+pattern([w,c,w,c,w,c,w,c,w,c,c], 2 ** 39). % SENTE 2
+pattern([w,c,w,c,w,c,w,c,w,c], 3 * 2 ** 36). % SENTE 2
+pattern([w,c,w,c,w,c,w,c,w], 3 * 2 ** 36). % SENTE 2
 
 % - w - w w - w - w   @   w - w - w w - w -
-pattern([c,w,c,w,w,c,w,c,w], 1). % SENTE 2
-pattern([w,c,w,w,c,w,c,w], 1). % SENTE
+pattern([c,w,c,w,w,c,w,c,w], 2 ** 41). % SENTE 2
+pattern([w,c,w,w,c,w,c,w], 2 ** 37). % SENTE
 
-pattern([w,c,w,c,w,w,c,w,c], 1). % SENTE 2
-pattern([w,c,w,c,w,w,c,w], 1). % SENTE
+pattern([w,c,w,c,w,w,c,w,c], 2 ** 41). % SENTE 2
+pattern([w,c,w,c,w,w,c,w], 2 ** 37). % SENTE
 
 /**
  * Pure Pattern with 6 stones.
@@ -348,38 +349,38 @@ pattern([w,c,w,c,w,w,c,w], 1). % SENTE
  */
 
 % - - w w w - w w w - -
-pattern([c,c,w,w,w,c,w,w,w,c,c], 1). % SENTE 3
-pattern([c,c,w,w,w,c,w,w,w,c], 1). % SENTE 2
-pattern([c,c,w,w,w,c,w,w,w], 1). % SENTE 2
+pattern([c,c,w,w,w,c,w,w,w,c,c], 2 ** 47). % SENTE 3
+pattern([c,c,w,w,w,c,w,w,w,c], 2 ** 41). % SENTE 2
+pattern([c,c,w,w,w,c,w,w,w], 2 ** 41). % SENTE 2
 
-pattern([c,w,w,w,c,w,w,w,c,c], 1). % SENTE 2
-pattern([c,w,w,w,c,w,w,w,c], 1). % SENTE
-pattern([c,w,w,w,c,w,w,w], 1). % SENTE
+pattern([c,w,w,w,c,w,w,w,c,c], 2 ** 41). % SENTE 2
+pattern([c,w,w,w,c,w,w,w,c], 2 ** 33). % SENTE
+pattern([c,w,w,w,c,w,w,w], 2 ** 33). % SENTE
 
-pattern([w,w,w,c,w,w,w,c,c], 1). % SENTE 2
-pattern([w,w,w,c,w,w,w,c], 1). % SENTE
-pattern([w,w,w,c,w,w,w], 1). % SENTE
+pattern([w,w,w,c,w,w,w,c,c], 2 ** 41). % SENTE 2
+pattern([w,w,w,c,w,w,w,c], 2 ** 33). % SENTE
+pattern([w,w,w,c,w,w,w], 2 ** 33). % SENTE
 
 % w w - w w - w w
-pattern([w,w,c,w,w,c,w,w], 2 ** 60). % WIN IN 1.
+pattern([w,w,c,w,w,c,w,w], 2 ** 66). % WIN IN 1.
 
 % - w - w w - w w w - -
-pattern([c,w,c,w,w,c,w,w,w,c,c], 1). % SENTE 3
-pattern([c,w,c,w,w,c,w,w,w,c], 1). % SENTE 2
-pattern([c,w,c,w,w,c,w,w,w], 1). % SENTE 2
+pattern([c,w,c,w,w,c,w,w,w,c,c], 3 * 2 ** 45). % SENTE 3
+pattern([c,w,c,w,w,c,w,w,w,c], 2 ** 38). % SENTE 2
+pattern([c,w,c,w,w,c,w,w,w], 2 ** 40). % SENTE 2
 
-pattern([w,c,w,w,c,w,w,w,c,c], 1). % SENTE 2
-pattern([w,c,w,w,c,w,w,w,c], 1). % SENTE
-pattern([w,c,w,w,c,w,w,w], 1). % SENTE
+pattern([w,c,w,w,c,w,w,w,c,c], 2 ** 36). % SENTE 2
+pattern([w,c,w,w,c,w,w,w,c], 2 ** 32). % SENTE
+pattern([w,c,w,w,c,w,w,w], 2 ** 32). % SENTE
 
-pattern([c,c,w,w,w,c,w,w,c,w,c], 1). % SENTE 3
-pattern([c,c,w,w,w,c,w,w,c,w], 1). % SENTE 2
+pattern([c,c,w,w,w,c,w,w,c,w,c], 3 * 2 ** 45). % SENTE 3
+pattern([c,c,w,w,w,c,w,w,c,w], 2 ** 36). % SENTE 2
 
-pattern([c,w,w,w,c,w,w,c,w,c], 1). % SENTE 2
-pattern([c,w,w,w,c,w,w,c,w], 1). % SENTE
+pattern([c,w,w,w,c,w,w,c,w,c], 2 ** 38). % SENTE 2
+pattern([c,w,w,w,c,w,w,c,w], 2 ** 32). % SENTE
 
-pattern([w,w,w,c,w,w,c,w,c], 1). % SENTE 2
-pattern([w,w,w,c,w,w,c,w], 1). % SENTE
+pattern([w,w,w,c,w,w,c,w,c], 2 ** 40). % SENTE 2
+pattern([w,w,w,c,w,w,c,w], 2 ** 32). % SENTE
 
 /**
  * dynamic score/2

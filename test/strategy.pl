@@ -63,8 +63,8 @@ sente_between([MultLower,MultUpper], A, B) :-
     UpperBound is A * MultUpper,
     LowerBound =< B, B =< UpperBound.
 
-sente2(A, B) :- sente_between([0.8,3.0], A, B).
-sente3(A, B) :- sente_between([0.2,1.0], A, B).
+sente2(A, B) :- sente_between([0.4,10.0], A, B).
+sente3(A, B) :- sente_between([0.05,3.0], A, B).
 
 test_sente :-
     % 3 Stones
