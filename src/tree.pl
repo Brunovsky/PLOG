@@ -89,7 +89,7 @@ mainline(Node, [Move|ChildMoves]) :-
  * Accessors and other quick utilities.
  */
 node_board(node(Board, _, _, _, _, _), Board).
-node_next(node(_, P, _, _, _, _), P).
+node_player(node(_, P, _, _, _, _), P).
 node_val(node(_, _, Val, _, _, _), Val).
 node_cap(node(_, _, _, Cap, _, _), Cap).
 node_children(node(_, _, _, _, Children, _), Children).
@@ -123,9 +123,9 @@ build_child_node(Move, ParentNode, ChildNode) :-
     other_player(P, Other),
     ParentNode = node(Board, P, Val, Cap, _, _),
     ChildNode = node(ChildBoard, Other, ChildVal, ChildCap, [], Worth),
-    place_stone(P, Board, Move, ChildBoard, Captures),
+    place_stone(P, Board, Move, ChildBoard, Captures), !,
     add_captures(P, Captures, Cap, ChildCap),
-    reevaluate_board(Board, ChildBoard, Val, ChildVal),
+    reevaluate_board(Board, ChildBoard, Val, ChildVal), !,
     totalval(ChildVal, ChildCap, Worth), !.
 
 /**
@@ -158,6 +158,23 @@ organize_children(P, Width, Unordered, BestOrdered, BestWorth) :-
     child_value(BestChild, BestWorth), !.
 
 /**
+ * build_children_loop_moves
+ * build_children_loop_moves()
+ */
+build_children_loop_moves(_, [], []).
+
+build_children_loop_moves(Node, [Move|_], [Worth-(Move-Child)]) :-
+    build_child_node(Move, Node, Child),
+    node_worth(Child, Worth),
+    node_player(Node, P),
+    winning_value(P, Worth), !.
+
+build_children_loop_moves(Node, [Move|ListMoves], [Worth-(Move-Child)|Children]) :-
+    build_child_node(Move, Node, Child),
+    node_worth(Child, Worth),
+    build_children_loop_moves(Node, ListMoves, Children).
+
+/**
  * build_children/3
  * build_children(+Node, -NewNode, +Options).
  *   Constructs a list [V-([Ri,Ci]-node/6),...] for a Node without children,
@@ -172,13 +189,7 @@ build_children(Node, NewNode, Options) :-
     Node = node(Board, P, Val, Cap, _, _),
     NewNode = node(Board, P, Val, Cap, Children, NewWorth),
     valid_moves_within_boundary(Board, Padding, Turn, Tournament, ListOfMoves),
-    (   foreach(Move, ListOfMoves),
-        fromto([], Childs, [Worth-(Move-Child)|Childs], Unordered),
-        param(Node)
-    do  (   build_child_node(Move, Node, Child),
-            node_worth(Child, Worth)
-        )
-    ),
+    build_children_loop_moves(Node, ListOfMoves, Unordered),
     organize_children(P, Width, Unordered, Children, NewWorth).
 
 /**

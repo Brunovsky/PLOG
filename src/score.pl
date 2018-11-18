@@ -32,70 +32,6 @@
  */
 
 /**
- * write_board_line_crude/1
- * write_board_line_crude(+L).
- */
-write_board_line_crude(L) :-
-    length(L, ColSize),
-    ColSize2 is ColSize + 2,
-    lb_foreach_increasing(L, write_board_unit, [[3,ColSize2], 2], 2).
-
-/**
- * print_pattern_values/1
- * print_pattern_values(+Pattern).
- */
-print_pattern_scores(Pattern, [PadLeft,PadRight]) :-
-    numlist(0, PadLeft, LeftsReversed),
-    numlist(0, PadRight, RightsReversed),
-    reverse(LeftsReversed, Lefts), reverse(RightsReversed, Rights),
-    (   foreach(Left, Lefts),
-        param(Pattern),
-        param(PadLeft),
-        param(PadRight),
-        param(Rights)
-    do  (   foreach(Right, Rights),
-            param(Pattern),
-            param(PadLeft),
-            param(PadRight),
-            param(Left)
-        do  fill_n(Left, c, CLeft),
-            fill_n(Right, c, CRight),
-            append([CLeft, Pattern, CRight], FullPattern),
-            evaluate(FullPattern, Value),
-
-            LeftSpaces is 2 * (PadLeft - Left),
-            RightSpaces is 2 * (PadRight - Right),
-            
-
-            pretty_print_pattern(FullPattern, [LeftSpaces, RightSpaces]),
-            format(' -- ~d~n', Value)
-        )
-    ).
-
-/**
- * pretty_print_pattern/2
- * pretty_print_pattern(+Pattern, +Length).
- */
-pretty_print_pattern(Pattern, [LeftSpaces, RightSpaces]) :-
-    fill_n(LeftSpaces, ' ', LeftSpacesList),
-    atom_chars(LeftString, LeftSpacesList),
-    fill_n(RightSpaces, ' ', RightSpacesList),
-    atom_chars(RightString, RightSpacesList),
-    write(LeftString),
-    write_board_line_crude(Pattern),
-    write(RightString).
-
-pretty_print_pattern(Pattern, Length) :-
-    integer(Length), !,
-    length(Pattern, PatternLength),
-    FillSpaces is Length - PatternLength,
-    fill_n(FillSpaces, ' ', SpacesList),
-    atom_chars(SpaceString, SpacesList),
-    write(SpaceString),
-    write_board_line_crude(Pattern),
-    write(SpaceString).
-
-/**
  * pattern/2
  * pattern(+Pattern, -Score).
  *   Determines the score of a given pattern.
@@ -443,22 +379,36 @@ multiscore(List, Pattern, TotalScore) :-
  */
 captures_score([C,C], 0) :- 0 is mod(C, 2), C < 10, C >= 0.
 
-captures_score([2,0], 2 ** 25).
-captures_score([4,0], 2 ** 37).
-captures_score([6,0], 2 ** 52).
-captures_score([8,0], 2 ** 77).
-captures_score([4,2], 2 ** 20).
-captures_score([6,2], 2 ** 49).
-captures_score([8,2], 2 ** 76).
-captures_score([6,4], 2 ** 44).
-captures_score([8,4], 2 ** 74).
-captures_score([8,6], 2 ** 69).
+captures_score([2,0], 2 ** 33).
+captures_score([4,0], 2 ** 49).
+captures_score([6,0], 2 ** 63).
+captures_score([8,0], 2 ** 73).
+captures_score([4,2], 2 ** 44).
+captures_score([6,2], 2 ** 61.5).
+captures_score([8,2], 2 ** 72.8).
+captures_score([6,4], 2 ** 57.5).
+captures_score([8,4], 2 ** 71.5).
+captures_score([8,6], 2 ** 67).
 captures_score([10,_], 2 ** 100).
 
 captures_score([Wc,Bc], Score) :-
     Wc < Bc,
     captures_score([Bc,Wc], WScore),
     Score is -WScore.
+
+/**
+ * winning_value/2
+ * winning_value(+P, +Value).
+ */
+winning_value(w, Value) :- Value > 2 ** 97.
+winning_value(b, Value) :- -Value > 2 ** 97.
+
+/**
+ * losing_value/2
+ * losing_value(+P, +Value).
+ */
+losing_value(w, Value) :- winning_value(b, Value).
+losing_value(b, Value) :- winning_value(w, Value).
 
 /**
  * dynamic evaluate/2
@@ -474,6 +424,80 @@ evaluate(List, Value) :-
     scanlist(plus, Scores, 0, Value),
     asserta((evaluate(List, Value))), !. % store for future calls on the same list.
 
+/**
+ * ===== ===== ===== ===== ===== === ===== ===== ===== ===== =====
+ * ===== ===== ===== ===== STUDYING SCORES ===== ===== ===== =====
+ * ===== ===== ===== ===== ===== === ===== ===== ===== ===== =====
+ */
+
+/**
+ * write_board_line_crude/1
+ * write_board_line_crude(+L).
+ */
+write_board_line_crude(L) :-
+    length(L, ColSize),
+    ColSize2 is ColSize + 2,
+    lb_foreach_increasing(L, write_board_unit, [[3,ColSize2], 2], 2).
+
+/**
+ * print_pattern_values/1
+ * print_pattern_values(+Pattern).
+ */
+print_pattern_scores(Pattern, [PadLeft,PadRight]) :-
+    numlist(0, PadLeft, LeftsReversed),
+    numlist(0, PadRight, RightsReversed),
+    reverse(LeftsReversed, Lefts), reverse(RightsReversed, Rights),
+    (   foreach(Left, Lefts),
+        param(Pattern),
+        param(PadLeft),
+        param(PadRight),
+        param(Rights)
+    do  (   foreach(Right, Rights),
+            param(Pattern),
+            param(PadLeft),
+            param(PadRight),
+            param(Left)
+        do  fill_n(Left, c, CLeft),
+            fill_n(Right, c, CRight),
+            append([CLeft, Pattern, CRight], FullPattern),
+            evaluate(FullPattern, Value),
+
+            LeftSpaces is 2 * (PadLeft - Left),
+            RightSpaces is 2 * (PadRight - Right),
+            
+
+            pretty_print_pattern(FullPattern, [LeftSpaces, RightSpaces]),
+            format(' -- ~d~n', Value)
+        )
+    ).
+
+/**
+ * pretty_print_pattern/2
+ * pretty_print_pattern(+Pattern, +Length).
+ */
+pretty_print_pattern(Pattern, [LeftSpaces, RightSpaces]) :-
+    fill_n(LeftSpaces, ' ', LeftSpacesList),
+    atom_chars(LeftString, LeftSpacesList),
+    fill_n(RightSpaces, ' ', RightSpacesList),
+    atom_chars(RightString, RightSpacesList),
+    write(LeftString),
+    write_board_line_crude(Pattern),
+    write(RightString).
+
+pretty_print_pattern(Pattern, Length) :-
+    integer(Length), !,
+    length(Pattern, PatternLength),
+    FillSpaces is Length - PatternLength,
+    fill_n(FillSpaces, ' ', SpacesList),
+    atom_chars(SpaceString, SpacesList),
+    write(SpaceString),
+    write_board_line_crude(Pattern),
+    write(SpaceString).
+
+/**
+ * check_evaluate/1
+ * check_evaluate(+Pattern).
+ */
 check_evaluate(List) :-
     length(List, Length),
     count_element(w, List, Whites),
