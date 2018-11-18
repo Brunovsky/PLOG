@@ -1,3 +1,11 @@
+pente :- 
+	sanitize_options([], Options),
+	main_menu(Options).
+
+pente(Options) :-
+	sanitize_options(Options, Sanitized),
+	main_menu(Sanitized).
+
 /**
  * player/2
  * player(?Color, ?Captures).

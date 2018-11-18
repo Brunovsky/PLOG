@@ -25,8 +25,10 @@
 % Player Bot
 :- compile('src/score.pl').
 :- compile('src/value.pl').
-:- compile('src/tree-opt.pl').
 :- compile('src/tree.pl').
+
+% Options
+:- compile('src/options.pl').
 
 % Game logic
 :- compile('src/game.pl').
@@ -40,3 +42,7 @@
 
 re :- compile('main.pl').
 te :- compile('test/test.pl').
+
+play :- pente.
+play(Options) :- pente(Options).
+help :- help_menu.
