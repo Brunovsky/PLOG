@@ -14,13 +14,12 @@ test_all(Name, Tests) :-
     nl.
 
 % Everything in test/
-:- reconsult('lists.pl').
-:- reconsult('matrix.pl').
-:- reconsult('board.pl').
-:- reconsult('score.pl').
-:- reconsult('tree.pl').
-:- reconsult('value.pl').
-:- reconsult('strategy.pl').
+:- compile('lists.pl').
+:- compile('matrix.pl').
+:- compile('board.pl').
+:- compile('score.pl').
+:- compile('tree.pl').
+:- compile('value.pl').
 
 test :-
     test_lists,

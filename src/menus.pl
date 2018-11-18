@@ -49,11 +49,13 @@ help_menu :-
 
 main_menu(Options) :- 
 	header,
-	write('\t\t1- Player (W) vs Player (B)'), nl,
-	write('\t\t2- Player (W) vs BOT    (B)'), nl,
-	write('\t\t3- BOT    (W) vs Player (B)'), nl,
-	write('\t\t4- BOT    (W) vs BOT    (B)'), nl,nl,
-	write('\t\t0- Exit'), nl,
+	write('\t\t1- Player (W) vs Player (B)'),nl,
+	write('\t\t2- Player (W) vs BOT    (B)'),nl,
+	write('\t\t3- BOT    (W) vs Player (B)'),nl,
+	write('\t\t4- BOT    (W) vs BOT    (B)'),nl,nl,
+	write('\t\t0- Exit'),nl,
+    nl,
+    write('\t\t5- To get a list of options, call: help.'),nl,
 	footer,
 	get_input(Input),
 	handle_input(Input, Options).
@@ -67,6 +69,7 @@ handle_input(2, Options) :- !, start_game(player, bot, Options).
 handle_input(3, Options) :- !, start_game(bot, player, Options).
 handle_input(4, Options) :- !, start_game(bot, bot, Options).
 handle_input(0, _) :- write('Exit').
+handle_input(5, _) :- help_menu.
 handle_input(_, Options) :-
 	write('Invalid Input'), nl,
 	get_input(Input),

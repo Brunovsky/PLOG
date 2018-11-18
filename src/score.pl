@@ -140,7 +140,7 @@
     pattern([w,c,w,w], -1 * 2 ** 21).
 
 % - - w - w - w - - CHECK 67M - 739M
-    pattern([c,c,w,c,w,c,w,c,c], 2 ** 27).
+    pattern([c,c,w,c,w,c,w,c,c], 2 ** 25).
     pattern([c,c,w,c,w,c,w,c],   2 ** 25).
     pattern([c,c,w,c,w,c,w],     2 ** 25).
 
@@ -399,6 +399,8 @@ captures_score([Wc,Bc], Score) :-
 /**
  * winning_value/2
  * winning_value(+P, +Value).
+ *   Value can be a worth or a token w-N / b-N where N is the turn
+ *   where the win is obtained by the respective player.
  */
 winning_value(w, Value) :- Value > 2 ** 97.
 winning_value(b, Value) :- -Value > 2 ** 97.
@@ -406,6 +408,8 @@ winning_value(b, Value) :- -Value > 2 ** 97.
 /**
  * losing_value/2
  * losing_value(+P, +Value).
+ *   Value can be a worth or a token w-N / b-N where N is the turn
+ *   where the win is obtained by the respective player.
  */
 losing_value(w, Value) :- winning_value(b, Value).
 losing_value(b, Value) :- winning_value(w, Value).
@@ -416,7 +420,7 @@ losing_value(b, Value) :- winning_value(w, Value).
  * end_value(+P, +Value).
  */
 end_value(Value) :- winning_value(w, Value); winning_value(b, Value).
-end_value(P, Value) :- winning_value(P, Value); losing_value(P, Value).
+end_value(_, Value) :- end_value(Value).
 
 /**
  * best_value/4
@@ -431,10 +435,10 @@ best_value(b, Val1, Val2, Val2) :- Val1 > Val2.
  * worst_value/4
  * worst_value(+P, +Val1, +Val2, -Best).
  */
-worst_value(w, Val1, Val2, Val1) :- Val1 < Val2, !.
-worst_value(w, Val1, Val2, Val2) :- Val1 >= Val2.
-worst_value(b, Val1, Val2, Val1) :- Val1 > Val2, !.
-worst_value(b, Val1, Val2, Val2) :- Val1 =< Val2.
+best_value(w, Val1, Val2, Val2) :- Val1 >= Val2, !.
+best_value(w, Val1, Val2, Val1) :- Val1 < Val2.
+best_value(b, Val1, Val2, Val2) :- Val1 =< Val2, !.
+best_value(b, Val1, Val2, Val1) :- Val1 > Val2.
 
 /**
  * dynamic evaluate/2

@@ -25,6 +25,7 @@ default(board_size, 19).
 default(difficulty, 3).
 default(flip_board, false).
 default(tournament_rule, true).
+default(traverse, false).
 
 default(depth, Depth) :-
     default(difficulty, Diff), difficulty_set(Diff, Depth, _, _).
@@ -40,11 +41,11 @@ default(width, WidthList) :-
  * difficulty_set(+Level, ?Depth, ?Padding, ?WidthList).
  *   Established the difficulty sets used.
  */
-difficulty_set(1, 1, 1, [3]).
-difficulty_set(2, 2, 3, [5,3]).
-difficulty_set(3, 5, 2, [4,3,2]).
-difficulty_set(4, 4, 2, [5,5,3,2]).
-difficulty_set(5, 6, 2, [10,10,8,6,5]).
+difficulty_set(1, 2, 1, [3,3]).
+difficulty_set(2, 3, 2, [4,3,2]).
+difficulty_set(3, 4, 2, [4,3,2]).
+difficulty_set(4, 5, 2, [4,3,2]).
+difficulty_set(5, 6, 2, [5,4,3,2]).
 
 /**
  * ===== ===== ===== ===== ====  ==== ===== ===== ===== =====
@@ -64,14 +65,16 @@ sanitize_options(Options, NewOptions) :-
     sanitize_padding(Options, DPadding, Padding), !,
     sanitize_width(Options, DWidth, Width), !,
     sanitize_flip_board(Options, Flip), !,
-    sanitize_tournament_rule(Options, Rule),
+    sanitize_tournament_rule(Options, Rule), !,
+    sanitize_traverse(Options, Traverse), !,
     NewOptions = [
         board_size(Size),
         depth(Depth),
         padding(Padding),
         width(Width),
         flip_board(Flip),
-        tournament_rule(Rule)
+        tournament_rule(Rule),
+        traverse(Traverse)
     ].
 
 /**
@@ -160,6 +163,17 @@ sanitize_tournament_rule(Options, Rule) :-
     getopt_alt(Options, [tournament_rule, rule, tournament], DefaultRule, Rule), !,
     memberchk(Rule, [false,true]);
     write('Invalid TOURNAMENT RULE option! (true or false)'), nl, fail.
+
+/**
+ * sanitize_traverse/2
+ * sanitize_traverse(+Options, -Rule).
+ *   Deduce the traverse option.
+ */
+sanitize_traverse(Options, Traverse) :-
+    default(traverse, DefaultTraverse),
+    getopt_alt(Options, [traverse, traversal], DefaultTraverse, Traverse), !,
+    memberchk(Traverse, [false,true]);
+    write('Invalid TRAVERSE option! (true or false)'), nl, fail.
 
 /**
  * ===== ===== ===== ===== ======  ====== ===== ===== ===== =====
@@ -264,6 +278,9 @@ opt_rule(Options, Rule) :-
 
 opt_tournament(Options, Rule) :-
     getopt_alt(Options, [tournament_rule, rule, tournament], Rule).
+
+opt_traverse(Options, Traverse) :-
+    getopt_alt(Options, [traverse, traversal], Traverse).
 
 opt_width(Options, Width) :-
     opt_depth(Options, Depth),
