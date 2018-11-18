@@ -32,6 +32,72 @@
  */
 
 /**
+ * write_board_line_crude/1
+ * write_board_line_crude(+L).
+ */
+write_board_line_crude(L) :-
+    length(L, ColSize),
+    ColSize2 is ColSize + 2,
+    lb_foreach_increasing(L, write_board_unit, [[3,ColSize2], 2], 2).
+
+/**
+ * print_pattern_values/1
+ * print_pattern_values(+Pattern).
+ */
+print_pattern_scores(Pattern, [PadLeft,PadRight]) :-
+    numlist(0, PadLeft, LeftsReversed),
+    numlist(0, PadRight, RightsReversed),
+    reverse(LeftsReversed, Lefts), reverse(RightsReversed, Rights),
+    (   foreach(Left, Lefts),
+        param(Pattern),
+        param(PadLeft),
+        param(PadRight),
+        param(Rights)
+    do  (   foreach(Right, Rights),
+            param(Pattern),
+            param(PadLeft),
+            param(PadRight),
+            param(Left)
+        do  fill_n(Left, c, CLeft),
+            fill_n(Right, c, CRight),
+            append([CLeft, Pattern, CRight], FullPattern),
+            evaluate(FullPattern, Value),
+
+            LeftSpaces is 2 * (PadLeft - Left),
+            RightSpaces is 2 * (PadRight - Right),
+            
+
+            pretty_print_pattern(FullPattern, [LeftSpaces, RightSpaces]),
+            format(' -- ~d~n', Value)
+        )
+    ).
+
+/**
+ * pretty_print_pattern/2
+ * pretty_print_pattern(+Pattern, +Length).
+ */
+pretty_print_pattern(Pattern, [LeftSpaces, RightSpaces]) :-
+    fill_n(LeftSpaces, ' ', LeftSpacesList),
+    atom_chars(LeftString, LeftSpacesList),
+    fill_n(RightSpaces, ' ', RightSpacesList),
+    atom_chars(RightString, RightSpacesList),
+    write(LeftString),
+    write_board_line_crude(Pattern),
+    write(RightString).
+
+pretty_print_pattern(Pattern, Length) :-
+    integer(Length), !,
+    length(Pattern, PatternLength),
+    FillSpaces is Length - PatternLength,
+    fill_n(FillSpaces, ' ', SpacesList),
+    atom_chars(SpaceString, SpacesList),
+    write(SpaceString),
+    write_board_line_crude(Pattern),
+    write(SpaceString).
+
+p(Pattern, Pad) :- print_pattern_scores(Pattern, Pad).
+
+/**
  * pattern/2
  * pattern(+Pattern, -Score).
  *   Determines the score of a given pattern.
@@ -39,179 +105,186 @@
 
 /**
  * Pure Pattern with 1 stone.
- * ! TODO
+ * Multiplier 2 ** 0
  * 9
  */
 
-% - - w - -
-pattern([c,c,w,c,c], 1).
-pattern([c,c,w,c], 1).
-pattern([c,c,w], 1).
+% - - w - - CHECK
+pattern([c,c,w,c,c], 12).
+pattern([c,c,w,c], 4).
+pattern([c,c,w], 3).
 
-pattern([c,w,c,c], 1).
-pattern([c,w,c], 1).
-pattern([c,w], 1).
+pattern([c,w,c,c], 4).
+pattern([c,w,c], 8).
+pattern([c,w], 2).
 
-pattern([w,c,c], 1).
-pattern([w,c], 1).
-pattern([w], 1).
+pattern([w,c,c], 3).
+pattern([w,c], 2).
+pattern([w], 2).
 
 /**
  * Pure Pattern with 2 stones.
- * ! TODO
+ * Multiplier 2 ** 5
  * 31
  */
 
-% - - w w - -
-pattern([c,c,w,w,c,c], 1).
-pattern([c,c,w,w,c], 1).
-pattern([c,c,w,w], 1).
+% - - w w - - CHECK
+pattern([c,c,w,w,c,c], 16 * 2 ** 5).
+pattern([c,c,w,w,c], 11 * 2 ** 5).
+pattern([c,c,w,w], 16 * 2 ** 5).
 
-pattern([c,w,w,c,c], 1).
-pattern([c,w,w,c], 1).
-pattern([c,w,w], 1).
+pattern([c,w,w,c,c], 11 * 2 ** 5).
+pattern([c,w,w,c], 64 * 2 ** 5).
+pattern([c,w,w], -24 * 2 ** 5).
 
-pattern([w,w,c,c], 1).
-pattern([w,w,c], 1).
-pattern([w,w], 1).
+pattern([w,w,c,c], 16 * 2 ** 5).
+pattern([w,w,c], -24 * 2 ** 5).
+pattern([w,w], 12 * 2 ** 5).
 
-% - - w - w - -
-pattern([c,c,w,c,w,c,c], 1).
-pattern([c,c,w,c,w,c], 1).
-pattern([c,c,w,c,w], 1).
+% - - w - w - - CHECK
+pattern([c,c,w,c,w,c,c], 50 * 2 ** 10).
+pattern([c,c,w,c,w,c], 70 * 2 ** 10).
+pattern([c,c,w,c,w], 80 * 2 ** 10).
 
-pattern([c,w,c,w,c,c], 1).
-pattern([c,w,c,w,c], 1).
-pattern([c,w,c,w], 1).
+pattern([c,w,c,w,c,c], 70 * 2 ** 10).
+pattern([c,w,c,w,c], 130 * 2 ** 10).
+pattern([c,w,c,w], 100 * 2 ** 10).
 
-pattern([w,c,w,c,c], 1).
-pattern([w,c,w,c], 1).
-pattern([w,c,w], 1).
+pattern([w,c,w,c,c], 80 * 2 ** 10).
+pattern([w,c,w,c], 100 * 2 ** 10).
+pattern([w,c,w], 250 * 2 ** 10).
 
-% - - w - - w - -
-pattern([c,c,w,c,c,w,c,c], 1).
-pattern([c,c,w,c,c,w,c], 1).
-pattern([c,c,w,c,c,w], 1).
+% - - w - - w - - CHECK
+pattern([c,c,w,c,c,w,c,c], 10 * 2 ** 8).
+pattern([c,c,w,c,c,w,c], 10 * 2 ** 8).
+pattern([c,c,w,c,c,w], 20 * 2 ** 8).
 
-pattern([c,w,c,c,w,c,c], 1).
-pattern([c,w,c,c,w,c], 1).
-pattern([c,w,c,c,w], 1).
+pattern([c,w,c,c,w,c,c], 10 * 2 ** 8).
+pattern([c,w,c,c,w,c], 90 * 2 ** 8).
+pattern([c,w,c,c,w], 90 * 2 ** 8).
 
-pattern([w,c,c,w,c,c], 1).
-pattern([w,c,c,w,c], 1).
-pattern([w,c,c,w], 1).
+pattern([w,c,c,w,c,c], 20 * 2 ** 8).
+pattern([w,c,c,w,c], 90 * 2 ** 8).
+pattern([w,c,c,w], 150 * 2 ** 8).
 
-% - w - - - w -
-pattern([c,w,c,c,w,c], 1).
-pattern([c,w,c,c,w], 1).
+% - w - - - w - CHECK
+pattern([c,w,c,c,c,w,c], 4 * 2 ** 5).
+pattern([c,w,c,c,c,w], 3 * 2 ** 5).
 
-pattern([w,c,c,w,c], 1).
-pattern([w,c,c,w], 1).
+pattern([w,c,c,c,w,c], 3 * 2 ** 5).
+pattern([w,c,c,c,w], 5 * 2 ** 5).
 
 /**
  * Pure Pattern with 3 stones.
- * ! TODO
+ * Multiplier 2 ** 10
  * 40
  */
 
-% - - w w w - -
-pattern([c,c,w,w,w,c,c], 1). % SENTE
-pattern([c,c,w,w,w,c], 1). % SENTE
-pattern([c,c,w,w,w], 1).
+% - - w w w - - CHECK
+pattern([c,c,w,w,w,c,c], 70 * 2 ** 24). % SENTE 2
+pattern([c,c,w,w,w,c], 30 * 2 ** 24). % SENTE
+pattern([c,c,w,w,w], 20 * 2 ** 24).
 
-pattern([c,w,w,w,c,c], 1). % SENTE
-pattern([c,w,w,w,c], 1).
-pattern([c,w,w,w], 1).
+pattern([c,w,w,w,c,c], 30 * 2 ** 24). % SENTE
+pattern([c,w,w,w,c], 15 * 2 ** 24).
+pattern([c,w,w,w], 2 * 2 ** 24).
 
-pattern([w,w,w,c,c], 1).
-pattern([w,w,w,c], 1).
-pattern([w,w,w], 1).
+pattern([w,w,w,c,c], 20 * 2 ** 24).
+pattern([w,w,w,c], 2 * 2 ** 24).
+pattern([w,w,w], 8 * 2 ** 24).
 
-% - w w - w -   @   - w - w w -
-pattern([c,w,w,c,w,c], 1). % SENTE
-pattern([c,w,w,c,w], 1).
+% - w w - w -   @   - w - w w - CHECK
+pattern([c,w,w,c,w,c], 32 * 2 ** 22). % SENTE
+pattern([c,w,w,c,w], 48 * 2 ** 22).
 
-pattern([w,w,c,w,c], 1).
-pattern([w,w,c,w], 1).
+pattern([w,w,c,w,c], 1 * 2 ** 22).
+pattern([w,w,c,w], -4 * 2 ** 22).
 
-pattern([c,w,c,w,w,c], 1). % SENTE
-pattern([c,w,c,w,w], 1).
+pattern([c,w,c,w,w,c], 32 * 2 ** 22). % SENTE
+pattern([c,w,c,w,w], 1 * 2 ** 22).
 
-pattern([w,c,w,w,c], 1).
-pattern([w,c,w,w], 1).
+pattern([w,c,w,w,c], 48 * 2 ** 22).
+pattern([w,c,w,w], -4 * 2 ** 22).
 
-% - - w - w - w - -
-pattern([c,c,w,c,w,c,w,c,c], 1).
-pattern([c,c,w,c,w,c,w,c], 1).
-pattern([c,c,w,c,w,c,w], 1).
+% - - w - w - w - - CHECK
+pattern([c,c,w,c,w,c,w,c,c], 5 * 2 ** 16).
+pattern([c,c,w,c,w,c,w,c], 7 * 2 ** 16).
+pattern([c,c,w,c,w,c,w], 4 * 2 ** 16).
 
-pattern([c,w,c,w,c,w,c,c], 1).
-pattern([c,w,c,w,c,w,c], 1).
-pattern([c,w,c,w,c,w], 1).
+pattern([c,w,c,w,c,w,c,c], 7 * 2 ** 16).
+pattern([c,w,c,w,c,w,c], 18 * 2 ** 16).
+pattern([c,w,c,w,c,w], 8 * 2 ** 16).
 
-pattern([w,c,w,c,w,c,c], 1).
-pattern([w,c,w,c,w,c], 1).
-pattern([w,c,w,c,w], 1).
+pattern([w,c,w,c,w,c,c], 4 * 2 ** 16).
+pattern([w,c,w,c,w,c], 8 * 2 ** 16).
+pattern([w,c,w,c,w], 4 * 2 ** 16).
 
-% - w - - w - w - -   @   - - w - w - - w -
-pattern([c,w,c,c,w,c,w,c,c], 1).
-pattern([c,w,c,c,w,c,w,c], 1).
-pattern([c,w,c,c,w,c,w], 1).
+% - w - - w - w - -   @   - - w - w - - w - CHECK
+pattern([c,w,c,c,w,c,w,c,c], 1 * 2 ** 11).
+pattern([c,w,c,c,w,c,w,c], 1.5 * 2 ** 11).
+pattern([c,w,c,c,w,c,w], 3 * 2 ** 11).
 
-pattern([w,c,c,w,c,w,c,c], 1).
-pattern([w,c,c,w,c,w,c], 1).
-pattern([w,c,c,w,c,w], 1).
+pattern([w,c,c,w,c,w,c,c], 1 * 2 ** 11).
+pattern([w,c,c,w,c,w,c], 5 * 2 ** 11).
+pattern([w,c,c,w,c,w], 12 * 2 ** 11).
 
-pattern([c,c,w,c,w,c,c,w,c], 1).
-pattern([c,c,w,c,w,c,c,w], 1).
+pattern([c,c,w,c,w,c,c,w,c], 1 * 2 ** 11).
+pattern([c,c,w,c,w,c,c,w], 1 * 2 ** 11).
 
-pattern([c,w,c,w,c,c,w,c], 1).
-pattern([c,w,c,w,c,c,w], 1).
+pattern([c,w,c,w,c,c,w,c], 1.5 * 2 ** 11).
+pattern([c,w,c,w,c,c,w], 5 * 2 ** 11).
 
-pattern([w,c,w,c,c,w,c], 1).
-pattern([w,c,w,c,c,w], 1).
+pattern([w,c,w,c,c,w,c], 3 * 2 ** 11).
+pattern([w,c,w,c,c,w], 12 * 2 ** 11).
 
 /**
  * Pure Pattern with 4 stones.
- * ! TODO
+ * 2 ** 30
  * 23
  */
 
-% - w w w w -
+% - w w w w - CHECK
 pattern([c,w,w,w,w,c], 2 ** 60). % WIN IN 1.
-pattern([c,w,w,w,w], 1). % SENTE
+pattern([c,w,w,w,w], 90 * 2 ** 32). % SENTE
 
-pattern([w,w,w,w,c], 1). % SENTE
-pattern([w,w,w,w], 1).
+pattern([w,w,w,w,c], 90 * 2 ** 32). % SENTE
+pattern([w,w,w,w], 3 * 2 ** 25).
 
-% - - w w w - w   @   w - w w w - -
-pattern([c,c,w,w,w,c,w], 1). % SENTE 2
-pattern([c,w,w,w,c,w], 1). % SENTE
-pattern([w,w,w,c,w], 1). % SENTE
+% - - w w w - w   @   w - w w w - - CHECK
+pattern([c,c,w,w,w,c,w], 150 * 2 ** 34). % SENTE 2
+pattern([c,w,w,w,c,w], 10 * 2 ** 34). % SENTE
+pattern([w,w,w,c,w], 60 * 2 ** 34). % SENTE
 
-pattern([w,c,w,w,w,c,c], 1). % SENTE 2
-pattern([w,c,w,w,w,c], 1). % SENTE
-pattern([w,c,w,w,w], 1). % SENTE
+pattern([w,c,w,w,w,c,c], 150 * 2 ** 34). % SENTE 2
+pattern([w,c,w,w,w,c], 10 * 2 ** 34). % SENTE
+pattern([w,c,w,w,w], 60 * 2 ** 34). % SENTE
 
-% - w - w w - w -
-pattern([c,w,c,w,w,c,w,c], 1). % SENTE 2
-pattern([c,w,c,w,w,c,w], 1). % SENTE
+% - w - w w - w - CHECK
+pattern([c,w,c,w,w,c,w,c], 40 * 2 ** 36). % SENTE 2
+pattern([c,w,c,w,w,c,w], 8 * 2 ** 36). % SENTE
 
-pattern([w,c,w,w,c,w,c], 1). % SENTE
-pattern([w,c,w,w,c,w], 1).
+pattern([w,c,w,w,c,w,c], 8 * 2 ** 36). % SENTE
+pattern([w,c,w,w,c,w], 3 * 2 ** 16).
 
-% - - w - w - w - w - -
-pattern([c,c,w,c,w,c,w,c,w,c,c], 1). % SENTE
-pattern([c,c,w,c,w,c,w,c,w,c], 1). % SENTE
-pattern([c,c,w,c,w,c,w,c,w], 1). % SENTE
+% - - w - w - w - w - - CHECK
+pattern([c,c,w,c,w,c,w,c,w,c,c], 3 ** 28). % SENTE
+pattern([c,c,w,c,w,c,w,c,w,c], 3 ** 28). % SENTE
+pattern([c,c,w,c,w,c,w,c,w], 3 ** 32). % SENTE
 
-pattern([c,w,c,w,c,w,c,w,c,c], 1). % SENTE
-pattern([c,w,c,w,c,w,c,w,c], 1). % SENTE
-pattern([c,w,c,w,c,w,c,w], 1). % SENTE
+pattern([c,w,c,w,c,w,c,w,c,c], 3 ** 28). % SENTE
+pattern([c,w,c,w,c,w,c,w,c], 3 ** 31). % SENTE
+pattern([c,w,c,w,c,w,c,w], 3 ** 27). % SENTE
 
-pattern([w,c,w,c,w,c,w,c,c], 1). % SENTE
-pattern([w,c,w,c,w,c,w,c], 1). % SENTE
-pattern([w,c,w,c,w,c,w], 1). % SENTE
+pattern([w,c,w,c,w,c,w,c,c], 3 ** 32). % SENTE
+pattern([w,c,w,c,w,c,w,c], 3 ** 27). % SENTE
+pattern([w,c,w,c,w,c,w], 12 * 2 ** 39). % SENTE
+
+% - w w - w w - CHECK
+pattern([c,w,w,c,w,w,c], 2 ** 22).
+pattern([c,w,w,c,w,w], 2 ** 21).
+
+pattern([w,w,c,w,w,c], 2 ** 21).
+pattern([w,w,c,w,w], -2 ** 24).
 
 /**
  * Pure Pattern with 5 stones.
@@ -315,9 +388,10 @@ pattern([w,w,w,c,w,w,c,w], 1). % SENTE
  */
  :- abolish(score/2). % reload
  :- findall([Pattern, Score], pattern(Pattern, Score), List),
-    (   foreach([WPattern, WScore], List)
+    (   foreach([WPattern, Score], List)
     do  (   list_reversal(WPattern, BPattern),
-            BScore is -WScore,
+            BScore is -Score,
+            WScore is Score,
             assertz((score(WPattern, WScore))),
             assertz((score(BPattern, BScore)))
         )
@@ -379,3 +453,45 @@ evaluate(List, Value) :-
     map(multiscore(List), Patterns, Scores), !, % very expensive
     scanlist(plus, Scores, 0, Value),
     asserta((evaluate(List, Value))), !. % store for future calls on the same list.
+
+check_evaluate(List) :-
+    length(List, Length),
+    count_element(w, List, Whites),
+    score_list(Patterns),
+    (   foreach(Pattern, Patterns),
+        param(List),
+        param(Length),
+        param(Whites)
+    do  score(Pattern, Score),
+        countsegment(List, Pattern, N),
+        count_element(w, Pattern, PWhites),
+        (N > 0, PWhites = Whites ->
+            pretty_print_pattern(Pattern, Length),
+            evaluate(Pattern, V),
+            format('~t  --~t~6| ~d~t~6+| ~D~t~20+| ~D~n', [N, Score, V]);
+            true
+        )
+    ),
+    evaluate(List, Value),
+    format('Total Value: ~d~n', Value).
+
+check_evaluate_all(List) :-
+    length(List, Length),
+    score_list(Patterns),
+    (   foreach(Pattern, Patterns),
+        param(List),
+        param(Length)
+    do  score(Pattern, Score),
+        countsegment(List, Pattern, N),
+        (N > 0 ->
+            pretty_print_pattern(Pattern, Length),
+            evaluate(Pattern, V),
+            format('~t  --~t~6| ~d~t~6+| ~D~t~20+| ~D~n', [N, Score, V]);
+            true
+        )
+    ),
+    evaluate(List, Value),
+    format('Total Value: ~D~n', Value).
+
+e(List) :- check_evaluate(List).
+a(List) :- check_evaluate_all(List).

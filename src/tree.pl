@@ -38,11 +38,52 @@ print_node(Node) :-
     display_game(Board, Wc, Bc, P),
     print_val(Val), nl,
     format('Node Worth: ~D', Worth), nl,
+    matrix_length(Board, RowSize, _),
+    print_children(Children, RowSize).
+
+/**
+ * print_children/1
+ * print_children(+Children).
+ *   For debugging purposes only.
+ */
+print_children(Children) :- print_children(Children, 19).
+
+print_children(Children, RowSize) :-
     length(Children, C),
-    format('-- Children: ~d', C), nl,
-    (   foreach(Value-(Move-_), Children)
-    do  format('  Value ~D~n  Move: ~w~n', [Value, Move])
+    format('===== ===== Children: ~d ===== =====', C), nl,
+    (   foreach(Value-(Move-Child), Children),
+        param(RowSize)
+    do  (   format('  Value ~D~n  Move: ', Value),
+            mainline(Child, Moves),
+            print_moves([Move|Moves], RowSize), nl
+        )
     ), !.
+
+/**
+ * print_moves/1
+ * print_moves(+Node).
+ */
+print_moves(Moves) :- print_moves(Moves, 19).
+
+print_moves(Moves, RowSize) :-
+    (   foreach(Move, Moves),
+        param(RowSize)
+    do  (   rep_internal(RowSize, [RepRow,RepCol], Move),
+            format('~w~d  ', [RepCol,RepRow])
+        )
+    ).
+
+/**
+ * mainline/2
+ * mainline(+Node, -Moves).
+ */
+mainline(Node, []) :-
+    \+ node_bestchild(Node, _).
+
+mainline(Node, [Move|ChildMoves]) :-
+    node_bestchild(Node, BestChild),
+    BestChild = _-(Move-ChildNode),
+    mainline(ChildNode, ChildMoves).
 
 /**
  * Accessors and other quick utilities.
@@ -53,6 +94,7 @@ node_val(node(_, _, Val, _, _, _), Val).
 node_cap(node(_, _, _, Cap, _, _), Cap).
 node_children(node(_, _, _, _, Children, _), Children).
 node_worth(node(_, _, _, _, _, Worth), Worth).
+node_bestchild(node(_, _, _, _, [Child|_], _), Child).
 
 child_value(Worth-(_-_), Worth).
 child_move(_-(Move-_), Move).
@@ -99,12 +141,21 @@ order_children(b, Children, OrderedChildren) :-
     keysort(Children, OrderedChildren).
 
 /**
- * best_children/3
- * best_children(+Width, +Children, -BestChildren).
- *   Choose from Children only the best children (Width children only).
+ * organize_children/[4,5]
+ * organize_children(+P, +Unordered, -Ordered, -BestWorth).
+ * organize_children(+P, +Width, +Unordered, -Ordered, -BestWorth).
+ *   Order a list of children and deduce the highest worth.
  */
-best_children(Width, Children, BestChildren) :-
-    extra_prefix_length(Children, BestChildren, Width).
+organize_children(P, Unordered, Ordered, BestWorth) :-
+    order_children(P, Unordered, Ordered), !,
+    head(Ordered, BestChild),
+    child_value(BestChild, BestWorth), !.
+
+organize_children(P, Width, Unordered, BestOrdered, BestWorth) :-
+    order_children(P, Unordered, Ordered), !,
+    extra_prefix_length(Ordered, BestOrdered, Width),
+    head(BestOrdered, BestChild),
+    child_value(BestChild, BestWorth), !.
 
 /**
  * build_children/3
@@ -116,7 +167,7 @@ best_children(Width, Children, BestChildren) :-
 build_children(Node, NewNode, Options) :-
     opt_padding(Options, Padding),
     opt_width(Options, Width),
-    Node = node(Board, P, Val, Cap, [], _),
+    Node = node(Board, P, Val, Cap, _, _),
     NewNode = node(Board, P, Val, Cap, Children, NewWorth),
     empty_positions_within_boundary(Board, Padding, ListOfMoves), % get subboard
     (   foreach(Move, ListOfMoves),
@@ -126,10 +177,7 @@ build_children(Node, NewNode, Options) :-
             node_worth(Child, Worth)
         )
     ),
-    order_children(P, Unordered, Ordered),
-    best_children(Width, Ordered, Children), % filter children
-    head(Children, BestChild),
-    child_value(BestChild, NewWorth).
+    organize_children(P, Width, Unordered, Children, NewWorth).
 
 /**
  * recurse_children/3
@@ -140,19 +188,17 @@ build_children(Node, NewNode, Options) :-
  */
 recurse_children(Node, NewNode, Options) :-
     next_depth(Options, OptionsChildren),
-    Node = node(Board, P, Val, Cap, Children, _),
+    Node = node(Board, P, Val, Cap, OldChildren, _),
     NewNode = node(Board, P, Val, Cap, NewChildren, BestWorth),
     % Recurse
-    (   foreach(_-(Move-Child), Children),
-        fromto([], NewChilds, [NewWorth-(Move-NewChild)|NewChilds], NewUnordered),
+    (   foreach(_-(Move-Child), OldChildren),
+        fromto([], NewChilds, [NewWorth-(Move-NewChild)|NewChilds], Unordered),
         param(OptionsChildren)
     do  (   build_tree(Child, NewChild, OptionsChildren),
             node_worth(NewChild, NewWorth)
         )
     ),
-    order_children(P, NewUnordered, NewChildren),
-    head(NewChildren, BestChild),
-    child_value(BestChild, BestWorth).
+    organize_children(P, Unordered, NewChildren, BestWorth).
 
 /**
  * build_tree/3
@@ -160,7 +206,8 @@ recurse_children(Node, NewNode, Options) :-
  *   Builds an evaluation Tree starting at Node with given Options (calls itself).
  */
 build_tree(Node, Node, Options) :-
-    getopt_depth(Options, 0).
+    opt_depth(Options, Depth),
+    opt_totaldepth(Options, Depth).
 
 build_tree(Node, Tree, Options) :-
     build_children(Node, NodeWithChildren, Options),

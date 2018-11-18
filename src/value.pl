@@ -49,7 +49,7 @@
  */
 print_val(Val) :-
     Val = val(RowV,ColV,LeftV,RightV),
-    write('===== ===== ===== ===== val/4 ===== ===== ===== ====='), nl,
+    write('===== ===== ===== val/4 ===== ===== ====='), nl,
     write(' RowV:   '), write(RowV), nl,
     write(' ColV:   '), write(ColV), nl,
     write(' LeftV:  '), write(LeftV), nl,

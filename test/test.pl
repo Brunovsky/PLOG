@@ -8,7 +8,7 @@ print_test(Test) :-
     format('[FAIL] ~w~n', Test), !.
 
 test_all(Name, Tests) :-
-    format('==[TESTS]== ~s', Name),
+    format('=======[TESTS]======= ~s', Name),
     nl,
     foreach(print_test, Tests),
     nl.
@@ -20,5 +20,13 @@ test_all(Name, Tests) :-
 :- reconsult('score.pl').
 :- reconsult('tree.pl').
 :- reconsult('value.pl').
+:- reconsult('strategy.pl').
 
-test :- test_lists, test_matrix, test_board, test_score, test_tree, test_value.
+test :-
+    test_lists,
+    test_matrix,
+    test_board,
+    test_score,
+    test_tree,
+    test_value,
+    test_strategy.

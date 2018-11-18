@@ -1,3 +1,12 @@
+% score/2
+test_scorepattern :-
+    findall(Pattern, score(Pattern, _), ListPatterns),
+    score_list(ListPatterns),
+    (   foreach(Pattern, ListPatterns)
+    do  reverse(Pattern, Reversed),
+        score(Pattern, Value), score(Reversed, Value)
+    ).
+
 % evaluate(List, Value)
 test_evaluate :-
     random_list(11, [c,c,w], Wpure),
@@ -45,8 +54,6 @@ test_evaluate :-
     evaluate(BiasedB, BB1),
     evaluate(BiasedBReversed, BB2), BB2 is -BB1.
 
-
-
 %captures_score([Wc,Bc], Score)
 test_captures_score :-
     \+ captures_score([3, 3], 0),
@@ -56,6 +63,7 @@ test_captures_score :-
     
     
 test_score :- test_all(score, [
+    test_scorepattern,
     test_evaluate,
     test_captures_score
 ]).

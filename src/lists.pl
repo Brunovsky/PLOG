@@ -595,6 +595,42 @@ contains_any(List, Set) :- any_of(Set, contains(List)), !.
 contains_none(List, Set) :- none_of(Set, contains(List)), !.
 
 /**
+ * count_element/3
+ * count_element(+E, +List, -N).
+ *   Count the number of entries in List equal to E.
+ */
+count_element(_, [], 0) :- !.
+count_element(E, [E|T], N) :- count_element(E, T, M), N is M + 1, !.
+count_element(E, [_|T], N) :- count_element(E, T, N), !.
+
+/**
+* count/3
+* count(:P, +List, -N).
+*   Count the elements of List that pass P(H) into N.
+*/
+count(_, [], 0) :- !.
+count(P, [H|T], N) :- call(P, H), count(P, T, M), N is M + 1, !.
+count(P, [H|T], N) :- \+ call(P, H), count(P, T, N), !.
+
+/**
+* a_count/4
+* a_count(:P, +List, +A, -N).
+*   Count the elements of List that pass P(H, A) into N.
+*/
+a_count(_, [], _, 0) :- !.
+a_count(P, [H|T], A, N) :- call(P, H, A), count(P, T, A, M), N is M + 1, !.
+a_count(P, [H|T], A, N) :- \+ call(P, H, A), count(P, T, A, N), !.
+
+/**
+* l_count/4
+* l_count(:P, +List, +Args, -N).
+*   Count the elements of List that pass P(H, Args...) into N.
+*/
+l_count(_, [], _, 0) :- !.
+l_count(P, [H|T], Args, N) :- apply(P, [H|Args]), count(P, T, Args, M), N is M + 1, !.
+l_count(P, [H|T], Args, N) :- \+ apply(P, [H|Args]), count(P, T, Args, N), !.
+
+/**
  * foreach/2
  * foreach(:P, +List).
  *   Call P(H) for each element H of List, irrespective of success.
