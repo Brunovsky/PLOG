@@ -23,6 +23,7 @@
 % Board display
 :- compile('src/strings.pl').
 :- compile('src/print-board.pl').
+:- compile('src/help.pl').
 
 % Player Bot
 :- compile('src/score.pl').
