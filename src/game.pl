@@ -31,9 +31,10 @@ is_player(b).
  *   > The current Board is represented by a SizexSize matrix, consisting of
  *     characters c for empty slots, w for White's pieces and b for Black's pieces.
  *   > Wc and Bc are White's and Black's captures, respectively.
- *   > next is w or b, indicating whose turn it is to play.
+ *   > P is w or b, indicating whose turn it is to play.
  *   > Turn is the current game turn. When the board is empty, it is White to play
  *   and Turn is 0.
+ *   > Options are the game options.
  */
 
 /**
