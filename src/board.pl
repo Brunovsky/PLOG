@@ -311,7 +311,7 @@ valid_move(Board, 2, Move) :-
 
 valid_move(Board, Turn, Move) :-
     Turn \= 0, Turn \= 2, !,
-    valid_moves(Board, _, ListOfMoves),
+    valid_moves(Board, Turn, ListOfMoves),
     contains(ListOfMoves, Move).
 
 /**

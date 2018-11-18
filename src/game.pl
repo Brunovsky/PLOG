@@ -36,33 +36,35 @@ is_player(b).
  * start_game/3
  * start_game(player, player, +Options)
  * start_game(player, bot, +Options)
+ * start_game(bot, player, +Options)
+ * start_game(bot, bot, +Options)
  *   Starts a pente game
  */
 start_game(player, player, Options) :-
 	getopt(Options, board_size, Size),
 	make_board(Size, Board),
-	gloop_player_player(game(Board, w, [0,0], 0), Options).
+	gloop_player_player(game(Board, w, [0,0], 0, Options)).
 
 start_game(player, bot, Options) :-
 	getopt(Options, board_size, Size),
 	make_board(Size, Board),
-	gloop_player_bot(game(Board, w, [0,0], 0), Options).
+	gloop_player_bot(game(Board, w, [0,0], 0, Options)).
 
 start_game(bot, player, Options) :-
     getopt(Options, board_size, Size),
     make_board(Size, Board),
-    gloop_bot_player(game(Board, w, [0,0], 0), Options).
+    gloop_bot_player(game(Board, w, [0,0], 0, Options)).
 
 start_game(bot, bot, Options) :-
 	getopt(Options, board_size, Size),
 	make_board(Size, Board),
-	gloop_bot_bot(game(Board, w, [0,0], 0), Options).
+	gloop_bot_bot(game(Board, w, [0,0], 0, Options)).
 
 cls :- write('\e[2J').
 
 /**
  * gloop_player_player/2, gloop_player_bot/2, gloop_bot_player/2, gloop_bot_bot/2
- * game_loop_**(+Game, +Options).
+ * gloop_*_*(+Game, +Options).
  *   Next iteration of the game.
  */
 % PLAYER vs PLAYER
@@ -124,7 +126,7 @@ gloop_bot_bot(Game) :-
 
 game_loop_aux(Loop, Game) :-
     is_player(P),
-	game_over(Game, P), !,
+	game_over(Game, P),
 	cls,
     display_game(Game),
 	victory(P), !;
@@ -140,13 +142,13 @@ victory(b):- write('Black player won!'), nl.
 
 /**
  * game_over/2
- * game_over(+Game, ?P).
+ * game_over(+Game, +P).
  *   Verifies if the game is over with winner P (w or b).
  */
 game_over(Game, w) :-
-    Game = game(Board, w, [Wc,_], _, _),
+    Game = game(Board, _, [Wc,_], _, _),
     (five_board(Board, w); Wc >= 10).
 
 game_over(Game, b) :-
-    Game = game(Board, b, [_,Bc], _, _),
+    Game = game(Board, _, [_,Bc], _, _),
     (five_board(Board, b); Bc >= 10).
