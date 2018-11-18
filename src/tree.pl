@@ -117,7 +117,7 @@ build_child_node(Move, ParentNode, ChildNode) :-
 /**
  * order_children/3
  * order_children(+P, +Children, -OrderedChildren).
- *   Order a list [V-[Ri,Ci]-node/6,...] according to key V.
+ *   Order a list [V-([Ri,Ci]-node/6),...] according to key V.
  */
 order_children(w, Children, OrderedChildren) :-
     keysort(Children, BlackOrdered),
@@ -144,30 +144,47 @@ organize_children(P, Width, Unordered, BestOrdered, BestWorth) :-
     child_value(BestChild, BestWorth), !.
 
 /**
- * choose_if_best/4
- * choose_if_best(+P, +Child, +RestChildren, -ChildOrChildren).
+ * choose_winner_if/4
+ * choose_winner_if(+P, +Child, +Children, -ChildOrChildren).
  */
-choose_if_best(P, _, [Worth-(_-_)], [Worth-(_-_)]) :- winning_value(P, Worth), !.
+choose_winner_if(P, _, [Worth-(Move-Child)|_], [Worth-(Move-Child)]) :-
+    winning_value(P, Worth), !.
 
-choose_if_best(_, Child, Children, [Child|Children]).
+choose_winner_if(P, Worth-(Move-Child), _, [Worth-(Move-Child)]) :-
+    winning_value(P, Worth), !.
+
+choose_winner_if(_, Child, Children, [Child|Children]).
 
 /**
- * build_children_loop_moves/3
- * build_children_loop_moves(Node, MoveList, Children).
+ * choose_best_entry/4
+ * choose_best_entry(+P, +Child1, +Child2, -Best).
+ */
+choose_best_entry(P, Child1, Child2, Child1) :-
+    Child1 = Worth1-(_-_),
+    Child2 = Worth2-(_-_),
+    best_value(P, Worth1, Worth2, Worth1), !.
+
+choose_best_entry(P, Child1, Child2, Child2) :-
+    Child1 = Worth1-(_-_),
+    Child2 = Worth2-(_-_),
+    best_value(P, Worth1, Worth2, Worth2).
+
+/**
+ * build_children_loop/3
+ * build_children_loop(Node, MoveList, Children).
  */
 % no more children
-build_children_loop_moves(_, [], []).
+build_children_loop(_, [], []).
 
-% not winning move
-build_children_loop_moves(Node, [Move|RestMoves], Best) :-
-    build_child_node(Move, Node, ChildNode),
-    node_worth(ChildNode, Worth),
+build_children_loop(Node, [Move|RestMoves], ResultChildren) :-
     node_player(Node, P),
-    Child = Worth-(Move-ChildNode),
+    build_child_node(Move, Node, Child), !,
+    node_worth(Child, Worth),
+    ChildEntry = Worth-(Move-Child),
     (   winning_value(P, Worth) ->
-        Best = [Child];
-        build_children_loop_moves(Node, RestMoves, RestChildren),
-        choose_if_best(P, Child, RestChildren, Best)
+        ResultChildren = [ChildEntry];
+        build_children_loop(Node, RestMoves, RestChildren),
+        choose_winner_if(P, ChildEntry, RestChildren, ResultChildren)
     ), !.
 
 /**
@@ -183,10 +200,46 @@ build_children(Node, NewNode, Options) :-
     opt_width(Options, Width),
     opt_tournament(Options, Tournament),
     Node = node(Board, P, Val, Cap, _, _),
-    NewNode = node(Board, P, Val, Cap, Children, NewWorth),
+    NewNode = node(Board, P, Val, Cap, Children, NewWorth), !,
     valid_moves_within_boundary(Board, Padding, Turn, Tournament, ListOfMoves), !,
-    build_children_loop_moves(Node, ListOfMoves, Unordered), !,
+    build_children_loop(Node, ListOfMoves, Unordered), !,
     organize_children(P, Width, Unordered, Children, NewWorth), !.
+
+/**
+ * recurse_children_loop/3
+ * recurse_children_loop(+Node, MoveList, Children).
+ */
+recurse_children_loop(Node, [ChildEntry], ResultChildren, Options, NewChildEntry) :-
+    node_player(Node, P),
+    ChildEntry = _-(Move-Child), !,
+    build_tree(Child, NewChild, Options), !,
+    node_worth(NewChild, NewWorth),
+    NewChildEntry = NewWorth-(Move-NewChild),
+    (   % include this entry if it isn't losing
+        losing_value(P, NewWorth) ->
+        ResultChildren = [];
+        ResultChildren = [NewChildEntry]
+    ), !.
+
+recurse_children_loop(Node, [ChildEntry|OldChildren], ResultChildren, Options, Best) :-
+    node_player(Node, P),
+    ChildEntry = _-(Move-Child), !,
+    build_tree(Child, NewChild, Options), !,
+    node_worth(NewChild, NewWorth),
+    NewChildEntry = NewWorth-(Move-NewChild),
+    (   % include only this child
+        winning_value(P, NewWorth) ->
+        ResultChildren = [NewChildEntry],
+        Best = NewChildEntry;
+        % discard this child
+        losing_value(P, NewWorth) ->
+        recurse_children_loop(Node, OldChildren, ResultChildren, Options, OldBest),
+        choose_best_entry(P, OldBest, NewChildEntry, Best);
+        % recurse naturally
+        recurse_children_loop(Node, OldChildren, RestChildren, Options, OldBest),
+        choose_winner_if(P, NewChildEntry, RestChildren, ResultChildren),
+        choose_best_entry(P, OldBest, NewChildEntry, Best)
+    ), !.
 
 /**
  * recurse_children/3
@@ -196,6 +249,9 @@ build_children(Node, NewNode, Options) :-
  *   See build_tree/3 for Options.
  */
 recurse_children(Node, Node, _) :-
+    Node = node(_, _, _, _, [], _), !.
+
+recurse_children(Node, Node, _) :-
     Node = node(_, P, _, _, [Worth-(_-_)], Worth),
     winning_value(P, Worth), !.
 
@@ -203,14 +259,12 @@ recurse_children(Node, NewNode, Options) :-
     next_depth(Options, OptionsChildren),
     Node = node(Board, P, Val, Cap, OldChildren, _),
     NewNode = node(Board, P, Val, Cap, NewChildren, BestWorth), !,
-    (   foreach(_-(Move-Child), OldChildren),
-        fromto([], NewChilds, [NewWorth-(Move-NewChild)|NewChilds], Unordered),
-        param(OptionsChildren)
-    do  (   build_tree(Child, NewChild, OptionsChildren),
-            node_worth(NewChild, NewWorth)
-        )
-    ),
-    organize_children(P, Unordered, NewChildren, BestWorth).
+    recurse_children_loop(Node, OldChildren, Unordered, OptionsChildren, Best), !,
+    (   Unordered = [] ->
+        NewChildren = [Best],
+        Best = BestWorth-(_-_);
+        organize_children(P, Unordered, NewChildren, BestWorth)
+    ), !.
 
 /**
  * build_tree/3

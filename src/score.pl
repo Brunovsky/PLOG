@@ -411,6 +411,24 @@ losing_value(w, Value) :- winning_value(b, Value).
 losing_value(b, Value) :- winning_value(w, Value).
 
 /**
+ * best_value/4
+ * best_value(+P, +Val1, +Val2, -Best).
+ */
+best_value(w, Val1, Val2, Val1) :- Val1 >= Val2, !.
+best_value(w, Val1, Val2, Val2) :- Val1 < Val2.
+best_value(b, Val1, Val2, Val1) :- Val1 =< Val2, !.
+best_value(b, Val1, Val2, Val2) :- Val1 > Val2.
+
+/**
+ * worst_value/4
+ * worst_value(+P, +Val1, +Val2, -Best).
+ */
+worst_value(w, Val1, Val2, Val1) :- Val1 < Val2, !.
+worst_value(w, Val1, Val2, Val2) :- Val1 >= Val2.
+worst_value(b, Val1, Val2, Val1) :- Val1 > Val2, !.
+worst_value(b, Val1, Val2, Val2) :- Val1 =< Val2.
+
+/**
  * dynamic evaluate/2
  * evaluate(+List, -Value).
  *   Evaluate a list.

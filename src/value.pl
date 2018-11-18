@@ -68,7 +68,7 @@ sumval(Val, TotalValue) :-
     sumlist(ColV, ColTotal),
     sumlist(LeftV, LeftTotal),
     sumlist(RightV, RightTotal), !,
-    TotalValue is RowTotal + ColTotal + LeftTotal + RightTotal, !.
+    TotalValue is integer(RowTotal + ColTotal + LeftTotal + RightTotal), !.
 
 /**
  * totalval/3
@@ -78,7 +78,7 @@ sumval(Val, TotalValue) :-
 totalval(Val, Cap, TotalValue) :-
     sumval(Val, ValValue),
     captures_score(Cap, CapValue),
-    TotalValue is ValValue + CapValue, !.
+    TotalValue is integer(ValValue + CapValue), !.
 
 /**
  * evaluate_board/2
