@@ -111,27 +111,31 @@ test_valid_move :-
         [c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c]
     ],
 
-    \+ valid_move(M1, 0, [7,8]),
-    \+ valid_move(M1, 0, [17,6]),
-    \+ valid_move(M1, 0, [12,12]),
-    valid_move(M1, 0, [10,10]),
+    \+ valid_move(M1, 0, true,[7,8]),
+    \+ valid_move(M1, 0, false, [17,6]),
+    \+ valid_move(M1, 0, true, [12,12]),
+    valid_move(M1, 0, true, [10,10]),
 
-    valid_move(M1, 2, [7,7]),
-    valid_move(M1, 2, [13,13]),
-    valid_move(M1, 2, [7,13]),
-    valid_move(M1, 2, [13,7]),
-    \+ valid_move(M1, 2, [12,11]),
-    \+ valid_move(M1, 2, [8,10]),
-    valid_move(M1, 2, [14,7]),
-    valid_move(M1, 2, [7,6]),
-    valid_move(M1, 2, [16,10]),
-    valid_move(M1, 2, [10,14]),
+    valid_move(M1, 2, true, [7,7]),
+    valid_move(M1, 2, true, [13,13]),
+    valid_move(M1, 2, true, [7,13]),
+    valid_move(M1, 2, true, [13,7]),
 
-    valid_move(M1, 7, [1,6]),
-    valid_move(M1, 16, [7,2]),
-    valid_move(M1, 19, [12,8]),
-    valid_move(M1, 1, [13,13]),
-    valid_move(M1, 9, [5,16]).
+    \+ valid_move(M1, 2, true, [12,11]),
+    \+ valid_move(M1, 2, true, [8,10]),
+    valid_move(M1, 2, false, [12,11]),
+    valid_move(M1, 2, false, [8,10]),
+
+    valid_move(M1, 2, true, [14,7]),
+    valid_move(M1, 2, true, [7,6]),
+    valid_move(M1, 2, true, [16,10]),
+    valid_move(M1, 2, true, [10,14]),
+
+    valid_move(M1, 7, true, [1,6]),
+    valid_move(M1, 16, true, [7,2]),
+    valid_move(M1, 19, true, [12,8]),
+    valid_move(M1, 1, true,[13,13]),
+    valid_move(M1, 9, true, [5,16]).
     
 
 test_board :- test_all(board, [
