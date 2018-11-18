@@ -69,21 +69,23 @@ cls :- write('\e[2J').
  */
 % PLAYER vs PLAYER
 gloop_player_player(Game) :-
-	Game = game(Board, _, _, Turn, _), cls,
+	Game = game(Board, _, _, Turn, Options), cls,
     display_game(Game),
     board_size(Board, Size), !,
     get_move(Size, Move),
-	valid_move(Board, Turn, Move), !,
+    opt_tournament(Options, Tournament),
+	valid_move(Board, Turn, Tournament, Move), !,
 	move(Move, Game, NewGame), !,
 	game_loop_aux(gloop_player_player, NewGame).
 
 % PLAYER vs BOT,  PLAYER's turn
 gloop_player_bot(Game) :-
-    Game = game(Board, w, _, Turn, _), cls,
+    Game = game(Board, w, _, Turn, Options), cls,
     display_game(Game),
     board_size(Board, Size), !,
     get_move(Size, Move),
-    valid_move(Board, Turn, Move), !,
+    opt_tournament(Options, Tournament),
+    valid_move(Board, Turn, Tournament, Move), !,
     move(Move, Game, NewGame), !,
     game_loop_aux(gloop_player_bot, NewGame).
 
@@ -107,11 +109,12 @@ gloop_bot_player(Game) :-
 
 % BOT vs PLAYER,  PLAYER's turn
 gloop_bot_player(Game) :-
-    Game = game(Board, b, _, Turn, _), cls,
+    Game = game(Board, b, _, Turn, Options), cls,
     display_game(Game),
     board_size(Board, Size), !,
     get_move(Size, Move),
-    valid_move(Board, Turn, Move), !,
+    opt_tournament(Options, Tournament),
+    valid_move(Board, Turn, Tournament, Move), !,
     move(Move, Game, NewGame), !,
     game_loop_aux(gloop_bot_player, NewGame).
 

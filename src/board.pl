@@ -299,17 +299,17 @@ empty_positions_within_boundary(Board, Padding, ListOfMoves) :-
     empty_positions(Board, Range, ListOfMoves), !.
 
 /**
- * valid_move/3
- * valid_move(+Board, +Turn, +Move).
+ * valid_move/4
+ * valid_move(+Board, +Turn, +Tournament, +Move).
  *    Check if a given move Move is valid in the given Turn
  */
-valid_move(Board, 0, Center) :- board_center(Board, Center).
+valid_move(Board, 0, _, Center) :- board_center(Board, Center).
 
-valid_move(Board, 2, Move) :-
-    valid_moves(Board, 2, ListOfMoves), !,
+valid_move(Board, 2, Tournament, Move) :-
+    valid_moves(Board, 2, Tournament, ListOfMoves), !,
     contains(ListOfMoves, Move), !.
 
-valid_move(Board, Turn, Move) :-
+valid_move(Board, Turn, _, Move) :-
     Turn \= 0, Turn \= 2, !,
     valid_moves(Board, Turn, ListOfMoves),
     contains(ListOfMoves, Move).
@@ -334,6 +334,26 @@ valid_moves(Board, Turn, ListOfMoves) :-
 
 /**
  * valid_moves/4
+ * valid_moves(+Board, +Turn, +Tournament, -ListOfMoves).
+ *   Gets a list the valid moves for turn 2 taking in consideration Tournament.
+ */
+valid_moves(Board, 0, _, [Center]) :- board_center(Board, Center).
+
+valid_moves(Board, 2, true, ListOfMoves) :- 
+    board_center_range(Board, CenterRange),
+    empty_positions(Board, CenterRange, ExcludedMoves),
+    empty_positions(Board, AllMoves),
+    exclude(contains(ExcludedMoves), AllMoves, ListOfMoves), !.
+
+valid_moves(Board, 2, false, ListOfMoves) :- 
+    empty_positions(Board, ListOfMoves).
+
+valid_moves(Board, Turn, _, ListOfMoves) :-
+    Turn \= 0, Turn \= 2, !,
+    empty_positions(Board, ListOfMoves).
+
+/**
+ * valid_moves/4
  * valid_moves(+Board, +Range, +Turn, -ListOfMoves).
  *   Gets a list with all the valid moves within a given range
  *   (does not depend on the player).
@@ -350,9 +370,32 @@ valid_moves(Board, Range, _, ListOfMoves) :-
     empty_positions(Board, Range, ListOfMoves).
 
 /**
- * valid_moves_within_boundary/[3,4]
+ * valid_moves/5
+ * valid_moves(+Board, +Range, +Turn, +Tournament, -ListOfMoves).
+ *   Gets a list with all the valid moves within a given range
+ *  having in consideration the Tournament rule.
+ *   (does not depend on the player).
+ */
+valid_moves(Board, _, 0, _, [Center]) :- board_center(Board, Center).
+
+valid_moves(Board, Range, 2, true, ListOfMoves) :-
+    board_center_range(Board, CenterRange),
+    empty_positions(Board, CenterRange, ExcludedMoves),
+    empty_positions(Board, Range, AllMoves),
+    exclude(contains(ExcludedMoves), AllMoves, ListOfMoves), !.
+
+valid_moves(Board, Range, 2, false, ListOfMoves) :-
+    empty_positions(Board, Range, ListOfMoves).
+
+valid_moves(Board, Range, _, _, ListOfMoves) :-
+    empty_positions(Board, Range, ListOfMoves).
+
+
+/**
+ * valid_moves_within_boundary/[3-5]
  * valid_moves_within_boundary(+Board, +Turn, -ListOfMoves).
  * valid_moves_within_boundary(+Board, +Padding, +Turn, -ListOfMoves).
+ * valid_moves_within_boundary(+Board, +Padding, +Turn, +Tournament, -ListOfMoves)
  */
 valid_moves_within_boundary(Board, Turn, ListOfMoves) :-
     board_boundary(Board, 0, Range),
@@ -361,6 +404,10 @@ valid_moves_within_boundary(Board, Turn, ListOfMoves) :-
 valid_moves_within_boundary(Board, Padding, Turn, ListOfMoves) :-
     board_boundary(Board, Padding, Range),
     valid_moves(Board, Range, Turn, ListOfMoves).
+
+valid_moves_within_boundary(Board, Padding, Turn, Tournament, ListOfMoves) :-
+    board_boundary(Board, Padding, Range),
+    valid_moves(Board, Range, Turn, Tournament, ListOfMoves).
 
 /**
  * board_boundary/[2,3]

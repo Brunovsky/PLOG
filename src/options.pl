@@ -151,12 +151,14 @@ tree_parseopt(Options, Turn, NewOptions) :-
     opt_totaldepth(Options, TotalDepth),
     opt_padding(Options, Padding),
     opt_widthlist(Options, WidthList),
+    opt_tournament(Options, Tournament),
     NewOptions = [
         turn(Turn),
         current(0),
         depth(TotalDepth),
         padding(Padding),
-        width(WidthList)
+        width(WidthList),
+        tournament(Tournament)
     ], !.
 
 /**

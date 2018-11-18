@@ -168,9 +168,10 @@ build_children(Node, NewNode, Options) :-
     opt_turn(Options, Turn),
     opt_padding(Options, Padding),
     opt_width(Options, Width),
+    opt_tournament(Options, Tournament),
     Node = node(Board, P, Val, Cap, _, _),
     NewNode = node(Board, P, Val, Cap, Children, NewWorth),
-    valid_moves_within_boundary(Board, Padding, Turn, ListOfMoves),
+    valid_moves_within_boundary(Board, Padding, Turn, Tournament, ListOfMoves),
     (   foreach(Move, ListOfMoves),
         fromto([], Childs, [Worth-(Move-Child)|Childs], Unordered),
         param(Node)
