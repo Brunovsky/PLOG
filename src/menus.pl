@@ -3,7 +3,8 @@
 	Displays the menus
 */
 
-header :- nl,
+header :-
+	write('\e[2J'),
 	write('======================================'), nl,
 	write('=                PENTE               ='), nl,
 	write('======================================'), nl, nl.
@@ -25,7 +26,7 @@ help_menu :-
 	write('        Board size (SxS), must be even!'),nl,nl,
 	write('    - difficulty(Diff), Diff = 1,2,3,4,5'),nl,
 	write('        Sets the bot difficulty (with 5 being the most difficult).'),nl,nl,
-	write('    - depth(D), D = 1,2,3,...'),nl,
+	write('    - depth(D), D = 0,1,2,...'),nl,
 	write('        Bot s analyzation tree maximum depth.'),nl,nl,
 	write('    - adding(P), P = 0,1,2,...'),nl,
 	write('        Padding of the board on new analysis recursion.'),nl,nl,
@@ -58,9 +59,9 @@ get_input(Input) :-
 	write('> Option: '), nl,
 	read(Input).
 
-handle_input(1, Options) :- write('P1 vs P2'), nl, write(Options).
-handle_input(2, Options) :- write('P1 vs BOT'), nl, write(Options).
-handle_input(3, Options) :- write('BOT1 vs BOT2'), nl, write(Options).
+handle_input(1, Options) :- !, start_game(player, player, Options).
+handle_input(2, Options) :- !, start_game(player, bot, Options).
+handle_input(3, Options) :- !, start_game(bot, bot, Options).
 handle_input(0, _) :- write('Exit').
 handle_input(_, Options) :-
 	write('Invalid Input'), nl,

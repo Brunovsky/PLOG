@@ -44,34 +44,84 @@ game(_, _, _, _, _).
 
 /**
  * start_game/3
- * start_game(+S, player, player)
- *   Starts a player vs player pente game with a board with size S
+ * start_game(player, player, +Options)
+ * start_game(player, bot, +Options)
+ *   Starts a pente game
  */
-start_game(S, player, player) :-
-	  make_board(S, B),
-		game_loop(game(B, 0, 0, w, 0), S).
+start_game(player, player, Options) :-
+	getopt(Options, board_size, Size),
+	make_board(Size, B),
+	game_loop_1(game(B, 0, 0, w, 0), Options).
+
+start_game(player, bot, Options) :-
+	getopt(Options, board_size, Size),
+	make_board(Size, B),
+	game_loop_2(game(B, 0, 0, w, 0), Options).
+
+start_game(bot, bot, Options) :-
+	getopt(Options, board_size, Size),
+	make_board(Size, B),
+	game_loop_3(game(B, 0, 0, w, 0), Options).
 
 /**
  * game_loop/2
- * game_loop(+game(B, Pw, Pb, Next))
+ * game_loop(+game(B, Pw, Pb, Next), +Options)
  *   Next iteration of the game 
  */
-game_loop(game(B, Wc, Bc, Next, Turn), Size) :-
+game_loop_1(game(B, Wc, Bc, Next, Turn), Options) :-
+	write('\e[2J'),
 	display_game(B, Wc, Bc, Next),
 	read_position(RepRow, RepCol),
+	getopt(Options, board_size, Size),
 	rep_internal(Size, [RepRow, RepCol], [R, C]),
 	valid_move(B, Turn, [R, C]),
-	move([R, C], game(B, Wc, Bc, Next, Turn), game(NewBoard, Nwc, Nbc, Nnext, NTurn)),
-	game_loop_aux(game(NewBoard, Nwc, Nbc, Nnext, NTurn), Size).
+	move([R,C], game(B, Wc, Bc, Next, Turn), NewGame),
+	game_loop_1_aux(NewGame, Options).
+
+game_loop_1_aux(game(B, Wc, Bc, Next, Turn), Options) :-
+	game_loop_aux(game(B, Wc, Bc, _, _), _);
+	game_loop_1(game(B, Wc, Bc, Next, Turn), Options).
+
+game_loop_2(game(B, Wc, Bc, w, Turn), Options) :-
+	write('\e[2J'),
+	display_game(B, Wc, Bc, w),
+	read_position(RepRow, RepCol),
+	getopt(Options, board_size, Size),
+	rep_internal(Size, [RepRow, RepCol], [R, C]),
+	valid_move(B, Turn, [R, C]),
+	move([R,C], game(B, Wc, Bc, w, Turn), NewGame),
+	game_loop_2_aux(NewGame, Options).
+
+game_loop_2(game(B, Wc, Bc, b, Turn), Options) :-
+	analyze_tree(B, b, [Wc,Bc], Tree, Options),
+	choose_move(Tree, [R,C]),
+	move([R,C], game(B, Wc, Bc, b, Turn), NewGame),
+	game_loop_2_aux(NewGame, Options).
+
+game_loop_2_aux(game(B, Wc, Bc, Next, Turn), Options) :-
+	game_loop_aux(game(B, Wc, Bc, _, _), _);
+	game_loop_2(game(B, Wc, Bc, Next, Turn), Options).
+
+game_loop_3(game(B, Wc, Bc, Next, Turn), Options) :-
+	write('\e[2J'),
+	display_game(B, Wc, Bc, Next),
+	analyze_tree(B, Next, [Wc,Bc], Tree, [turn(Turn)|Options]),
+	choose_move(Tree, [R,C]),
+	write(' '), get_code(_),
+	move([R,C], game(B, Wc, Bc, Next, Turn), NewGame),
+	game_loop_3_aux(NewGame, Options).
+
+game_loop_3_aux(game(B, Wc, Bc, Next, Turn), Options) :-
+	game_loop_aux(game(B, Wc, Bc, _, _), _);
+	game_loop_3(game(B, Wc, Bc, Next, Turn), Options).
 
 game_loop_aux(game(B, Wc, Bc, _, _), _) :-
 	is_player(P),
 	game_over(game(B, Wc, Bc, _, _), P), !,
+	write('\e[2J'),
 	display_game(B, Wc, Bc, P),
 	victory(P).
 
-game_loop_aux(game(B, Wc, Bc, Next, Turn), Size) :-
-	game_loop(game(B, Wc, Bc, Next, Turn), Size).
 
 /**
  * victory/1
@@ -80,8 +130,6 @@ game_loop_aux(game(B, Wc, Bc, Next, Turn), Size) :-
  */
 victory(w):- write('White player won!'), nl.
 victory(b):- write('Black player won!'), nl.
-
-s_g(S):- start_game(S, player, player).
 
 /**
  * game_over/2

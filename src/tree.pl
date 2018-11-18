@@ -225,3 +225,13 @@ analyze_tree(Board, P, Cap, Tree, UserOptions) :-
     tree_parseopt(UserOptions, Options),
     build_start_node(Board, P, Cap, Node),
     build_tree(Node, Tree, Options).
+
+/**
+ * choose_move/2
+ * choose_move(+Tree, -[R,C]).
+ *   Choose the best move [R,C] to a given Tree.
+ */
+choose_move(Tree, [R,C]) :-
+    node_bestchild(Tree, Child),
+    Child = _-([R,C]-_).
+    

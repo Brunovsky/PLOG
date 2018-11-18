@@ -6,6 +6,8 @@
 :- use_module(library(lists)).
 % Random
 :- use_module(library(random)).
+% Sleep
+:- use_module(library(system)).
 
 % ***** User
 

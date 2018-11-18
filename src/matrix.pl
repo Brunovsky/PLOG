@@ -540,14 +540,14 @@ matrix_boundary(Matrix, Elem, [RowRange,ColRange]) :-
 
 matrix_boundary(Matrix, Elem, Padding, [RowRange,ColRange]) :-
     integer(Padding), !,
-    matrix_boundary(Matrix, Elem, [Padding,Padding], [RowRange,ColRange]).
+    matrix_boundary(Matrix, Elem, [Padding,Padding], [RowRange,ColRange]), !.
 
 matrix_boundary(Matrix, Elem, [PadRows,PadCols], [RowRange,ColRange]) :-
     matrix_proper_length(Matrix, RowSize, ColSize),
     transpose(Matrix, Transposed),
     fill_n(ColSize, Elem, RowElem),
     fill_n(RowSize, Elem, ColElem),
-    boundary(Matrix, RowElem, PadRows, RowRange),
+    boundary(Matrix, RowElem, PadRows, RowRange), !,
     boundary(Transposed, ColElem, PadCols, ColRange).
 
 /**

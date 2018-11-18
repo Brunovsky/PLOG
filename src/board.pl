@@ -246,26 +246,58 @@ empty_positions(Board, Range, FilteredListOfMoves) :-
  */
 valid_move(Board, 0, [R,C]) :-
     !, R is C,
-    board_size(Board, S),
-    R is integer((S+1)/2).
+    valid_moves(Board, _, 0, ListOfMoves), !,
+    contains(ListOfMoves, [R,C]).
 
 valid_move(Board, 2, [R,C]) :-
-    !, board_size(Board, S),
-    Center is integer((S+1)/2),
-    Min is Center-3, Max is Center+3,
-    empty_position(Board, ListOfMoves),
-    empty_positions(Board, [[Min, Max], [Min, Max]], InvalidMoves),
-    exclude(contains(ListOfMoves), InvalidMoves, FilteredListOfMoves), !,
-    contains(FilteredListOfMoves, [R,C]).
+    !, valid_moves(Board, _, 2, ListOfMoves), !,
+    contains(ListOfMoves, [R,C]).
 
-valid_move(_, _, _).
+valid_move(Board, _, Pos) :-
+    valid_moves(Board, _, _, ListOfMoves),
+    contains(ListOfMoves, Pos).
 
 /**
- * valid_moves/3
+ * valid_moves/[3,4]
  * valid_moves(+Board, +Player, ?ListOfMoves).
+ * valid_moves(+Board, +Player, +Turn, ?ListOfMoves).
  *   Gets a list with all the valid moves (does not depend on the player).
  */
 valid_moves(Board, _, ListOfMoves) :- empty_positions(Board, ListOfMoves).
+valid_moves(Board, _, 0, ListOfMoves) :-
+    board_size(Board, S),
+    C is integer((S+1)/2),
+    ListOfMoves = [[C,C]].
+
+valid_moves(Board, _, 2, ListOfMoves) :- 
+    board_size(Board, S),
+    Center is integer((S+1)/2),
+    Min is Center-2, Max is Center+2,
+    valid_moves_within_boundary(Board, [[Min,Max],[Min,Max]], ListOfMoves).
+
+valid_moves(Board, _, _, ListOfMoves) :- empty_positions(Board, ListOfMoves).
+
+/**
+ * valid_moves_within_boundary/[3-5]
+ * valid_moves_within_boundary(+Board, +Range, -ListOfMoves).
+ * valid_moves_within_boundary(+Board, +Range, +Turn, -ListOfMoves).
+ * valid_moves_within_boundary(+Board, +Range, +Turn, +Padding, -ListOfMoves).
+ *   Gets a list with all the valid moves within a boundary.  
+ */
+valid_moves_within_boundary(Board, Range, ListOfMoves) :-
+    empty_positions(Board, L),
+    empty_positions(Board, Range, InvalidMoves),
+    exclude(contains(InvalidMoves), L, ListOfMoves).
+
+valid_moves_within_boundary(Board, Range, Turn, ListOfMoves) :-
+    valid_moves(Board, _, Turn, L),
+    empty_positions(Board, Range, InvalidMoves),
+    exclude(contains(InvalidMoves), L, ListOfMoves).
+
+valid_moves_within_boundary(Board, Range, Turn, Padding, ListOfMoves) :-
+    valid_moves(Board, _, Turn, L),
+    empty_positions(Board, Range, InvalidMoves),
+    exclude(contains(InvalidMoves), L, ListOfMoves).
 
 /**
  * move/3
