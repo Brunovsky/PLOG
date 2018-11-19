@@ -12,7 +12,7 @@
 	\vspace{-2\baselineskip}
 	\includegraphics[scale=0.15]{feuplogo.jpg}\\
 	{\Huge Pente}\\
-	{\Large Game Overview, History, Rules and Initial Implementation}\\
+	{\Large Game Overview, History, Rules and Implementation}\\
 	{\normalsize PLOG 2018}
 }
 
@@ -25,6 +25,13 @@
 \begin{document}
 \maketitle
 \thispagestyle{empty}
+
+\section{Introduction}
+\label{sec:introduction}
+
+This project's objective is for us to implement a board game (for us is Pente) using Prolog, with 3 different modes: Player vs Player, Player vs Bot and Bot vs Bot, with the Bot having 2 different difficulties.
+  It is needed for us to implement all the game's rules and use the best suiting compounds to represent the game, with the board, pieces, player's turn, etc...
+This will all be discussed below.
 
 \section{Overview and History}
 \label{sec:overview}
@@ -96,13 +103,11 @@ Among variations we find: suicides allowed, called \textit{poofs} (\textit{Poof-
 \section{Implementation: Internal Representation}
 \label{sec:internal}
 
-Representing the game's board is fairly simple. Every position in the \boardsize{19} board is in one of three states: white piece, black piece, or empty. We'll represent the board using a \boardsize{19} matrix (list of lists), whose elements are \textbf{w}, \textbf{b} or \textbf{c}, for each state respectively. This matrix will be called $Board$.
+Representing the game's board is fairly simple. Every position in the SxS board is in one of three states: white piece, black piece, or empty. We'll represent the board using a SxS matrix (list of lists), whose elements are \textbf{w}, \textbf{b} or \textbf{c}, for each state respectively. This matrix will be called $Board$.
 
 Now, each player has captured a certain number of pieces (an integer) and only plays pieces of a certain color (white or black). We'll represent the captures as a pair $[Wc,Bc]$, with no similar abstraction for players.
 
-The overall game state will be kept by $\textup{game}(Board, White, Black, next)$, where $White$ and $Black$ are players and $next$ is \textbf{w} or \textbf{b} according to who will play next.
-
-For examples see \autoref{fig:earlygame}, \autoref{fig:midgame} and \autoref{fig:lategame} below.
+The overall game state will be kept by $\textup{game}(Board, P, [Wc,Bc], Turn, Options)$, where P is \textbf{w} or \textbf{b} according to who will play next, Turn is an integer representing the current game turn number, starting at 0. Lastly, Options is a list with the game options (this will be discussed next).
 
 \section{Implementation: Board Display}
 \label{sec:boarddisplay}
