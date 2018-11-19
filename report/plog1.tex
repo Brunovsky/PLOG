@@ -12,7 +12,7 @@
 	\vspace{-2\baselineskip}
 	\includegraphics[scale=0.15]{feuplogo.jpg}\\
 	{\Huge Pente}\\
-	{\Large Game Overview, History, Rules and Initial Implementation}\\
+	{\Large PROLOG Implementation of a Board Game}\\
 	{\normalsize PLOG 2018}
 }
 
@@ -25,6 +25,7 @@
 \begin{document}
 \maketitle
 \thispagestyle{empty}
+\tableofcontents
 
 \section{Overview and History}
 \label{sec:overview}
@@ -93,96 +94,108 @@ Other sources do not specify starting player (or choose Black) and do not requir
 
 Among variations we find: suicides allowed, called \textit{poofs} (\textit{Poof-Pente}); harsher Tournament Rule (\textit{G-Pente}, \textit{D-Pente}); 3-in-a-row captures (\textit{Keryo-Pente}), and others.\supercite{pente-org,pente-net}
 
-\section{Implementation: Internal Representation}
+\section{Internal Representation}
 \label{sec:internal}
 
-Representing the game's board is fairly simple. Every position in the \boardsize{19} board is in one of three states: white piece, black piece, or empty. We'll represent the board using a \boardsize{19} matrix (list of lists), whose elements are \textbf{w}, \textbf{b} or \textbf{c}, for each state respectively. This matrix will be called $Board$.
+Representing the game's board is fairly simple. Every position in the \boardsize{19} board is in one of three states: white piece, black piece, or empty. We'll represent the board using an \boardsize{S} matrix (list of lists), whose elements are \textbf{w}, \textbf{b} or \textbf{c}, for each state respectively. This matrix will be called $Board$.
 
-Now, each player has captured a certain number of pieces (an integer) and only plays pieces of a certain color (white or black). We'll represent the captures as a pair $[Wc,Bc]$, with no similar abstraction for players.
+Now, each player has captured a certain number of pieces (an integer) and only plays pieces of a certain color (white or black). We'll represent the captures as a pair $Cap=[Wc,Bc]$, with no similar general abstraction for players.
 
-The overall game state will be kept by $\textup{game}(Board, White, Black, next)$, where $White$ and $Black$ are players and $next$ is \textbf{w} or \textbf{b} according to who will play next.
+The overall game state will be kept by $\textup{game}(Board, P, Cap, Turn, Options)$, where $P\in\{w,b\}$ is the next player to play, and $Options$ is the options list, see \autoref{subsec:options}.
 
 For examples see \autoref{fig:earlygame}, \autoref{fig:midgame} and \autoref{fig:lategame} below.
 
-\section{Implementation: Board Display}
+\section{Board Display}
 \label{sec:boarddisplay}
 
-It's possible to flip the board (display only, not representation) when it is Black's turn to play, as if the two players were playing face-to-face on a physical Go board. Naturally we adjust the identification of rows and columns.
+It's possible to flip the board (display only, not representation) when it is Black's turn to play, as if the two players were playing face-to-face on a physical Go board. Naturally we adjust the identification of rows and columns. By default this is turned off.
 
-To draw the board with text (on the console) we used unicode box-drawing characters (range \texttt{u+2500}--\texttt{u+257f}). The white and black pieces become filled and empty unicode circles, respectively.
+To draw the board with text (on the console) we used unicode box-drawing characters (range \texttt{u+2500}--\texttt{u+257f}). The white and black pieces become filled and empty unicode circles, respectively. Assumes a dark-themed console.
 
 \begin{figure}[bhtp]
 	\begin{minipage}{0.45\textwidth}
-	\includegraphics[scale=0.25]{earlygame.png}
+	\includegraphics[width=\textwidth]{earlygame.png}
 	\end{minipage}
 	\begin{minipage}{0.55\textwidth}
-		\includegraphics[scale=0.50]{earlygame-code.png}
+		\includegraphics[width=\textwidth]{earlygame-code.png}
 	\end{minipage}
 	\caption{A game after 10 moves. It is White's turn to play.\label{fig:earlygame}}
 \end{figure}
 
 \begin{figure}[bhtp]
 	\begin{minipage}{0.45\textwidth}
-		\includegraphics[scale=0.25]{midgame.png}
+		\includegraphics[width=\textwidth]{midgame.png}
 	\end{minipage}
 	\begin{minipage}{0.55\textwidth}
-		\includegraphics[scale=0.50]{midgame-code.png}
+		\includegraphics[width=\textwidth]{midgame-code.png}
 	\end{minipage}
 	\caption{A game after 29 moves. It is Black's turn to play.\label{fig:midgame}}
 \end{figure}
 
 \begin{figure}[bhtp]
 	\begin{minipage}{0.45\textwidth}
-		\includegraphics[scale=0.25]{lategame.png}
+		\includegraphics[width=\textwidth]{lategame.png}
 	\end{minipage}
 	\begin{minipage}{0.55\textwidth}
-		\includegraphics[scale=0.50]{lategame-code.png}
+		\includegraphics[width=\textwidth]{lategame-code.png}
 	\end{minipage}
 	\caption{A game after 44 moves. It is White's turn to play, and win at H11.\label{fig:lategame}}
 \end{figure}
 
-\section{Options}
+\section{Game Logic}
+\label{sec:gamelogic}
 
-The overall game state will be represented by a $game/5$ compound. This compound is game(Board, P, [Wc, Bc], Turn, Options), where P is w or b according to who will play next, Turn is an integer thst represents the current game turn number, starting at 0. Lastly, Options is a list that represents the game's options. These option include (use 'help' to get same information): 
+\subsection{Definitions, Compounds and Abstractions}
+\label{subsec:abstractions}
+
+The overall game state will be represented by a \textit{game/5} data compound:
+\begin{center}
+\comp{game(Board, P, [Wc,Bc], Turn, Options)}
+\end{center}
+where P is w or b according to who will play next, Turn is an integer starting at 0 that counts moves, and lastly, Options is a list that represents the game's options (see \autoref{subsec:options}).
+
+There are two more data compounds: \vt{val/4}, which holds a board evaluation (see \autoref{subsec:boardscoring}) and \vt{node/6}, which is a node in the bot's lookahead tree analysis (see \autoref{subsec:bot}).
+
+Several list data structures are abstracted away either by library  or auxiliary predicates which act on them: \vt{Move} is merely a row column pair [$R$,$C$]; \vt{Range} is a list [$I$,$J$] representing an interval (which includes $I$ and $J$); \vt{Cap} is the pair of captures [Wc,Bc]; the abstractions are usually hidden behind variables \vt{Game}, \vt{Val} and \vt{Node}, etc.
+
+\subsection{Options}
+\label{subsec:options}
+
+The options accepted in the \vt{Options} list are the following (use \vt{help}, \vt{help(Option)} or \vt{help_menu} to get a description on the console):
 
 \begin{itemize}
-	\item \textbf{board\_size(S)} or size(S), S in {7,9,11,...}\\
+	\item \vtb{board_size(S)} or \vtb{size(S)}, \vt{S} in {7,9,11,...}\\
 	Defines the board size (SxS), must be odd.
-	Default: 19
-	\item \textbf{difficulty(D)}, D in {1,2,3,4,5}\\
+	Default: 19.
+	\item \vtb{difficulty(D)}, \vt{D} in {1,2,3,4,5}\\
 	Sets the bot difficulty (with 5 being the most
 	difficult) by selecting a set of predefined values
 	for depth, padding and width. If given values for
 	depth, padding and width, these override those selected
 	by the difficulty.
-	Default: 3
-	\item \textbf{depth(D)}, D in {0,1,2,3,...}\\
-	Depth of the bot search tree.
-	Suggestion: Choose an even depth (2 or 4).
-	Default (difficulty 3): 5
-	\item \textbf{padding(P)}, P in {0,1,2,3,...}\\
+	\item \vtb{depth(D)}, \vt{D} in $\{0,1,2,3,...\}$\\
+	Depth of the bot's search tree.
+	\item \vtb{padding(P)}, \vt{P} in $\{0,1,2,3,...\}$\\
 	Padding of the active subboard used by the search tree.
-	Default (difficulty 3): 2
-	\item \textbf{width([W0,W1,...])}, Wi in {1,2,3,...}\\
-	For each search node on depth i (top is depth 0)
+	\item \vtb{width([W0,W1,...])}, \vt{Wi} in $\{1,2,3,...\}$\\
+	For each search node on depth \textit{i} (top is depth 0)
 	recurse the search tree only for the Wi best moves.
 	If the width is not defined for all the depths, the
 	last width in the list will be used repeatedly.
-	- width(W), W in {1,2,3,...}
+	\item \vtb{width(W)}, \vt{W} in $\{1,2,3,...\}$
 	Use the width W for all depths.
-	Default (difficulty 3): [4,3,2]
-	\item \textbf{flip\_board(B)} or \textbf{flip(B)}, \textbf{B} is true or false\\
-	Flip the board print on the console for Blacks turn.
-	Default: false
-	\item \textbf{tournament\_rule(B)} or \textbf{rule(B)}, \textbf{B} is true or false\\
+	\item \vtb{flip_board(B)} or \vtb{flip(B)}, \vt{B} is \vt{true} or \vt{false}\\
+	Flip the board print on the console for Black's turn.
+	Default: false.
+	\item \vtb{tournament_rule(B)} or \vtb{rule(B)}, \vt{B} is \vt{true} or \vt{false}\\
 	Use the tournament rule.
-	Default: true
+	Default: true.
 \end{itemize}
 
 \subsection{Valid Moves}
 \label{subsec:validmoves}
 
-In Pente, the player's possible moves does not depend on which player is going to play. The available moves are the same for each one.
+In Pente, the player's possible moves do not depend on which player is going to play. The available moves are the same for each one.
 With this being said we implemented several predicates that give us a list with all the possible moves a player can make.
 
 \begin{itemize}
