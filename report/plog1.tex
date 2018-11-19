@@ -4,15 +4,15 @@
 
 \addbibresource{plog1.bib}
 
-\newcommand*{\foottitle}{Pente}
-\newcommand*{\boardsize}[1]{#1\texttt{x}#1}
+\newcommand*{\foottitle}{Pente 3 - PLOG 2018}
+\newcommand*{\boardsize}[1]{$#1$\texttt{x}$#1$}
 
 
 \title{
 	\vspace{-2\baselineskip}
 	\includegraphics[scale=0.15]{feuplogo.jpg}\\
 	{\Huge Pente}\\
-	{\Large PROLOG Implementation of a Board Game}\\
+	{\Large \texttt{Prolog} Implementation of a Board Game}\\
 	{\normalsize PLOG 2018}
 }
 
@@ -25,13 +25,15 @@
 \begin{document}
 \maketitle
 \thispagestyle{empty}
+\vspace*{-2\baselineskip}
 \tableofcontents
 
 \section{Introduction}
 \label{sec:introduction}
 
-This project's objective is for us to implement a board game (for us is Pente) using Prolog, with 3 different modes: Player vs Player, Player vs Bot and Bot vs Bot, with the Bot having 2 different difficulties.
-  It is needed for us to implement all the game's rules and use the best suiting compounds to represent the game, with the board, pieces, player's turn, etc...
+This project's objective is to implement a board game using Prolog, with 3 different modes: Player vs Player, Player vs Bot and Bot vs Bot, with the Bot having 2 different difficulties. Our game is Pente.
+
+We implemented all of Pente's rules (see below) and created proper abstractions and compound terms to represent boards, game states, and other repetitive data elements.
 This will all be discussed below.
 
 \section{Overview and History}
@@ -109,172 +111,254 @@ Every position in the \boardsize{19} board is in one of three states:
 white piece, black piece, or empty. We'll represent the board using
 an \boardsize{S} matrix (list of lists), whose elements are \textbf{w},
 \textbf{b} or \textbf{c}, for each state respectively.
-This matrix will be called $Board$.
+This matrix will be called \vt{Board}.
 
-Now, each player has captured a certain number of pieces (an integer) and only plays pieces of a certain color (white or black). We'll represent the captures as a pair $Cap=[Wc,Bc]$, with no similar general abstraction for players.
+Now, each player has captured a certain number of pieces (an integer) and only plays pieces of a certain color (white or black). We'll represent the captures as a pair [\vt{Wc},\vt{Bc}], with no similar general abstraction for \textit{players} (it wasn't needed).
 
-The overall game state will be kept by $\textup{game}(Board, P, Cap, Turn, Options)$, where $P\in\{w,b\}$ is the next player to play, and $Options$ is the options list, see \autoref{subsec:options}.
+The overall game state will be represented by a \textit{game/5} data compound:
+\begin{center}
+	\comp{game(Board, P, [Wc,Bc], Turn, Options)}
+\end{center}
+where P is w or b according to who will play next, Turn is an integer starting at 0 that counts moves, and lastly, Options is a list that represents the game's options (see \autoref{subsec:options}).
 
-For examples see \autoref{fig:earlygame}, \autoref{fig:midgame} and \autoref{fig:lategame} below.
+\subsection{Definitions, Compounds and Abstractions}
+\label{subsec:abstractions}
 
-\section{Board Display}
+There are two more data compounds: \vt{val/4}, which holds a board evaluation (see \autoref{subsec:boardscoring}) and \vt{node/6}, which is a node in the bot's evaluation tree (see \autoref{subsec:bot}).
+
+Several list data structures are abstracted away either by library  or auxiliary predicates which act on them: \vt{Move} is merely a row column pair [$R$,$C$]; \vt{Range} is a list [$I$,$J$] representing an interval (which includes $I$ and $J$); \vt{Cap} is the pair of captures [Wc,Bc]; the three compounds are usually kept unexpanded in variables \vt{Game}, \vt{Val}, \vt{Node}, \vt{Tree}, etc.
+
+\subsection{Board Display}
 \label{sec:boarddisplay}
 
 It's possible to flip the board (display only, not representation) when it is Black's turn to play, as if the two players were playing face-to-face on a physical Go board. Naturally we adjust the identification of rows and columns. By default this is turned off.
 
-To draw the board with text (on the console) we used unicode box-drawing characters (range \texttt{u+2500}--\texttt{u+257f}). The white and black pieces become filled and empty unicode circles, respectively. Assumes a dark-themed console.
+To draw the board with text (on the console) we used unicode box-drawing characters (range \texttt{u+2500}--\texttt{u+257f}). The white and black pieces become filled and empty unicode circles, respectively. This assumes a dark-themed console --- white consoles will have the colors swapped.
+Below the board you can see the pieces captured and the turn number.
+
+For examples see \autoref{fig:earlygame}, \autoref{fig:midgame} and \autoref{fig:lategame} below.
 
 \begin{figure}[bhtp]
-	\begin{minipage}{0.45\textwidth}
+	\centering
+	\begin{minipage}{0.35\textwidth}
 	\includegraphics[width=\textwidth]{earlygame.png}
 	\end{minipage}
-	\begin{minipage}{0.55\textwidth}
+	\begin{minipage}{0.45\textwidth}
 		\includegraphics[width=\textwidth]{earlygame-code.png}
 	\end{minipage}
-	\caption{A game after 10 moves. It is White's turn to play.\label{fig:earlygame}}
+	\caption{A game after 10 moves. It is White's turn to play.}
+	\label{fig:earlygame}
 \end{figure}
-
-\begin{figure}[bhtp]
-	\begin{minipage}{0.45\textwidth}
+\vspace*{-2\baselineskip}
+\begin{figure}
+	\centering
+	\begin{minipage}{0.35\textwidth}
 		\includegraphics[width=\textwidth]{midgame.png}
 	\end{minipage}
-	\begin{minipage}{0.55\textwidth}
+	\begin{minipage}{0.45\textwidth}
 		\includegraphics[width=\textwidth]{midgame-code.png}
 	\end{minipage}
-	\caption{A game after 29 moves. It is Black's turn to play.\label{fig:midgame}}
+	\caption{A game after 29 moves. It is Black's turn to play.}
+	\label{fig:midgame}
 \end{figure}
-
-\begin{figure}[bhtp]
-	\begin{minipage}{0.45\textwidth}
+\vspace*{-2\baselineskip}
+\begin{figure}
+	\centering
+	\begin{minipage}{0.35\textwidth}
 		\includegraphics[width=\textwidth]{lategame.png}
 	\end{minipage}
-	\begin{minipage}{0.55\textwidth}
+	\begin{minipage}{0.45\textwidth}
 		\includegraphics[width=\textwidth]{lategame-code.png}
 	\end{minipage}
-	\caption{A game after 44 moves. It is White's turn to play, and win at H11.\label{fig:lategame}}
+	\caption{A game after 44 moves. It is White's turn to play, and win at H11.}
+	\label{fig:lategame}
 \end{figure}
 
 \section{Game Logic}
 \label{sec:gamelogic}
 
-\subsection{Definitions, Compounds and Abstractions}
-\label{subsec:abstractions}
+The entry points are \vt{pente/[0,1]} and \vt{play/[0,1]}. The functors accept an \vt{OptionsList} argument specifying implementation details or game rules only; the game type --- Player vs Player, Player vs Bot and Bot vs Bot --- are chosen through a simple menu afterwards.
 
-The overall game state will be represented by a \textit{game/5} data compound:
-\begin{center}
-\comp{game(Board, P, [Wc,Bc], Turn, Options)}
-\end{center}
-where P is w or b according to who will play next, Turn is an integer starting at 0 that counts moves, and lastly, Options is a list that represents the game's options (see \autoref{subsec:options}).
-
-There are two more data compounds: \vt{val/4}, which holds a board evaluation (see \autoref{subsec:boardscoring}) and \vt{node/6}, which is a node in the bot's lookahead tree analysis (see \autoref{subsec:bot}).
-
-Several list data structures are abstracted away either by library  or auxiliary predicates which act on them: \vt{Move} is merely a row column pair [$R$,$C$]; \vt{Range} is a list [$I$,$J$] representing an interval (which includes $I$ and $J$); \vt{Cap} is the pair of captures [Wc,Bc]; the abstractions are usually hidden behind variables \vt{Game}, \vt{Val} and \vt{Node}, etc.
+See also predicate \vt{help/[0,1]}.
 
 \subsection{Options}
 \label{subsec:options}
 
-The options accepted in the \vt{Options} list are the following (use \vt{help}, \vt{help(Option)} or \vt{help_menu} to get a description on the console):
+The options accepted in the \vt{OptionsList} argument of \vt{play/1} are the following (use \vt{help} or \vt{help(Option)} to get a description on the console):
 
 \begin{itemize}
-	\item \vtb{board_size(S)} or \vtb{size(S)}, \vt{S} in {7,9,11,...}\\
-	Defines the board size (SxS), must be odd.
-	Default: 19.
-	\item \vtb{difficulty(D)}, \vt{D} in {1,2,3,4,5}\\
-	Sets the bot difficulty (with 5 being the most
-	difficult) by selecting a set of predefined values
-	for depth, padding and width. If given values for
-	depth, padding and width, these override those selected
-	by the difficulty.
-	\item \vtb{depth(D)}, \vt{D} in $\{0,1,2,3,...\}$\\
-	Depth of the bot's search tree.
-	\item \vtb{padding(P)}, \vt{P} in $\{0,1,2,3,...\}$\\
-	Padding of the active subboard used by the search tree.
-	\item \vtb{width([W0,W1,...])}, \vt{Wi} in $\{1,2,3,...\}$\\
-	For each search node on depth \textit{i} (top is depth 0)
-	recurse the search tree only for the Wi best moves.
-	If the width is not defined for all the depths, the
-	last width in the list will be used repeatedly.
-	\item \vtb{width(W)}, \vt{W} in $\{1,2,3,...\}$
-	Use the width W for all depths.
-	\item \vtb{flip_board(B)} or \vtb{flip(B)}, \vt{B} is \vt{true} or \vt{false}\\
-	Flip the board print on the console for Black's turn.
-	Default: false.
-	\item \vtb{tournament_rule(B)} or \vtb{rule(B)}, \vt{B} is \vt{true} or \vt{false}\\
-	Use the tournament rule.
-	Default: true.
+\item \vtb{board_size(S)} or \vtb{size(S)}, \vt{S} in $\{7,9,11,...\}$\\
+Defines the board size (SxS), must be odd.
+Default: 19.
+\item \vtb{difficulty(D)}, \vt{D} in $\{1,2,3,4,5\}$\\
+Sets the bot difficulty (with 5 being the most
+difficult) by selecting a set of predefined values
+for depth, padding and width. If given values for
+depth, padding and width, these override those selected
+by the difficulty.
+\item \vtb{depth(D)}, \vt{D} in $\{0,1,2,3,...\}$\\
+Depth of the bot's search tree.
+\item \vtb{padding(P)}, \vt{P} in $\{1,2,3,...\}$\\
+Padding of the active subboard used by the search tree.
+\item \vtb{width([W1,W2,...])}, \vt{Wi} in $\{1,2,3,...\}$\\
+For each search node on depth $i$ (top is depth 0)
+recurse the search tree only for the $W_i$ best moves.
+If the width is not defined for all the depths, the
+last width in the list will be used repeatedly.
+Please be mindful that bot runtime is $o(W1\times\cdots\times W_{D})$
+on average per move.
+\item \vtb{width(W)}, \vt{W} in $\{1,2,3,...\}$
+Use the width W for all depths.
+\item \vtb{flip_board(B)} or \vtb{flip(B)}, \vt{B} is \vt{true} or \vt{false}\\
+Flip the board print on the console for Black's turn.
+Default: false.
+\item \vtb{tournament_rule(B)} or \vtb{rule(B)}, \vt{B} is \vt{true} or \vt{false}\\
+Use the tournament rule.
+Default: true.
 \end{itemize}
 
 \subsection{Valid Moves}
 \label{subsec:validmoves}
 
 In Pente, the player's possible moves do not depend on which player is going to play. The available moves are the same for each one.
-With this being said we implemented several predicates that give us a list with all the possible moves a player can make.
+With this in mind, we implemented several predicates that give us a list with all the possible moves a player can make: \vt{empty_positions/[2,3]}, \vt{valid_stones/[2-5]} and their \vt{within_boundary} counterparts.
 
-\begin{itemize}
-	\item \textbf{valid\_moves/2}\\
-	This gives the player all the empty positions on the board, does not take in consideration the game's turn or if the user wants to play using the tournament rule.
-	\item \textbf{valid\_moves/3}\\
-	Being more specific than the previous one it takes a given turn making sure that at the turn number 0 the only available move for the player is the center piece.
-	By default it uses the Tournament rule at turn 2.
-	\item \textbf{valid\_moves/4}\\
-	Takes into account the game turn and if the tournament rule is active or not. At turn 0 the only valid move is still the center one, and at turn 2 if the Tournament rule is being used the valid moves are the empty positions at least 3 intersections away from the center.
+\begin{itemize}[noitemsep]
+\item \vtb{valid_moves/2}: \vt{valid_moves(+Board, -ListOfMoves)}\\
+This gives the player all the empty positions on the board, does not take in consideration the game's turn or if the user wants to play using the tournament rule.
+\item \vtb{valid_moves/3}: \vt{valid_moves(+Board, +Turn, -ListOfMoves)}\\
+More specific than the previous one, it takes a Turn and makes sure that at the turn number 0 the only available move for the player is the center intersection, and at turn number 2 implements the Tournament Rule.
+\item \vtb{valid_moves/4}: \vt{valid_moves(+Board, +Turn, +Rule, -ListOfMoves)}\\
+Takes into account the game Turn and if the Tournament Rule is active or not.
 \end{itemize}
 
 \subsection{Validation and Execution of Moves}
 \label{subsec:moves}
 
-When a player makes a move it needs to be checked. This analysis is made seeing if the player move is in the appropriate list of valid moves, as returned from one of the predicates described above.
+Input is expected quietly whenever it is the player's turn to make a move.
+Moves are typed into the console like
+\begin{center}
+	\ttfamily K10.
+\end{center}
+and column K, row 10 is deduced. If invalid, new input will be silently expected.
 
-In the case that the player move is valid we do several things:
+When a player makes chooses a move it needs to be checked before being accepted. This is done by asserting the move is in the appropriate list of valid moves (see \vt{valid_move/[2-4]}) returned from one of the predicates described above.
 
-\begin{enumerate}[label=(\alph*)]
-	\item Place the player's corresponding colored stone at the given game coords.
-	\item Check if that stone bracketed the opponent, in each of the possible eight directions. Then add 2 captures to the player's captures and remove those 2 stones from the board.
+Once the player move is valid we have to do several things:
+
+\begin{enumerate}[noitemsep,label=(\roman*)]
+	\item Place the player's stone at the given position.
+	\item Check if that stone bracketed the opponent, in every one of the eight possible directions. In that case, remove those 2 stones from the board and add 2 captures to the player's total captures.
 	\item Update the next player playing.
 	\item Increment the game's turn by 1.
 \end{enumerate}
 
-This is all done in \textbf{move/3}.
+Items (i) and (ii) above are carried out by \vt{place_stone/5} through the use of \vt{remove_dead_stones/5}. The whole process is \vt{move/3} as seen from the main game loop.
 
 \subsection{Game Over}
 \label{subsec:gameover}
 
 In the end of every game iteration a test is performed by \textbf{game\_over/2} to check for either winning condition, for either player.
 
-In case of victory, a message is displayed for that player and the game cycle is stopped, finishing the game successfully. Otherwise the game goes on naturally.
+In case of victory, a message is displayed for that player and the game cycle is stopped, ending the game successfully. Otherwise the game must go on.
 
 \subsection{Board Scoring}
 \label{subsec:boardscoring}
 
-The board evaluation is based on list patterns. No two-dimensional patterns are recognized or searched for when evaluating a board; rather, patterns are searched in lists --- all the board's rows, columns, and diagonals. Each reasonable sized pattern comprised solely of one player's pieces is scored by \textbf{pattern/2} and \textbf{score/2} to be of an integer value between $1$ and $2^{100}$, the former for a single stone and the latter for a five-in-a-row. Every pattern is then counted in every list, scoring said list as a weighed sum of the number of patterns it contains.
+Our board evaluation idea is simple in theory, but hard to implement \textit{effectively}. Consider an \boardsize{S} Board. It has $S$ rows, $S$ columns, $2S - 1$ diagonals parallel to the main diagonal -- we call them \textit{left} diagonals, as the longest starts on the top left -- and $2S - 1$ \textit{right diagonals}, perpendicular to the main diagonal. All of these are ways of splitting the two-dimensional Board into multiple one-dimensional \textsl{lists}.
 
-Patterns made with White pieces are positive, those made with Black pieces are symmetrical. After scoring each list with \textbf{evaluate/2}, the Board's total value is the sum of the list scores (\textbf{evaluate\_board/2}). The value of a game position is the Board's value, plus a bonus for the number of captures of either player.
+Good Pente patterns might show up in any such list, namely four and five-in-a-rows, or simpler patterns at the beginning of the game. Hence we decided the value of a Board is determined entirely by the individual values of these lists. No two-dimensional patterns are recognized or searched for when evaluating a Board. The value of a game position is the board value plus a function of the player captures.
 
-There are about $150$ patterns scored by hand, for a total of $300$ pattern searches in every list. Some of these are not very meaningful and can be removed to increase efficiency, but we did other things to speed up evaluation:
+The Board's value is stored in compound \vt{val/4}:
+\begin{center}
+	\vt{val(RowValues, ColValues, LeftValues, RightValues)}
+\end{center}
+
+Board value is based entirely on \textit{list patterns}. Through \vt{pattern/2}, a \textsl{score} is given to each short pattern comprising one to six pieces all of the same color. From patterns as simple as\footnote{The dashes represent empty intersections}
+\begin{center}
+\tt	- W -
+\end{center}
+to patterns such as
+\begin{center}
+\tt	- W - W W - W W W - -
+\end{center}
+Scores range from $1$ for a single piece to $2^{100}$ for a five-in-a-row.
+
+To score a given List, for every recorded pattern one counts its number of occurrences in List, multiples it by the pattern's score, and adds all of them up to get the value of List.
+
+Patterns made with White pieces are positive (\vt{pattern/2}), those made with Black pieces are their negative. Scoring each list is done with \vt{evaluate/2}, which accumulates \vt{score/2}; the Board's total value is computed with \vt{evaluate_board/2}, and finally the value of the game position is computed with \vt{totalval/3}, which needs the player captures.
+
+There are about $150$ patterns scored by hand, for a total of $300$ \vt{score/2} searches in every list\footnote{Predicates \vt{p/2}, \vt{e/1} and \vt{a/1} present different ways of investigating the score of a list}. Some of these are not very meaningful and can be removed to increase efficiency substantially, but we did two other things to speed up evaluation for the Bot:
 
 \begin{itemize}
-	\item Instead of evaluation an entire board every time with \textbf{evaluate\_board/2}, we use mostly \textbf{reevaluate\_board} which takes two Boards that differ by just one stone placement, the initial Board's value, and computes the new Value, only having to reevaluate, most of the time, four new lists.
-	\item Predicate \textbf{evaluate/2} is dynamic and every list evaluation
-	is stored using \textbf{asserta} (the lemma idiom). This results in thousands of clauses, and evaluation is mostly replaced by lookup, but the speed is very considerable.
+	\item Instead of evaluating an entire board every time with \vt{evaluate\_board/2}, we use mostly \vt{reevaluate\_board/4} which takes two Boards that differ by just one stone placement (one move), the initial Board's value, and computes the new Value, only having to reevaluate, most of the time, four new lists.
+	\item Predicate \vt{evaluate/2} is dynamic and every new list evaluation result is stored using \vt{asserta} (the lemma idiom). This results in tens of thousands of clauses for \vt{evaluate/2} once the bot kicks in, making evaluation mostly a matter of lookup.
 \end{itemize}
+
+\subsubsection{Motivation}
+\label{subsubsec:motivation}
+
+If we create a decent, fast Bot but our hand-picked scores are very bad, they can be improved at a future time through machine-learning and self-play, or on a lower scale through simple experimentation.
+
+By downscaling a two-dimensional board into multiple one-dimensional lists we lose tremendous amounts of information, but to look for various different two-dimensional patterns in a 19x19 board efficiently is just computationally infeasible. Look at Go for example.
+
+Another idea we had was to look mostly/exclusively for forcing patterns on the board (possibly two-dimensional) like
+\begin{center}
+\tt - W - W W W - -
+\end{center}
+which require Black to respond locally, possibly twice; or even patterns like the \textit{tessera}
+\begin{center}
+\tt - W W W W -
+\end{center}
+which are win-in-one bar any captures. But these don't help the Bot play the first few moves in the game, are very hard-coded, are require much more knowledge of the game than the one we have.
 
 \subsection{Computer Bot Moves}
 \label{subsec:bot}
 
-We made an elaborate, although largely imperfect and static bot to play the game which uses a mix of a lookahead analysis tree and board evaluations.
+We made an elaborate, although static and largely imperfect Bot to play Pente which uses board evaluations for the lookahead tree.
 
-The analysis tree simulates moves on the board to evaluate and inspect possible future positions. This is done recursively to a variable depth (the lookahead length) and mostly depth-first, and variable width (number of children per node). Future positions which are winning or losing positions are identified and handled specially; other positions are merely scored by board evaluation and ranked. From the best moves, one at random is chosen and played.
+The lookahead tree is \textit{not} (necessarily) binary. It's rooted in the current game position, its children are the possible moves being analyzed, and in general every subtree head is one move away from any of its children.
+The tree is static: it has fixed depth and fixed width set at game startup, which do not change throughout (see \autoref{subsec:options}).
 
-From our experience, difficulty 3 gives a bot which computes reasonably fasts, makes decent moves, and answers most forcing moves adequately.
+A node in the tree (and the tree itself) is represented by \vt{node/6}:
+\begin{center}
+\tt node(Board, P, Val, Cap, Children, Worth)
+\end{center}
+where P is the next player (the one making the move M that transforms the node into one of its children), Children is a key-valued ordered list of children nodes (empty list for leaves), and Worth is a score-like integer which is the current \textit{value} of the node.
 
-For reference, see predicates \textbf{build\_children/3} and \textbf{recurse\_children/3}.
+The \textit{worth} of a node is initially just the value of the game position it is assigned, but it will change after the node has generated its children: once a subtree is generated, the worth of the leaf nodes bubbles up the tree naturally, according to the following rules:
+\begin{itemize}
+\item If a parent node generates a child node which is surely a losing position (for the child node's player), then the parent node is surely a winning position (for the parent node's player). Once this child node is found, no more child nodes need be generated any longer for this parent node. See \vt{build_children/3} and \vt{recurse_children}
+\item The parent node is assigned the worth of the best of his children.\footnote{Remember White wants positive score/worth, Black wants negative score/worth}. Before this, the children are ordered by worth. To ensure repeated bot games don't play out the same way, the children are clumped by worth, randomized within each clump, then put back together. See \vt{reorder_clumps/2}
+\item If a parent node generates a child node which is surely a winning position (for the child node's player), then the parent node's player should not play the move leading to said child node position. This means the child node can be effectively discarded. See \vt{recurse_children_loop/5} \\footnote{Some care must be taken to ensure the root will have at least on child.}
+\end{itemize}
 
-\subsection{Conclusion}
+The Bot generates a tree every time the other player makes a move (see \vt{analyze_tree/3}, called by the game loop).
+The search is \textit{mostly} depth-first: the Bot starts by creating children for every move available within a certain subboard of the Board which surrounds the active area of the Board (the one which has pieces),
+done with \vt{build_children/3}. Then these children get filtered (according to option depth) and depth-first recursion follows for each good child.
+
+\subsubsection{Motivation}
+\label{subsubsec:motivationbot}
+
+Apart from the obvious, with depth 2 or higher -- and with reasonably high width values -- this helps the bot answer simple forcing moves like
+\begin{center}
+\tt W W W W -
+\end{center}
+and with depth 4 or higher, might help the bot answer more advanced threats such as
+\begin{center}
+\tt - - W W W - -
+\end{center}
+or create multiple ones like these itself.
+
+\section{Conclusion}
+\label{sec:conc}
 
 This project required a lot of work, but was very rewarding.
-We achieved everything that we stipulated from the beginning and plenty more. In our opinion we took what was asked for and elevated it to another level giving the player a lot more options to customize both bot and the game.
-The biggest difficulties when developing this game was, definitely, the making of the Bot's evaluation tree. It has some faults (obviously it doesn't resign, for instance), but we think we conquered this and are pretty happy with how it turned out.
-The one thing that we would like to improve are the values for each pattern, in our opinion these aren't perfectly tuned and would require more time to perfect these.
+We achieved everything we stipulated from the beginning, and some more. In our opinion we took what was asked for and elevated it to another level giving the player a lot more options to customize both the bot and the game.
+
+The biggest difficulties when developing this game was, definitely, the making of the Bot's lookahead evaluation tree. It has some faults (for one it doesn't resign), but we think we achieved the goals with this and are pretty happy with how it turned out.
+
+One thing that we would like to improve are the scores of each pattern, in our opinion these aren't perfectly tuned and need some serious work.
 
 \printbibliography
 
