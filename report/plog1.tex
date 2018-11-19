@@ -27,6 +27,13 @@
 \thispagestyle{empty}
 \tableofcontents
 
+\section{Introduction}
+\label{sec:introduction}
+
+This project's objective is for us to implement a board game (for us is Pente) using Prolog, with 3 different modes: Player vs Player, Player vs Bot and Bot vs Bot, with the Bot having 2 different difficulties.
+  It is needed for us to implement all the game's rules and use the best suiting compounds to represent the game, with the board, pieces, player's turn, etc...
+This will all be discussed below.
+
 \section{Overview and History}
 \label{sec:overview}
 
@@ -97,7 +104,12 @@ Among variations we find: suicides allowed, called \textit{poofs} (\textit{Poof-
 \section{Internal Representation}
 \label{sec:internal}
 
-Representing the game's board is fairly simple. Every position in the \boardsize{19} board is in one of three states: white piece, black piece, or empty. We'll represent the board using an \boardsize{S} matrix (list of lists), whose elements are \textbf{w}, \textbf{b} or \textbf{c}, for each state respectively. This matrix will be called $Board$.
+Representing the game's board is fairly simple.
+Every position in the \boardsize{19} board is in one of three states:
+white piece, black piece, or empty. We'll represent the board using
+an \boardsize{S} matrix (list of lists), whose elements are \textbf{w},
+\textbf{b} or \textbf{c}, for each state respectively.
+This matrix will be called $Board$.
 
 Now, each player has captured a certain number of pieces (an integer) and only plays pieces of a certain color (white or black). We'll represent the captures as a pair $Cap=[Wc,Bc]$, with no similar general abstraction for players.
 
