@@ -5,5 +5,6 @@
 :- compile('src/matrix.pl').
 :- compile('src/lists.pl').
 :- compile('src/print.pl').
+:- compile('src/statistics.pl').
 
 re :- compile('main.pl').

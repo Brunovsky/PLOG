@@ -1,4 +1,4 @@
-test :- doors([[4,2,4,2],[5,3,5,3],[4,3,4,4],[2,3,2,4]]).
+test :- doors([[4,2,4,2],[5,3,5,3],[4,3,0,4],[2,3,2,4]]).
 
 doors(Board) :-
   length(Board, NRows),
@@ -27,7 +27,9 @@ doors(Board) :-
       do get_solution(Board, Vertical, Horizontal, [R,C])
       )
   ),
+  reset_timer,
   labeling([ff], Vars),
+  print_time,
   print_board(Board, Vertical, Horizontal).
 
 length_list(N, L) :- length(L, N).
@@ -46,6 +48,8 @@ calculate_value([H|T], V) :-
  * Computes the four accumulators on cell [R,C], and bind them
  * to the value of the respective cell in the Board.
  */
+get_solution(Board, _, _, [R,C]) :-
+  matrixnth1([R,C], Board, 0).
 get_solution(Board, Vertical, Horizontal, [R,C]) :-
   matrixnth1([R,C], Board, Value),
   right_total(Vertical, [R,C], Right),
