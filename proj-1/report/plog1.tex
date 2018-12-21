@@ -242,7 +242,7 @@ Moves are typed into the console like
 \end{center}
 and column K, row 10 is deduced. If invalid, new input will be silently expected.
 
-When a player makes chooses a move it needs to be checked before being accepted. This is done by asserting the move is in the appropriate list of valid moves (see \vt{valid_move/[2-4]}) returned from one of the predicates described above.
+When a player chooses a move it needs to be checked before being accepted. This is done by asserting the move is in the appropriate list of valid moves (see \vt{valid_move/[2-4]}) returned from one of the predicates described above.
 
 Once the player move is valid we have to do several things:
 
@@ -291,7 +291,7 @@ Patterns made with White pieces are positive (\vt{pattern/2}), those made with B
 There are about $150$ patterns scored by hand, for a total of $300$ \vt{score/2} searches in every list\footnote{Predicates \vt{p/2}, \vt{e/1} and \vt{a/1} present different ways of investigating the score of a list}. Some of these are not very meaningful and can be removed to increase efficiency substantially, but we did two other things to speed up evaluation for the Bot:
 
 \begin{itemize}
-	\item Instead of evaluating an entire board every time with \vt{evaluate\_board/2}, we use mostly \vt{reevaluate\_board/4} which takes two Boards that differ by just one stone placement (one move), the initial Board's value, and computes the new Value, only having to reevaluate, most of the time, four new lists.
+	\item Instead of evaluating an entire board every time with \vt{evaluate_board/2}, we use mostly \vt{reevaluate_board/4} which takes two Boards that differ by just one stone placement (one move), the initial Board's value, and computes the new Value, only having to reevaluate, most of the time, four new lists.
 	\item Predicate \vt{evaluate/2} is dynamic and every new list evaluation result is stored using \vt{asserta} (the lemma idiom). This results in tens of thousands of clauses for \vt{evaluate/2} once the bot kicks in, making evaluation mostly a matter of lookup.
 \end{itemize}
 
@@ -329,8 +329,8 @@ where P is the next player (the one making the move M that transforms the node i
 The \textit{worth} of a node is initially just the value of the game position it is assigned, but it will change after the node has generated its children: once a subtree is generated, the worth of the leaf nodes bubbles up the tree naturally, according to the following rules:
 \begin{itemize}
 \item If a parent node generates a child node which is surely a losing position (for the child node's player), then the parent node is surely a winning position (for the parent node's player). Once this child node is found, no more child nodes need be generated any longer for this parent node. See \vt{build_children/3} and \vt{recurse_children}
-\item The parent node is assigned the worth of the best of his children.\footnote{Remember White wants positive score/worth, Black wants negative score/worth}. Before this, the children are ordered by worth. To ensure repeated bot games don't play out the same way, the children are clumped by worth, randomized within each clump, then put back together. See \vt{reorder_clumps/2}
-\item If a parent node generates a child node which is surely a winning position (for the child node's player), then the parent node's player should not play the move leading to said child node position. This means the child node can be effectively discarded. See \vt{recurse_children_loop/5} \\footnote{Some care must be taken to ensure the root will have at least on child.}
+\item The parent node is assigned the worth of the best of his children.\footnote{Remember White wants positive score/worth, Black wants negative score/worth} Before this, the children are ordered by worth. To ensure repeated bot games don't play out the same way, the children are clumped by worth, randomized within each clump, then put back together. See \vt{reorder_clumps/2}
+\item If a parent node generates a child node which is surely a winning position (for the child node's player), then the parent node's player should not play the move leading to said child node position. This means the child node can be effectively discarded. See \vt{recurse_children_loop/5}. \footnote{Some care must be taken to ensure the root will have at least one child.}
 \end{itemize}
 
 The Bot generates a tree every time the other player makes a move (see \vt{analyze_tree/3}, called by the game loop).

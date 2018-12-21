@@ -25,7 +25,7 @@ default(board_size, 19).
 default(difficulty, 3).
 default(flip_board, false).
 default(tournament_rule, true).
-default(traverse, false).
+default(traverse, true).
 
 default(depth, Depth) :-
     default(difficulty, Diff), difficulty_set(Diff, Depth, _, _).
@@ -41,11 +41,11 @@ default(width, WidthList) :-
  * difficulty_set(+Level, ?Depth, ?Padding, ?WidthList).
  *   Established the difficulty sets used.
  */
-difficulty_set(1, 2, 1, [3,3]).
-difficulty_set(2, 3, 2, [4,3,2]).
-difficulty_set(3, 4, 2, [4,3,2]).
-difficulty_set(4, 5, 2, [4,3,2]).
-difficulty_set(5, 6, 2, [5,4,3,2]).
+difficulty_set(1, 2, 1, [12,10]).
+difficulty_set(2, 2, 2, [8,7]).
+difficulty_set(3, 3, 2, [5,4,4]).
+difficulty_set(4, 4, 2, [4,4,3,2]).
+difficulty_set(5, 5, 2, [4,4,3,2]).
 
 /**
  * ===== ===== ===== ===== ====  ==== ===== ===== ===== =====
