@@ -8,6 +8,12 @@ doors(Board) :-
   NCols1 is NCols - 1,
   create_matrix(NRows, NCols1, Vertical),
   create_matrix(NRows1, NCols, Horizontal),
+  % Use 1 for door present and 0 for door absent
+  flatten(Vertical, VerticalFlat),
+  flatten(Horizontal, HorizontalFlat),
+  domain(VerticalFlat, 0, 1),
+  domain(HorizontalFlag, 0, 1),
+  % .
   get_solution(Board, [NRows,NCols], Vertical, Horizontal, [1,1]),
   flatten(Vertical, VerticalF),
   labeling([ff], VerticalF),
@@ -47,7 +53,6 @@ get_solution(Board, [NR,NC], Vertical, Horizontal, [R,C]) :-
 
 right_total(Vertical, [R,C], Total) :-
   nth1(R, Vertical, L),
-  domain(L, 0, 1),
   proper_length(L, S),
   range(L, Sublist, [C,S]),
   calculate_value(Sublist, Total).
@@ -55,7 +60,6 @@ right_total(_,_,0).
 
 left_total(Vertical, [R,C], Total) :-
   nth1(R, Vertical, L),
-  domain(L, 0, 1),
   range(L, Sublist1, [1,C]),
   reverse(Sublist1, Sublist),
   calculate_value(Sublist, Total).
@@ -63,7 +67,6 @@ left_total(_,_,0).
 
 top_total(Horizontal, [R,C], Total) :-
   get_column(C, Horizontal, [], L),
-  domain(L, 0, 1),
   range(L, Sublist1, [1,R]),
   reverse(Sublist1, Sublist),
   calculate_value(Sublist, Total).
@@ -71,7 +74,6 @@ top_total(_,_,0).
 
 bot_total(Horizontal, [R,C], Total) :-
   get_column(C, Horizontal, [], L),
-  domain(L, 0, 1),
   proper_length(L, S),
   range(L, Sublist, [R,S]),
   calculate_value(Sublist, Total).
