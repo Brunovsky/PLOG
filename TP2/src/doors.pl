@@ -9,19 +9,15 @@ doors(Board) :-
   create_matrix(NRows, NCols1, Vertical),
   create_matrix(NRows1, NCols, Horizontal),
   get_solution(Board, [NRows,NCols], Vertical, Horizontal, [1,1]),
-  labeling([ff], Vertical).
+  flatten(Vertical, VerticalF),
+  labeling([ff], VerticalF),
+  write(VerticalF).
 
 
 length_list(N, L) :- length(L, N).
 create_matrix(R, C, M) :-
   length_list(R, M),
   maplist(length_list(C), M).
-
-line([_], _).
-line([H|T], [H1|T1]) :-
-  calculate_value([H1|T1], V),
-  H #= V+1,
-  line(T, T1).
 
 calculate_value([H], H).
 calculate_value([H|T], V) :-
@@ -35,7 +31,7 @@ get_column(I, [H|T], C, R) :-
   append(C, [E], C1),
   get_column(I, T, C1, R).
 
-get_solution(_, [NR,NC], _, _, [NR,C]) :- C #= NC+1.
+get_solution(_, [NR,_], _, _, [R,1]) :- R #= NR+1.
 get_solution(Board, [NR,NC], Vertical, Horizontal, [R,C]) :-
   matrixnth1([R|[C]], Board, Value),
   right_total(Vertical, [R,C], Right),
@@ -44,7 +40,7 @@ get_solution(Board, [NR,NC], Vertical, Horizontal, [R,C]) :-
   bot_total(Horizontal, [R,C], Bot),
   Right + Left + Top + Bot + 1 #= Value,
   (C1 #= C+1,
-    C #< NC,
+    C1 #=< NC,
     get_solution(Board, [NR,NC], Vertical, Horizontal, [R,C1]);
   R1 #= R+1,
   get_solution(Board, [NR,NC], Vertical, Horizontal, [R1,1])).
@@ -71,7 +67,7 @@ top_total(Horizontal, [R,C], Total) :-
   range(L, Sublist1, [1,R]),
   reverse(Sublist1, Sublist),
   calculate_value(Sublist, Total).
-left_total(_,_,0).
+top_total(_,_,0).
 
 bot_total(Horizontal, [R,C], Total) :-
   get_column(C, Horizontal, [], L),
