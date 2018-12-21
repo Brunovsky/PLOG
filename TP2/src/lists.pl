@@ -954,3 +954,12 @@ extra_prefix_length(List, Prefix, N) :- prefix_length(List, Prefix, N).
 extra_suffix_length(List, List, N) :- length(List, Length), N > Length.
 
 extra_suffix_length(List, Suffix, N) :- suffix_length(List, Suffix, N).
+
+/**
+ * popn/3
+ * popn(?N, ?Original, ?New).
+ *   New is the list result of popping the first N elements of Original.
+ */
+popn(N, Original, New) :-
+    length(Pop, N),
+    append(Pop, New, Original), !.

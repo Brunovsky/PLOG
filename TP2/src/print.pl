@@ -15,15 +15,15 @@ print_vertical(_, Numbers, Verticals) :-
     write('\x2502\'), write(Front),
     (   foreach(Number, Tail),
         foreach(Vert, Verticals)
-    do  (Vert = 1 -> write('\x2502\'); write(' ')), write(Number)
+    do  (Vert = 0 -> write('\x2502\'); write(' ')), write(Number)
     ),
     write('\x2502\'), nl.
 
 print_horizontal(_, Horizontals) :-
     Horizontals = [Front|Tail],
-    write('\x2502\'), (Front = 1 -> write('\x2500\'); write(' ')),
+    write('\x2502\'), (Front = 0 -> write('\x2500\'); write(' ')),
     (   foreach(Horz, Tail)
-    do  write(' '), (Horz = 1 -> write('\x2500\'); write(' '))
+    do  write(' '), (Horz = 0 -> write('\x2500\'); write(' '))
     ),
     write('\x2502\'), nl.
 

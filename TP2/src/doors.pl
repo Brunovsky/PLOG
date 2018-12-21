@@ -61,11 +61,9 @@ get_solution(Board, Vertical, Horizontal, [R,C]) :-
  */
 right_total(Vertical, [R,C], Total) :-
   nth1(R, Vertical, L),
-  proper_length(L, S), !,
-  range(L, Sublist, [C,S]),
+  Pop is C - 1,
+  popn(Pop, L, Sublist),
   calculate_value(Sublist, Total).
-
-right_total(_, [_,_], 0).
 
 /**
  * left_total/3
@@ -73,12 +71,12 @@ right_total(_, [_,_], 0).
  * Compute the accumulator function to the left of cell [R,C].
  */
 left_total(Vertical, [R,C], Total) :-
-  nth1(R, Vertical, L), !,
-  range(L, Sublist1, [1,C]),
-  reverse(Sublist1, Sublist),
+  nth1(R, Vertical, L),
+  reverse(L, Reversed),
+  matrix_length(Vertical, _, V),
+  Pop is V - C + 1,
+  popn(Pop, Reversed, Sublist),
   calculate_value(Sublist, Total).
-
-left_total(_, [_,_], 0).
 
 /**
  * top_total/3
@@ -86,12 +84,12 @@ left_total(_, [_,_], 0).
  * Compute the accumulator function upwards of cell [R,C].
  */
 top_total(Horizontal, [R,C], Total) :-
-  matrix_col(C, Horizontal, L), !,
-  range(L, Sublist1, [1,R]),
-  reverse(Sublist1, Sublist),
+  matrix_col(C, Horizontal, L),
+  reverse(L, Reversed),
+  matrix_length(Horizontal, H, _),
+  Pop is H - R + 1,
+  popn(Pop, Reversed, Sublist),
   calculate_value(Sublist, Total).
-
-top_total(_, [_,_], 0).
 
 /**
  * bot_total/3
@@ -100,11 +98,9 @@ top_total(_, [_,_], 0).
  */
 bot_total(Horizontal, [R,C], Total) :-
   matrix_col(C, Horizontal, L),
-  proper_length(L, S), !,
-  range(L, Sublist, [R,S]),
+  Pop is R - 1,
+  popn(Pop, L, Sublist),
   calculate_value(Sublist, Total).
-
-bot_total(_, [_,_], 0).
 
 test_calculate_value :-
   calculate_value([], A1), write(A1), nl,
