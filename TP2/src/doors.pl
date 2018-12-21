@@ -55,7 +55,7 @@ right_total(Vertical, [R,C], Total) :-
   proper_length(L, S),
   range(L, Sublist, [C,S]),
   calculate_value(Sublist, Total).
-right_total(_, _, _).
+right_total(_,_,0).
 
 left_total(Vertical, [R,C], Total) :-
   nth1(R, Vertical, L),
@@ -63,7 +63,7 @@ left_total(Vertical, [R,C], Total) :-
   range(L, Sublist1, [1,C]),
   reverse(Sublist1, Sublist),
   calculate_value(Sublist, Total).
-left_total(_,_,_).
+left_total(_,_,0).
 
 top_total(Horizontal, [R,C], Total) :-
   get_column(C, Horizontal, [], L),
@@ -71,7 +71,7 @@ top_total(Horizontal, [R,C], Total) :-
   range(L, Sublist1, [1,R]),
   reverse(Sublist1, Sublist),
   calculate_value(Sublist, Total).
-left_total(_,_,_).
+left_total(_,_,0).
 
 bot_total(Horizontal, [R,C], Total) :-
   get_column(C, Horizontal, [], L),
@@ -79,4 +79,4 @@ bot_total(Horizontal, [R,C], Total) :-
   proper_length(L, S),
   range(L, Sublist, [R,S]),
   calculate_value(Sublist, Total).
-bot_total(_,_,_).
+bot_total(_,_,0).
