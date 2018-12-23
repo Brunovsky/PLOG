@@ -114,3 +114,12 @@ test_calculate_value :-
   calculate_value(B, 5),
   labeling([ff], B),
   write(B), nl, fail; otherwise.
+
+
+test_prob :-
+  doors([
+    [4,2,4,2],
+    [5,3,5,3],
+    [4,3,4,4],
+    [2,3,2,4]
+  ]).
