@@ -14,6 +14,8 @@
 % \renewcommand\UrlFont{\color{blue}\rmfamily}
 
 \newcommand*{\cc}[2]{\multicolumn{1}{#1}{#2}}
+\newcommand*{\ttd}[1]{\texttt{\detokenize{#1}}}
+\newcommand*{\sld}[1]{\textsl{\detokenize{#1}}}
 
 \begin{document}
 %
@@ -54,6 +56,30 @@ In this paper we describe and explore a simple restraint logic programming solut
 2 & \cc{ c|}{3} & \cc{|c }{2} & 4\\
 \hline
 \end{array}
+\qquad
+\begin{array}[c]{|c c c c c c|}
+\hline
+3 & \cc{ c|}{5} & \cc{|c }{3} & \cc{ c|}{2} & \cc{|c }{2} & 5\\
+\cline{4-5}
+  & \cc{|c|}{ } & \cc{|c }{4} & \cc{ c }{5} & \cc{ c|}{ } &  \\
+\cline{1-1}\cline{3-3}\cline{5-5}
+4 & \cc{ c }{6} & \cc{ c|}{4} & \cc{|c }{5} & \cc{ c }{ } & 6\\
+\cline{5-5}
+5 & \cc{ c }{7} & \cc{ c }{5} & \cc{ c|}{6} & \cc{|c|}{1} & 4\\
+\hline
+\end{array}
+\qquad
+\begin{array}[c]{|c c c c c c|}
+\hline
+2 & \cc{|c|}{1} & \cc{|c|}{4} & \cc{|c|}{ } & \cc{|c|}{ } & 1\\
+\cline{2-2}\cline{4-4}\cline{6-6}
+2 & \cc{|c }{2} & \cc{ c|}{5} & \cc{|c }{5} & \cc{ c }{6} & 4\\
+\cline{1-2}
+1 & \cc{|c }{3} & \cc{ c|}{5} & \cc{|c }{4} & \cc{ c|}{5} & 2\\
+\cline{1-1}\cline{6-6}
+  & \cc{|c }{3} & \cc{ c|}{5} & \cc{|c }{5} & \cc{ c }{6} & 3\\
+\hline
+\end{array}
 \end{equation*}
 
 \section{Problem Description}
@@ -63,15 +89,15 @@ The logic problem \textit{Doors} is a puzzle on a rectangular board whose cells 
 
 The puzzle consists in discovering an assignment of open and closed doors to the walls of the board such that the natural number in each non-empty cell is how many rooms are visible from that cell (including itself). There may be multiple solutions, or none at all.
 
-\section{Representation}
-\label{sec:representation}
+\section{Approach}
+\label{sec:approach}
 
 A puzzle of size $n\times m$ is represented internally by three matrices (list of lists): \textsl{Board}, of size $n\times m$, holding the cell numbers; \textsl{Vertical}, of size $n\times (m-1)$, holding the vertical walls; and \textsl{Horizontal}, of size $(n-1)\times m$, holding the horizontal walls.
 
 For each cell $(R,C), R=1,2,\cdots,n, C=1,2,\cdots,m$, indices in \textsl{Board}, the left wall has index $(R,C-1)$ in \textsl{Vertical}, the right wall has index $(R,C)$ in \textsl{Vertical}, the top wall has index $(R-1,C)$ in \textsl{Horizontal}, the bottom wall has index $(R,C)$ in \textsl{Horizontal}.
 Each wall in the board is assigned the number 0 for closed door and 1 for open door.
 
-\section{Restrictions}
+\subsection{Restrictions}
 \label{subsec:solutionrestrictions}
 
 When solving a puzzle \textsl{Board} is fully instantiated, while \textsl{Vertical} and \textsl{Horizontal} contain domain variables (domain $\{0,1\}$). Empty cells in the \textsl{Board} are represented by a $0$, as it is never a valid visible room counter.
@@ -138,6 +164,12 @@ restrict_cell(Board, Vertical, Horizontal, [R,C]) :-
 \end{minipage}
 \end{center}
 
+\section{Solution presentation}
+\label{sec:presentation}
+
+We represent the board using Unicode box drawing characters. Cells are sufficiently sized for all board numbers with \ttd{max_width_number/3} and centered with \ttd{center_number/2}.
+
+Predicate \ttd{write_connector/4} serves to select the appropriate unicode character to connect the cell corners inside and in the edges of the board, and \ttd{write_multiple/2} serves to write the same character multiple characters. Using these auxiliary predicates, the board is written in a straightforward fashion, with number rows and horizontal wall rows interleaved.
 
 %
 % ---- Bibliography ----

@@ -22,7 +22,7 @@ doors_calculator(Board) :-
         param(Vertical),
         param(Horizontal),
         param(R)
-      do get_solution(Board, Vertical, Horizontal, [R,C])
+      do restrict_cell(Board, Vertical, Horizontal, [R,C])
       )
   ),
   reset_timer,
@@ -41,14 +41,14 @@ calculate_value([H|T], V) :-
   V #= H + H*V1.
 
 /**
- * get_solution/4
- * get_solution(+Board, +Vertical, +Horizontal, +Cell).
+ * restrict_cell/4
+ * restrict_cell(+Board, +Vertical, +Horizontal, +Cell).
  * Computes the four accumulators on cell [R,C], and bind them
  * to the value of the respective cell in the Board.
  */
-get_solution(Board, _, _, [R,C]) :-
+restrict_cell(Board, _, _, [R,C]) :-
   matrixnth1([R,C], Board, 0), !.
-get_solution(Board, Vertical, Horizontal, [R,C]) :-
+restrict_cell(Board, Vertical, Horizontal, [R,C]) :-
   matrixnth1([R,C], Board, Value),
   right_total(Vertical, [R,C], Right),
   left_total(Vertical, [R,C], Left),
