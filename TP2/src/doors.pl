@@ -28,6 +28,7 @@ doors_calculator(Board) :-
   reset_timer,
   labeling([ff], Vars),
   print_time,
+  fd_statistics,
   print_board(Board, Vertical, Horizontal).
 
 length_list(N, L) :- length(L, N).
