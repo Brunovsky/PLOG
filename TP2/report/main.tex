@@ -261,6 +261,521 @@ number of cells & time   & constraints created & number of backtracks \\
 
 \section{Attachments}
 \label{sec:attachments}
-Meter aqui codigo todo
+
+\subsection{main.pl}
+
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\centering\ttfamily
+\begin{lstlisting}[language=Prolog]
+:- use_module(library(clpfd)).
+:- use_module(library(lists)).
+:- use_module(library(random)).
+
+:- compile('src/doors.pl').
+:- compile('src/matrix.pl').
+:- compile('src/lists.pl').
+:- compile('src/print.pl').
+:- compile('src/statistics.pl').
+:- compile('src/random.pl').
+:- compile('src/menus.pl').
+:- compile('src/test.pl').
+
+re :- compile('main.pl').
+doors :- main_menu.
+doors(Board) :- doors_calculator(Board).
+
+\end{lstlisting}
+\end{minipage}
+\end{center}
+
+\subsection{doors.pl}
+
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\centering\ttfamily
+\begin{lstlisting}[language=Prolog]
+doors_calculator(Board) :-
+  length(Board, NRows),
+  NRows1 is NRows - 1,
+  nth1(1, Board, Line),
+  length(Line, NCols),
+  NCols1 is NCols - 1,
+  create_matrix(NRows, NCols1, Vertical),
+  create_matrix(NRows1, NCols, Horizontal),
+  % Use 1 for door present and 0 for door absent
+  flatten(Vertical, VerticalFlat),
+  flatten(Horizontal, HorizontalFlat),
+  append(VerticalFlat, HorizontalFlat, Vars),
+  domain(Vars, 0, 1),
+  % Apply restriction on each cell
+  (   for(R, 1, NRows),
+      param(Board),
+      param(Vertical),
+      param(Horizontal),
+      param(NCols)
+  do  ( for(C, 1, NCols),
+        param(Board),
+        param(Vertical),
+        param(Horizontal),
+        param(R)
+      do restrict_cell(Board, Vertical, Horizontal, [R,C])
+      )
+  ),
+  reset_timer,
+  labeling([ffc], Vars),
+  print_time,
+  fd_statistics,
+  print_board(Board, Vertical, Horizontal).
+
+length_list(N, L) :- length(L, N).
+create_matrix(R, C, M) :-
+  length_list(R, M),
+  maplist(length_list(C), M).
+
+calculate_value([], 0).
+calculate_value([H|T], V) :-
+  calculate_value(T, V1),
+  V #= H + H*V1.
+  
+\end{lstlisting}
+\end{minipage}
+\end{center}
+
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\centering\ttfamily
+\begin{lstlisting}[language=Prolog]
+/**
+ * restrict_cell/4
+ * restrict_cell(+Board, +Vertical, +Horizontal, +Cell).
+ * Computes the four accumulators on cell [R,C], and bind them
+ * to the value of the respective cell in the Board.
+ */
+restrict_cell(Board, _, _, [R,C]) :-
+  matrixnth1([R,C], Board, 0), !.
+restrict_cell(Board, Vertical, Horizontal, [R,C]) :-
+  matrixnth1([R,C], Board, Value),
+  right_total(Vertical, [R,C], Right),
+  left_total(Vertical, [R,C], Left),
+  top_total(Horizontal, [R,C], Top),
+  bot_total(Horizontal, [R,C], Bot),
+  Right + Left + Top + Bot + 1 #= Value.
+  
+\end{lstlisting}
+\end{minipage}
+\end{center}
+
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\centering\ttfamily
+\begin{lstlisting}[language=Prolog]
+/**
+ * right_total/3
+ * right_total(+Vertical, +[R,C], -Total).
+ * Compute the accumulator function to the right of cell [R,C].
+ */
+right_total(Vertical, [R,C], Total) :-
+  nth1(R, Vertical, L),
+  Pop is C - 1,
+  popn(Pop, L, Sublist),
+  calculate_value(Sublist, Total).
+  
+\end{lstlisting}
+\end{minipage}
+\end{center}
+
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\centering\ttfamily
+\begin{lstlisting}[language=Prolog]
+/**
+ * left_total/3
+ * left_total(+Vertical, +[R,C], -Total).
+ * Compute the accumulator function to the left of cell [R,C].
+ */
+left_total(Vertical, [R,C], Total) :-
+  nth1(R, Vertical, L),
+  reverse(L, Reversed),
+  matrix_length(Vertical, _, V),
+  Pop is V - C + 1,
+  popn(Pop, Reversed, Sublist),
+  calculate_value(Sublist, Total).
+  
+\end{lstlisting}
+\end{minipage}
+\end{center}
+
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\centering\ttfamily
+\begin{lstlisting}[language=Prolog]
+/**
+ * top_total/3
+ * top_total(+Vertical, +[R,C], -Total).
+ * Compute the accumulator function upwards of cell [R,C].
+ */
+top_total(Horizontal, [R,C], Total) :-
+  matrix_col(C, Horizontal, L),
+  reverse(L, Reversed),
+  matrix_length(Horizontal, H, _),
+  Pop is H - R + 1,
+  popn(Pop, Reversed, Sublist),
+  calculate_value(Sublist, Total).
+  
+\end{lstlisting}
+\end{minipage}
+\end{center}
+
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\centering\ttfamily
+\begin{lstlisting}[language=Prolog]
+/**
+ * bot_total/3
+ * bot_total(+Vertical, +[R,C], -Total).
+ * Compute the accumulator function downwards of cell [R,C].
+ */
+bot_total(Horizontal, [R,C], Total) :-
+  matrix_col(C, Horizontal, L),
+  Pop is R - 1,
+  popn(Pop, L, Sublist),
+  calculate_value(Sublist, Total).
+
+\end{lstlisting}
+\end{minipage}
+\end{center}
+
+\subsection{random.pl}
+
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\centering\ttfamily
+\begin{lstlisting}[language=Prolog]
+door_prob(0.3).
+novalue_prob(0.2).
+
+/**
+ * generate_random_board/2
+ * generate_random_board(+[R,C], -Board)
+ * generates a random RxC Board
+ */
+generate_random_board([R,C], Board) :-
+  R1 is R - 1,
+  C1 is C - 1,
+  create_matrix(R, C1, Vertical),
+  create_matrix(R1, C, Horizontal),
+  door_prob(Prob),
+  populate_matrix(Vertical, [R,C1], Prob),
+  populate_matrix(Horizontal, [R1,C], Prob),
+  create_matrix(R, C, Board),
+  generate_values(Board, [R,C], Vertical, Horizontal).
+  
+\end{lstlisting}
+\end{minipage}
+\end{center}
+
+
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\centering\ttfamily
+\begin{lstlisting}[language=Prolog]
+/**
+* populate_matrix/3
+* populate_matrix(+Matrix, +[NR,NC], +Prob)
+* populates a given Matrix (NRxNC) with a probability (0 =< Prob =< 1) of being 0
+* and the rest is 1
+*/
+populate_matrix(Matrix, [NR,NC], Prob) :-
+  ( for(R, 1, NR),
+    param(Matrix),
+    param(Prob),
+    param(NC)
+  do  ( for(C, 1, NC),
+        param(Matrix),
+        param(Prob),
+        param(R)
+        do ( matrixnth1([R,C], Matrix, V),
+            (maybe(Prob), !, V is 0; V is 1)
+           )
+      )
+  ).
+  
+\end{lstlisting}
+\end{minipage}
+\end{center}
+
+
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\centering\ttfamily
+\begin{lstlisting}[language=Prolog]
+/**
+* generate_values/4
+* generate_values(+Board, +[NR,NC], +Vertical, +Horizontal)
+* generates the board (NRxNC) cells' value with the given Vertical doors and Horizontal doors
+* each cell has a probability of having value 0
+*/
+generate_values(Board, [NR,NC],  Vertical, Horizontal) :-
+  novalue_prob(Prob),
+  ( for(R, 1, NR),
+    param(Prob),
+    param(Board),
+    param(Vertical),
+    param(Horizontal),
+    param(NC)
+  do  ( for(C, 1, NC),
+        param(Prob),
+        param(Board),
+        param(Vertical),
+        param(Horizontal),
+        param(R)
+        do (
+            (maybe(Prob), !, matrixnth1([R,C], Board, 0), !;
+            calculate_value(Board, Vertical, Horizontal, [R,C]))
+          )
+      )
+  ).
+  
+\end{lstlisting}
+\end{minipage}
+\end{center}
+
+
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\centering\ttfamily
+\begin{lstlisting}[language=Prolog]
+/**
+* calculate_value/4
+* calculate_value(+Board, +Vertical, +Horizontal, +[R,C])
+*/
+calculate_value(Board, Vertical, Horizontal, [R,C]) :-
+  matrixnth1([R,C], Board, Value),
+  right_total(Vertical, [R,C], Right),
+  left_total(Vertical, [R,C], Left),
+  top_total(Horizontal, [R,C], Top),
+  bot_total(Horizontal, [R,C], Bot),
+  Value is Right + Left + Top + Bot + 1.
+
+
+\end{lstlisting}
+\end{minipage}
+\end{center}
+
+\subsection{statistics.pl}
+
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\centering\ttfamily
+\begin{lstlisting}[language=Prolog]
+reset_timer :- statistics(walltime, _).
+print_time :-
+  statistics(walltime, [_,T]),
+  TS is ((T//10)*10)/1000,
+  nl, format('Time: ~5fs ~n~n', [TS]).
+
+\end{lstlisting}
+\end{minipage}
+\end{center}
+
+\subsection{print.pl}
+
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\centering\ttfamily
+\begin{lstlisting}[language=Prolog]
+/**
+ * max_width_number/2
+ * max_width_number(+Numbers, -Width).
+ * Width is the maximum number of digits of any number in Numbers.
+ */
+max_width_number(Numbers, Width) :-
+  flatten(Numbers, Flat),
+  map(number_codes, Flat, Codes),
+  map(length, Codes, Widths),
+  max_member(Width, Widths).
+
+/**
+ * center_number/2
+ * center_number(+Width, +Num).
+ * Left and right padding for writing numbers in board cells.
+ */
+center_number(Width, Num) :-
+  number_codes(Num, NumberCodes),
+  length(NumberCodes, L),
+  Rest is Width - L,
+  LeftL is integer((Rest + 1) / 2),
+  RightL is integer(Rest / 2),
+  fill_n(LeftL, ' ', LeftSpaces),
+  fill_n(RightL, ' ', RightSpaces),
+  atom_chars(Left, LeftSpaces),
+  atom_chars(Right, RightSpaces),
+  write(Left), write(Num), write(Right).
+\end{lstlisting}
+\end{minipage}
+\end{center}
+  
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\centering\ttfamily
+\begin{lstlisting}[language=Prolog]
+/**
+ * write_connector/4
+ * write_connector(+Left, +Right, +Up, +Down).
+ * Unicode box drawing connection horizontal and vertical dashes between
+ * cells in the board.
+ */
+write_connector(1, 1, 1, 1) :- write(' ').
+write_connector(1, 1, 1, 0) :- write('\x2577\').
+write_connector(1, 1, 0, 1) :- write('\x2575\').
+write_connector(1, 1, 0, 0) :- write('\x2502\').
+write_connector(1, 0, 1, 1) :- write('\x2576\').
+write_connector(1, 0, 1, 0) :- write('\x250c\').
+write_connector(1, 0, 0, 1) :- write('\x2514\').
+write_connector(1, 0, 0, 0) :- write('\x251c\').
+write_connector(0, 1, 1, 1) :- write('\x2574\').
+write_connector(0, 1, 1, 0) :- write('\x2510\').
+write_connector(0, 1, 0, 1) :- write('\x2518\').
+write_connector(0, 1, 0, 0) :- write('\x2524\').
+write_connector(0, 0, 1, 1) :- write('\x2500\').
+write_connector(0, 0, 1, 0) :- write('\x252c\').
+write_connector(0, 0, 0, 1) :- write('\x2534\').
+write_connector(0, 0, 0, 0) :- write('\x253c\').
+\end{lstlisting}
+\end{minipage}
+\end{center}
+
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\centering\ttfamily
+\begin{lstlisting}[language=Prolog]
+/**
+ * write_multiple/2
+ * write_multiple(+N, +Char).
+ * Write Char N times.
+ */
+write_multiple(N, Char) :-
+  fill_n(N, Char, Bars),
+  atom_chars(String, Bars),
+  write(String).
+
+/**
+ * write_top/2
+ * write_top(+Width, +Vertical).
+ * Top bar of the board. 
+ */
+write_top(Width, VerticalRow) :-
+  write('\x250c\'), write_multiple(Width, '\x2500\'),
+  ( foreach(Vert, VerticalRow),
+    param(Width)
+  do  write_connector(0, 0, 1, Vert),
+      write_multiple(Width, '\x2500\')
+  ),
+  write('\x2510\'), nl.
+\end{lstlisting}
+\end{minipage}
+\end{center}
+
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\centering\ttfamily
+\begin{lstlisting}[language=Prolog]
+/**
+ * write_bot/2
+ * write_bot(+Width, +Vertical).
+ * Bottom bar of the board.
+ */
+write_bot(Width, VerticalRow) :-
+  write('\x2514\'), write_multiple(Width, '\x2500\'),
+  ( foreach(Vert, VerticalRow),
+    param(Width)
+  do  write_connector(0, 0, Vert, 1),
+      write_multiple(Width, '\x2500\')
+  ),
+  write('\x2518\'), nl.
+\end{lstlisting}
+\end{minipage}
+\end{center}
+
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\centering\ttfamily
+\begin{lstlisting}[language=Prolog]
+/**
+ * write_number_row/3
+ * write_number_row(+Width, +BoardRow, +VerticalRow).
+ * Write a number line of the board.
+ */
+write_number_row(Width, BoardRow, VerticalRow) :-
+  BoardRow = [Front|Tail],
+  write('\x2502\'),
+  (Front = 0 -> write_multiple(Width, ' '); center_number(Width, Front)),
+  ( foreach(Num, Tail),
+    foreach(Vert, VerticalRow),
+    param(Width)
+  do  (Vert = 0 -> write('\x2502\'); write(' ')),
+      (Num = 0 -> write_multiple(Width, ' '); center_number(Width, Num))
+  ),
+  write('\x2502\'), nl.
+\end{lstlisting}
+\end{minipage}
+\end{center}
+  
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\centering\ttfamily
+\begin{lstlisting}[language=Prolog]
+/**
+ * write_horz_row/4
+ * write_horz_row(+Width, +VerticalUp, +VerticalDown, +HorizontalRow).
+ * Write a line in between number lines of the board.
+ */
+write_horizontals(Width, VerticalUp, VerticalDown, HorizontalRow) :-
+  HorizontalRow = [FrontHorz|HorizontalTail],
+  write_connector(1, FrontHorz, 0, 0),
+  (FrontHorz = 0 -> write_multiple(Width, '\x2500\'); write_multiple(Width, ' ')),
+  ( foreach(Horz, HorizontalTail),
+    foreach(Up, VerticalUp),
+    foreach(Down, VerticalDown),
+    fromto(FrontHorz, PreviousHorz, Horz, BackHorz),
+    param(Width)
+  do  write_connector(PreviousHorz, Horz, Up, Down),
+      (Horz = 0 -> write_multiple(Width, '\x2500\'); write_multiple(Width, ' '))
+  ),
+  write_connector(BackHorz, 1, 0, 0), nl.
+\end{lstlisting}
+\end{minipage}
+\end{center}
+
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\centering\ttfamily
+\begin{lstlisting}[language=Prolog]
+/**
+ * print_board/3
+ * print_board(+Board, +Vertical, +Horizontal).
+ * Entry point for board drawing.
+ */
+print_board(Board, Vertical, Horizontal) :-
+  max_width_number(Board, Width),
+  Board = [FrontBoard|BoardTail],
+  Vertical = [FrontVertical|VerticalTail],
+  append(Upper, [BackVertical], Vertical),
+  write_top(Width, FrontVertical),
+  write_number_row(Width, FrontBoard, FrontVertical),
+  ( foreach(BoardRow, BoardTail),
+    foreach(VerticalDown, VerticalTail),
+    foreach(HorizontalRow, Horizontal),
+    foreach(VerticalUp, Upper),
+    param(Width)
+  do  write_horizontals(Width, VerticalUp, VerticalDown, HorizontalRow),
+      write_number_row(Width, BoardRow, VerticalDown)
+  ),
+  write_bot(Width, BackVertical).
+
+\end{lstlisting}
+\end{minipage}
+\end{center}
 
 \end{document}
