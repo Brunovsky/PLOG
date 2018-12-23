@@ -94,11 +94,13 @@ write_bot(Width, VerticalRow) :-
  */
 write_number_row(Width, BoardRow, VerticalRow) :-
   BoardRow = [Front|Tail],
-  write('\x2502\'), center_number(Width, Front),
+  write('\x2502\'),
+  (Front = 0 -> write_multiple(Width, ' '); center_number(Width, Front)),
   ( foreach(Num, Tail),
     foreach(Vert, VerticalRow),
     param(Width)
-  do  (Vert = 0 -> write('\x2502\'); write(' ')), center_number(Width, Num)
+  do  (Vert = 0 -> write('\x2502\'); write(' ')),
+      (Num = 0 -> write_multiple(Width, ' '); center_number(Width, Num))
   ),
   write('\x2502\'), nl.
 
@@ -121,6 +123,11 @@ write_horizontals(Width, VerticalUp, VerticalDown, HorizontalRow) :-
   ),
   write_connector(BackHorz, 1, 0, 0), nl.
 
+/**
+ * print_board/3
+ * print_board(+Board, +Vertical, +Horizontal).
+ * Entry point for board drawing.
+ */
 print_board(Board, Vertical, Horizontal) :-
   max_width_number(Board, Width),
   Board = [FrontBoard|BoardTail],
@@ -147,9 +154,9 @@ print_test(1) :-
   print_board([
     [1, 2, 3, 4, 5, 6, 7],
     [2, 2, 3, 4, 5, 6, 7],
-    [3, 2, 3, 14, 5, 6, 7],
+    [3, 2, 3, 14, 5, 0, 7],
     [4, 2, 3, 4, 5, 6, 7],
-    [5, 6, 7, 8, 9, 6, 7]
+    [5, 6, 7, 8, 0, 6, 7]
   ], [
     [ 0, 1, 0, 0, 1, 0],
     [ 1, 1, 0, 1, 0, 1],
