@@ -26,7 +26,7 @@ doors_calculator(Board) :-
       )
   ),
   reset_timer,
-  labeling([ff], Vars),
+  labeling([ffc], Vars),
   print_time,
   fd_statistics,
   print_board(Board, Vertical, Horizontal).

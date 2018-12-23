@@ -41,7 +41,14 @@ In this paper we describe and explore a simple restraint logic programming solut
 \keywords{doors \and logic puzzle \and rooms}
 \end{abstract}
 
-\section{Examples}
+\section{Problem Description}
+\label{sec:description}
+
+The logic problem \textit{Doors} is a puzzle on a rectangular board whose cells are either empty or contain natural numbers. The board is thought of like a \textit{house}. Each cell is a \textit{room}, and two adjacent cells are separated by a \textit{wall} with one \textit{door}. That door may be either open or closed. If it is open, then the cell can \textsl{see} its adjacent room through the doorway. A man standing in a room can look in all four directions --- north, east, west, south --- and count the number of \textit{visible rooms}.
+
+The puzzle consists in discovering an assignment of open and closed doors to the walls of the board such that the natural number in each non-empty cell is how many rooms are visible from that cell (including itself). There may be multiple solutions, or none at all.
+
+\subsection{Examples}
 
 \begin{equation*}
 \arraycolsep=4.0pt\def\arraystretch{1.3}
@@ -81,13 +88,6 @@ In this paper we describe and explore a simple restraint logic programming solut
 \hline
 \end{array}
 \end{equation*}
-
-\section{Problem Description}
-\label{sec:description}
-
-The logic problem \textit{Doors} is a puzzle on a rectangular board whose cells are either empty or contain natural numbers. The board is thought of like a \textit{house}. Each cell is a \textit{room}, and two adjacent cells are separated by a \textit{wall} with one \textit{door}. That door may be either open or closed. If it is open, then the cell can \textsl{see} its adjacent room through the doorway. A man standing in a room can look in all four directions --- north, east, west, south --- and count the number of \textit{visible rooms}.
-
-The puzzle consists in discovering an assignment of open and closed doors to the walls of the board such that the natural number in each non-empty cell is how many rooms are visible from that cell (including itself). There may be multiple solutions, or none at all.
 
 \section{Approach}
 \label{sec:approach}
@@ -131,7 +131,7 @@ e_A=b+b(c+c(d+d(e+e(f+f(g+g\cdot 0)))))
 
 Now, if we analogously define $w_A$ for west, $n_A$ for north and $s_A$ for south, then we find that the number in cell $A$ must be $e_A+w_A+n_A+s_A+1$.
 
-Implementing these restrictions in \texttt{PROLOG} is surprisingly simple. We start with a predicate to compute formula (\ref{eq:acc}):
+Implementing these restrictions in \texttt{PROLOG} is surprisingly simple. We start with a predicate to compute formula:
 
 \begin{center}
 \begin{minipage}{0.45\textwidth}
@@ -164,12 +164,67 @@ restrict_cell(Board, Vertical, Horizontal, [R,C]) :-
 \end{minipage}
 \end{center}
 
+\subsection{Search strategy}
+\label{subsec:searchstrategy}
+The labeling strategy implemented was the \ttd{ffc}. This strategy uses "the most constrained heuristic is used: a variable with the smallest domain is selected, breaking ties by (a) selecting the variable that has the most constraints suspended on it and (b) selecting the leftmost one." Even thought all of our variables have the same domain we decided to use this labeling strategy since it would provide us the puzzle solutions more efficiently.
+
+\subsection{Random board generation}
+\label{subsec:randomboard}
+It is also implemented a way to generate a random board with a specified number of rows and a specified number of columns. The methodology used here is the opposite of what the game consists. We start by creating the Vertical and the Horizontal matrixes and randomly (but with a certain probability) populate them with 0 (door) or 1 (no door). Certainly, the probability of an element to be an 1 is higher than the probability to be an 0.
+
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\centering\ttfamily
+\begin{lstlisting}[language=Prolog]
+door_prob(0.3).
+\end{lstlisting}
+\end{minipage}
+\end{center}
+
+After this step it is pretty straight forward to generate the board. We go through each element of the Board matrix and, using the formula discussed above, calculate each value.
+
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\centering\ttfamily
+\begin{lstlisting}[language=Prolog]
+calculate_value(Board, Vertical, Horizontal, [R,C]) :-
+  matrixnth1([R,C], Board, Value),
+  right_total(Vertical, [R,C], Right),
+  left_total(Vertical, [R,C], Left),
+  top_total(Horizontal, [R,C], Top),
+  bot_total(Horizontal, [R,C], Bot),
+  Value is Right + Left + Top + Bot + 1.
+\end{lstlisting}
+\end{minipage}
+\end{center}
+
 \section{Solution presentation}
 \label{sec:presentation}
 
 We represent the board using Unicode box drawing characters. Cells are sufficiently sized for all board numbers with \ttd{max_width_number/3} and centered with \ttd{center_number/2}.
 
 Predicate \ttd{write_connector/4} serves to select the appropriate unicode character to connect the cell corners inside and in the edges of the board, and \ttd{write_multiple/2} serves to write the same character multiple characters. Using these auxiliary predicates, the board is written in a straightforward fashion, with number rows and horizontal wall rows interleaved.
+
+\newpage
+
+\section{Results}
+\label{sec:results}
+
+\begin{table}[]
+\begin{tabular}{llll}
+number of cells & time   & constraints created & number of backtracks \\
+9               & 0.00s  & 150                 & 0                    \\
+25              & 0.00s  & 626                 & 5                    \\
+49              & 0.00s  & 2058                & 146                  \\
+64              & 0.030s & 2963                & 813                  \\
+100             & 0.610s & 8767                & 18734                \\
+110             & 7.10s  & 52149               & 383107               \\
+150             & 61.64s & 12891362            & 10509283            
+\end{tabular}
+\end{table}
+
+\section{Conclusions}
+\label{sec:conclusions}
 
 %
 % ---- Bibliography ----
@@ -201,4 +256,11 @@ Predicate \ttd{write_connector/4} serves to select the appropriate unicode chara
 	LNCS Homepage, \url{http://www.springer.com/lncs}. Last accessed 4
 	Oct 2017
 \end{thebibliography}
+
+\newpage
+
+\section{Attachments}
+\label{sec:attachments}
+Meter aqui codigo todo
+
 \end{document}
