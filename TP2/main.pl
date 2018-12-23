@@ -9,6 +9,7 @@
 :- compile('src/statistics.pl').
 :- compile('src/random.pl').
 :- compile('src/menus.pl').
+:- compile('src/test.pl').
 
 re :- compile('main.pl').
 doors :- main_menu.
