@@ -5,13 +5,15 @@
 \documentclass[runningheads]{llncs}
 %
 \usepackage{graphicx}
-\usepackage{amsmath,mathtools,listings,inconsolata}
+\usepackage{amsmath,mathtools,listings,inconsolata,booktabs}
 % Used for displaying a sample figure. If possible, figure files should
 % be included in EPS format.
 %
 % If you use the hyperref package, please uncomment the following line
 % to display URLs in blue roman font according to Springer's eBook style:
 % \renewcommand\UrlFont{\color{blue}\rmfamily}
+
+\graphicspath{{.}{./images/}}
 
 \newcommand*{\cc}[2]{\multicolumn{1}{#1}{#2}}
 \newcommand*{\ttd}[1]{\texttt{\detokenize{#1}}}
@@ -170,10 +172,10 @@ The labeling strategy implemented was the \ttd{ffc}. This strategy uses "the mos
 
 \subsection{Random board generation}
 \label{subsec:randomboard}
-It is also implemented a way to generate a random board with a specified number of rows and a specified number of columns. The methodology used here is the opposite of what the game consists. We start by creating the Vertical and the Horizontal matrixes and randomly (but with a certain probability) populate them with 0 (door) or 1 (no door). Certainly, the probability of an element to be an 1 is higher than the probability to be an 0.
+It is also implemented a way to generate a random board with a specified number of rows and a specified number of columns. The methodology used here is the opposite of what the game consists. We start by creating the Vertical and the Horizontal matrices and randomly (but with a certain probability) populate them with 0 (door) or 1 (no door). Certainly, the probability of an element to be an 1 is higher than the probability to be an 0.
 
 \begin{center}
-\begin{minipage}{0.85\textwidth}
+\begin{minipage}{0.25\textwidth}
 \centering\ttfamily
 \begin{lstlisting}[language=Prolog]
 door_prob(0.3).
@@ -184,7 +186,7 @@ door_prob(0.3).
 After this step it is pretty straight forward to generate the board. We go through each element of the Board matrix and, using the formula discussed above, calculate each value.
 
 \begin{center}
-\begin{minipage}{0.85\textwidth}
+\begin{minipage}{0.90\textwidth}
 \centering\ttfamily
 \begin{lstlisting}[language=Prolog]
 calculate_value(Board, Vertical, Horizontal, [R,C]) :-
@@ -210,21 +212,40 @@ Predicate \ttd{write_connector/4} serves to select the appropriate unicode chara
 \section{Results}
 \label{sec:results}
 
-\begin{table}[]
-\begin{tabular}{llll}
+\begin{figure}[hbtp]
+\centering
+\includegraphics[width=0.8\textwidth]{example1.png}
+\caption{Example of a solver execution.}
+\label{fig:examples}
+\end{figure}
+
+In terms of mere efficiency, on square boards we have the following scores:
+
+\begin{table}[hbtp]
+\centering
+\begin{tabular}{cccc}
+\toprule
 number of cells & time   & constraints created & number of backtracks \\
+\midrule
 9               & 0.00s  & 150                 & 0                    \\
 25              & 0.00s  & 626                 & 5                    \\
 49              & 0.00s  & 2058                & 146                  \\
 64              & 0.030s & 2963                & 813                  \\
 100             & 0.610s & 8767                & 18734                \\
 110             & 7.10s  & 52149               & 383107               \\
-150             & 61.64s & 12891362            & 10509283            
+150             & 61.64s & 12891362            & 10509283             \\
+\bottomrule\\
 \end{tabular}
+\caption{Solver execution statistics on various square board sizes}
+\label{tab:time}
 \end{table}
 
 \section{Conclusions}
 \label{sec:conclusions}
+
+We believe our solution is elegant and straightforward, although not terribly efficient. A problem centered around rooms \textsl{seeing} each other has a solution whose logic restraints do not involve more than one room at a time.
+
+To extend the simple solution we included detailed execution statistics and a nice board display on the console.
 
 %
 % ---- Bibliography ----
