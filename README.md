@@ -1,8 +1,7 @@
 # PLOG-FEUP
 
-### TP1: Pente (3)
-### TP2: Doors
+Project partner:
+* [Amadeu Pereira](https://github.com/amadeuppereira)
 
-Bruno Carvalho up201606517
-Amadeu Pereira up201605646
-
+### Project 1: Pente (3)
+### Project 2: Doors
